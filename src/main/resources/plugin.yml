@@ -1,0 +1,15 @@
+name: OreTycoon
+version: '1.0-SNAPSHOT'
+main: me.mangokevin.oreTycoon.OreTycoon
+api-version: '1.21'
+depend:
+  - FancyHolograms
+  - PlaceholderAPI
+  - Multiverse-Core
+commands:
+  tycoon:
+    description: Recieve the tycoon block
+    usage: /<command>
+    aliases:
+      - ore
+      - mine

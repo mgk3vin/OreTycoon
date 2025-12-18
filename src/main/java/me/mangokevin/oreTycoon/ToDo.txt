@@ -1,0 +1,10 @@
+Random ressources list with weight
+5x5 rule when placing more tycoons✅
+bukkit runnable timer (Load bar Hologram)
+saving tycoons over reset✅
+Hologram formatting
+Clean up TycoonBlockclass
+(Own Hologram system for timer/load bar)
+
+
+
