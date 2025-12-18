@@ -1,2 +1,11 @@
 # Project exclude paths
 /target/
+# IntelliJ
+.idea/
+*.iml
+
+# Maven
+target/
+
+# Logs
+*.log

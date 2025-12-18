@@ -252,6 +252,10 @@ public class TycoonBlock {
     public void addTotalXp(int amount) {
         this.totalxp += amount;
     }
+    public void levelUp(){
+        this.level++;
+        this.progress = 0;
+    }
 
     // ---------     Getter      ---------
     public String getBlockUID(){
