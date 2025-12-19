@@ -68,24 +68,7 @@ public class TycoonBlockManager {
 
     }
 
-
-    public void handleXpGain(TycoonBlock tycoon, int amount) {
-        int oldXp = tycoon.getTotalxp();
-        tycoon.addTotalXp(amount);
-
-        // 4. Level-Check über den injizierten LevelManager
-        int oldLevel = levelManager.getLevelFromXp(oldXp);
-        int newLevel = levelManager.getLevelFromXp(tycoon.getTotalxp());
-
-        if (newLevel > oldLevel) {
-            // LEVEL UP!
-            tycoon.setLevel(newLevel);
-        }
-
-        // Hologramm immer aktualisieren (wegen XP-Fortschritt)
-
-    }
-
+    @Deprecated
     public void checkTycoonProgress(TycoonBlock block){
         int currentLevel = block.getLevel();
         int nextLevel = block.getLevel() + 1;
@@ -121,6 +104,7 @@ public class TycoonBlockManager {
             data.set(path + "ownerName", tycoon.getOwnerName());
 
             data.set(path + "level", tycoon.getLevel());
+            data.set(path + "xp", tycoon.getLevelxp());
             data.set(path + "isActive", tycoon.isActive());
 
             if (tycoon.getLastSpawnedBlock() != null) {
@@ -169,6 +153,8 @@ public class TycoonBlockManager {
 
                 // 3. Restliche Daten
                 int level = section.getInt(path + "level");
+                int xp = section.getInt(path + "xp");
+
                 boolean active = section.getBoolean(path + "isActive");
                 int spawnInterval = section.getInt(path + "spawnInterval");
                 String matName = section.getString(path + "lastSpawnedBlock");
@@ -177,8 +163,10 @@ public class TycoonBlockManager {
                 // 4. Objekt erstellen
                 // Wichtig: Nutze deinen Konstruktor.
                 // Falls er einen Spielernamen braucht, nimm Bukkit.getOfflinePlayer(ownerUUID).getName()
-                TycoonBlock block = new TycoonBlock(loc, ownerUUID, active, spawnInterval, plugin);
+                TycoonBlock block = new TycoonBlock(loc, ownerUUID, active, spawnInterval, plugin, levelManager);
                 block.setLevel(level);
+                block.setLevelxp(xp);
+
                 if (type != null) {
                     block.setLastSpawnedBlock(type);
                 }
@@ -327,7 +315,7 @@ public class TycoonBlockManager {
                 //for (int z = centerZ -2; z <=  centerZ + 2; z++) {}   optional für 3d scan mit y
 
                 Location checkLocation = new Location(world, x, centerY, z);
-                System.out.println("[OreTycoon] checkLocation: " + centerX + "|" + centerY + "|" + centerZ);
+                //System.out.println("[OreTycoon] checkLocation: " + centerX + "|" + centerY + "|" + centerZ);
                 if (isTycoonBlock(checkLocation)){
                     player.sendMessage(ChatColor.RED + "Tycoon blocks must be placed atleast 5 blocks away from eachother!");
                     return true;
@@ -387,7 +375,7 @@ public class TycoonBlockManager {
     }
 
     public void addTycoonBlock(Block placedBlock, UUID playerUuid) {
-        TycoonBlock tycoonBlock = new TycoonBlock(placedBlock.getLocation(), playerUuid, false,5, plugin);
+        TycoonBlock tycoonBlock = new TycoonBlock(placedBlock.getLocation(), playerUuid, false,5, plugin, levelManager);
 
         tycoonBlocks.put(placedBlock.getLocation(), tycoonBlock);
         System.out.println("[OreTycoon] Added Tycoon Block " + playerUuid + " to " + placedBlock.getLocation());
@@ -450,4 +438,11 @@ public class TycoonBlockManager {
     public int getMaxBlocksPerPlayer() {
         return this.maxBlocksPerPlayer;
     }
+    public LevelManager getLevelManager() {
+        return this.levelManager;
+    }
+
+
 }
+
+

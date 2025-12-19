@@ -6,6 +6,7 @@ import de.oliver.fancyholograms.api.data.HologramData;
 import de.oliver.fancyholograms.api.data.TextHologramData;
 import de.oliver.fancyholograms.api.hologram.Hologram;
 import me.mangokevin.oreTycoon.OreTycoon;
+import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -22,6 +23,7 @@ public class TycoonBlock {
 
     private int level;
     private int totalxp;
+    private int levelxp;
     private double progress;
 
     private boolean isActive;
@@ -39,7 +41,9 @@ public class TycoonBlock {
     private final Set<Block> activeOres = new HashSet<>();
 
     HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
+
     private final OreTycoon plugin;
+    private final LevelManager levelManager;
 
 
     private final List<Material> TYCOON_RESOURCE_MATERIALS = Arrays.asList(
@@ -51,15 +55,17 @@ public class TycoonBlock {
             // Fügen Sie hier weitere Materialien hinzu
     );
 
-    public TycoonBlock(Location location, UUID ownerUuid, boolean isActive, int spawnInterval, OreTycoon plugin) {
+    public TycoonBlock(Location location, UUID ownerUuid, boolean isActive, int spawnInterval, OreTycoon plugin, LevelManager levelManager) {
         this.location = location;
         this.block = location.getBlock();
         this.ownerUuid = ownerUuid;
         this.owner = Bukkit.getOfflinePlayer(ownerUuid);
         this.isActive = isActive;
         this.plugin = plugin;
+        this.levelManager = levelManager;
         level = 1;
         totalxp = 0;
+        levelxp = 0;
         progress = 0;
 
         this.spawnInterval = spawnInterval;
@@ -144,9 +150,10 @@ public class TycoonBlock {
         hologramData.addLine("Block: " + lastSpawnedBlock);
         hologramData.addLine("Status: " + isActive);
         hologramData.addLine("Level: " + level);
-        hologramData.addLine("X: " + block.getX());
-        hologramData.addLine("Y: " + block.getY());
-        hologramData.addLine("Z: " + block.getZ());
+        hologramData.addLine("xp: " + levelxp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + levelManager.getProgressPercentage(levelxp, level + 1));
+//        hologramData.addLine("X: " + block.getX());
+//        hologramData.addLine("Y: " + block.getY());
+//        hologramData.addLine("Z: " + block.getZ());
 
         hologramData.setBackground(Color.fromARGB(0));
         hologramData.setPersistent(false);
@@ -172,20 +179,6 @@ public class TycoonBlock {
                 hologramMap.remove(location);
             }
     }
-
-//    public void manipulateHologram(Location location, String material) {
-//        if (getHologram(location) != null) {
-//            Hologram hologram = getHologram(location);
-//            HologramData data = hologram.getData();
-//            //TextHologramData textHologramData = (TextHologramData) data;
-//            List<String> hologramLines = ((TextHologramData) data).getText();
-//
-//            hologramLines.set(2, "Status: " + material);
-//            System.out.println("[TycoonBlockHolo] Manipulating hologram...");
-//
-//            hologram.queueUpdate();
-//        }
-//    }
     public void updateHologram(Location location) {
         Hologram hologram = getHologram(location);
         if (hologram != null) {
@@ -212,7 +205,12 @@ public class TycoonBlock {
                 }else {
                     hologramLines.set(2, "Status: " + ChatColor.RED + isActive + ChatColor.RESET);
                 }
-
+                break;
+            case "LEVEL":
+                hologramLines.set(3, "Level: " + level);
+                break;
+            case "XP":
+                hologramLines.set(4, "xp: " + levelxp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + levelManager.getProgressPercentage(levelxp, level + 1));
                 break;
             default:
                 break;
@@ -249,15 +247,27 @@ public class TycoonBlock {
     }
     // ---------     BlockHologram      ---------
 
+
+    // ---------     Adder      ---------
     public void addTotalXp(int amount) {
         this.totalxp += amount;
+        updateHologramPreset(location, "XP");
     }
-    public void levelUp(){
+    public void addLevelxp(int amount) {
+        this.levelxp += amount;
+    }
+    @Deprecated
+    public void levelUp(int leftoverXp){
         this.level++;
-        this.progress = 0;
+        this.levelxp = leftoverXp;
+        updateHologramPreset(location, "LEVEL");
     }
-
+    // ---------     Adder      ---------
     // ---------     Getter      ---------
+
+    public int getLevelxp(){
+        return levelxp;
+    }
     public String getBlockUID(){
         return blockUID;
     }
@@ -306,6 +316,9 @@ public class TycoonBlock {
     // ---------     Setter      ---------
     public void setLevel(int level) {
         this.level = level;
+    }
+    public void setLevelxp(int levelxp) {
+        this.levelxp = levelxp;
     }
     public void setTotalxp(int totalxp) {
         this.totalxp = totalxp;

@@ -1,6 +1,7 @@
 package me.mangokevin.oreTycoon.listener;
 
 import me.mangokevin.oreTycoon.OreTycoon;
+import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
 import org.bukkit.ChatColor;
@@ -16,10 +17,12 @@ public class BlockBreakListener implements Listener {
 
     private final OreTycoon oreTycoon;
     private final TycoonBlockManager blockManager;
+    private final LevelManager levelManager;
 
-    public BlockBreakListener(OreTycoon oreTycoon, TycoonBlockManager blockManager) {
+    public BlockBreakListener(OreTycoon oreTycoon, TycoonBlockManager blockManager, LevelManager levelManager) {
         this.oreTycoon = oreTycoon;
         this.blockManager = blockManager;
+        this.levelManager = levelManager;
     }
 
     @EventHandler
@@ -53,24 +56,15 @@ public class BlockBreakListener implements Listener {
             }
         }
 
-        if (blockManager.getTycoonContainsBlock(block) != null) {
-            TycoonBlock tycoonBlock = blockManager.getTycoonContainsBlock(block);
-            //blockManager.handleXpGain(tycoonBlock, 20);
-            tycoonBlock.addTotalXp(20);
-            p.sendMessage(ChatColor.GOLD + "Recieved 20 Tycoon xp!");
+        TycoonBlock tycoonBlock = blockManager.getTycoonContainsBlock(block);
+        if (tycoonBlock != null) {
+            System.out.println("------------[LM]------------");
+            levelManager.handleXpGain(tycoonBlock, 50);
+            System.out.println("------------[LM]------------");
+            p.sendMessage(ChatColor.GOLD + "Recieved 50 Tycoon xp!");
+
             tycoonBlock.removeBlock(block);
         }
-
-
-//        if (block.hasMetadata("tycoon_id")) {
-//            String blockID = block.getMetadata("tycoon_id").get(0).asString();
-//
-//            TycoonBlock tycoonBlock = blockManager.getTycoonBlock(blockID);
-//            if (tycoonBlock != null) {
-//                tycoonBlock.addTotalXp(20);
-//                p.sendMessage(ChatColor.GOLD + "Recieved 20 Tycoon xp!");
-//            }
-//        }
 
     }
 

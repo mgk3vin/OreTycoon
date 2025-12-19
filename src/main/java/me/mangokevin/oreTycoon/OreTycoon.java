@@ -14,7 +14,6 @@ import org.mvplugins.multiverse.core.MultiverseCoreApi;
 public final class OreTycoon extends JavaPlugin {
 
     private TycoonBlockManager blockManager;
-    private LevelManager  levelManager;
 
     public OreTycoon() {
 
@@ -24,8 +23,9 @@ public final class OreTycoon extends JavaPlugin {
     public void onEnable() {
         // Plugin startup logic
         saveDefaultConfig();
+        LevelManager levelManager = new LevelManager();
         this.blockManager = new TycoonBlockManager(this, levelManager);
-        this.levelManager = new LevelManager();
+
 
         blockManager.loadTycoons();
 
@@ -36,7 +36,7 @@ public final class OreTycoon extends JavaPlugin {
 
         //-----------------------   Listeners & Commands    -----------------------
         getServer().getPluginManager().registerEvents(new BlockPlacedListener(this, blockManager), this);
-        getServer().getPluginManager().registerEvents(new BlockBreakListener(this, blockManager), this);
+        getServer().getPluginManager().registerEvents(new BlockBreakListener(this, blockManager, levelManager), this);
         getServer().getPluginManager().registerEvents(new BlockInteractListener(this, blockManager), this);
         getCommand("tycoon").setExecutor(new TycoonCmd(this, blockManager));
         //-----------------------   Listeners & Commands    -----------------------
