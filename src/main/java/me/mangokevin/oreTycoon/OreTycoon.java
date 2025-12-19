@@ -11,6 +11,8 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.mvplugins.multiverse.core.MultiverseCoreApi;
 
+import java.util.Objects;
+
 public final class OreTycoon extends JavaPlugin {
 
     private TycoonBlockManager blockManager;
@@ -29,8 +31,10 @@ public final class OreTycoon extends JavaPlugin {
 
         blockManager.loadTycoons();
 
+        // TODO: Generate Tycoon Islands with Preset
         RegisteredServiceProvider<MultiverseCoreApi> provider = Bukkit.getServicesManager().getRegistration(MultiverseCoreApi.class);
         if (provider != null) {
+            @SuppressWarnings("unused")
             MultiverseCoreApi coreApi = provider.getProvider();
         }
 
@@ -38,7 +42,7 @@ public final class OreTycoon extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BlockPlacedListener(this, blockManager), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(this, blockManager, levelManager), this);
         getServer().getPluginManager().registerEvents(new BlockInteractListener(this, blockManager), this);
-        getCommand("tycoon").setExecutor(new TycoonCmd(this, blockManager));
+        Objects.requireNonNull(getCommand("tycoon")).setExecutor(new TycoonCmd(this, blockManager));
         //-----------------------   Listeners & Commands    -----------------------
     }
 

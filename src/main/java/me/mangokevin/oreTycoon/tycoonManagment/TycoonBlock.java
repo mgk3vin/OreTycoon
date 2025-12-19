@@ -17,13 +17,12 @@ import java.util.*;
 public class TycoonBlock {
 
     private final Location location;
-    private Player testowner;
     private OfflinePlayer owner;
     private final UUID ownerUuid;
 
     private int level;
-    private int totalxp;
-    private int levelxp;
+    private int totalXp;
+    private int levelXp;
     private double progress;
 
     private boolean isActive;
@@ -32,11 +31,9 @@ public class TycoonBlock {
     private int spawnInterval;
     private final String blockUID;
 
-    Hologram statsHologram;
     private String hologramUID;
     Block block;
     public static final Map<Location, String> hologramMap = new HashMap<>();
-    private Map<Location, Block> spawnedBlocksMap = new HashMap<>();
 
     private final Set<Block> activeOres = new HashSet<>();
 
@@ -64,13 +61,13 @@ public class TycoonBlock {
         this.plugin = plugin;
         this.levelManager = levelManager;
         level = 1;
-        totalxp = 0;
-        levelxp = 0;
+        totalXp = 0;
+        levelXp = 0;
         progress = 0;
 
         this.spawnInterval = spawnInterval;
 
-        this.blockUID = this.location.getWorld().getName() + "_" +
+        this.blockUID = Objects.requireNonNull(this.location.getWorld()).getName() + "_" +
                 this.location.getBlockX() + "_" +
                 this.location.getBlockY() + "_" +
                 this.location.getBlockZ();
@@ -86,7 +83,6 @@ public class TycoonBlock {
         }
     }
     public void trySpawnRessource() {
-        Player player = owner.getPlayer();
         Location center = getLocation();
         World world = center.getWorld();
         Random rand = new Random();
@@ -117,9 +113,11 @@ public class TycoonBlock {
             //tycoonBlock.manipulateHologram(tycoonBlock.getLocation(), material.name());
             setLastSpawnedBlock(material);
             updateHologramPreset(getLocation(), "BLOCK");
+            assert world != null;
             world.playSound(randomLocation, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.5f);
             world.spawnParticle(Particle.EXPLOSION, randomLocation, 1);
         }
+
     }
     private Material getRandomMaterial() {
         Random rand = new Random();
@@ -148,12 +146,15 @@ public class TycoonBlock {
         hologramData.setText(name);
 
         hologramData.addLine("Block: " + lastSpawnedBlock);
-        hologramData.addLine("Status: " + isActive);
+
+        if (isActive){
+            hologramData.addLine("Status: " + ChatColor.GREEN+ true + ChatColor.RESET);
+        }else{
+            hologramData.addLine("Status: " + ChatColor.RED + false + ChatColor.RESET);
+        }
+
         hologramData.addLine("Level: " + level);
-        hologramData.addLine("xp: " + levelxp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + levelManager.getProgressPercentage(levelxp, level + 1));
-//        hologramData.addLine("X: " + block.getX());
-//        hologramData.addLine("Y: " + block.getY());
-//        hologramData.addLine("Z: " + block.getZ());
+        hologramData.addLine("xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + levelManager.getProgressPercentage(levelXp, level + 1));
 
         hologramData.setBackground(Color.fromARGB(0));
         hologramData.setPersistent(false);
@@ -165,15 +166,6 @@ public class TycoonBlock {
         hologramMap.put(location, hologramUID);
     }
     public void removeHologram(Location location) {
-//            String uniqueId = hologramMap.get(location);
-//
-//
-//            Hologram hologram = manager.getHologram(uniqueId).orElse(null);
-//            if (hologram != null) {
-//
-//            }else{
-//                System.out.println("Hologram with id " + uniqueId + " not found");
-//            }
             if (getHologram(location) != null) {
                 manager.removeHologram(getHologram(location));
                 hologramMap.remove(location);
@@ -187,36 +179,37 @@ public class TycoonBlock {
     }
     public void updateHologramPreset(Location location, String preset) {
         Hologram hologram = getHologram(location);
-
+        if (hologram == null) {
+            return;
+        }
         HologramData data = hologram.getData();
         //TextHologramData textHologramData = (TextHologramData) data;
         List<String> hologramLines = ((TextHologramData) data).getText();
 
-        if (hologram == null) {
-            return;
-        }
+
         switch (preset) {
             case "BLOCK":
                 hologramLines.set(1, "Block: " + lastSpawnedBlock);
                 break;
             case "STATUS":
                 if (isActive) {
-                    hologramLines.set(2, "Status: " + ChatColor.GREEN + isActive + ChatColor.RESET);
+                    hologramLines.set(2, "Status: " + ChatColor.GREEN + true + ChatColor.RESET);
                 }else {
-                    hologramLines.set(2, "Status: " + ChatColor.RED + isActive + ChatColor.RESET);
+                    hologramLines.set(2, "Status: " + ChatColor.RED + false + ChatColor.RESET);
                 }
                 break;
             case "LEVEL":
                 hologramLines.set(3, "Level: " + level);
                 break;
             case "XP":
-                hologramLines.set(4, "xp: " + levelxp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + levelManager.getProgressPercentage(levelxp, level + 1));
+                hologramLines.set(4, "xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + levelManager.getProgressPercentage(levelXp, level + 1));
                 break;
             default:
                 break;
         }
         updateHologram(location);
     }
+    @Deprecated
     public void editHologram(Location location, int line, String text) {
         if (getHologram(location) != null) {
             Hologram hologram = getHologram(location);
@@ -249,24 +242,26 @@ public class TycoonBlock {
 
 
     // ---------     Adder      ---------
+    @Deprecated
     public void addTotalXp(int amount) {
-        this.totalxp += amount;
+        this.totalXp += amount;
         updateHologramPreset(location, "XP");
     }
-    public void addLevelxp(int amount) {
-        this.levelxp += amount;
+    @Deprecated
+    public void addLevelXp(int amount) {
+        this.levelXp += amount;
     }
     @Deprecated
     public void levelUp(int leftoverXp){
         this.level++;
-        this.levelxp = leftoverXp;
+        this.levelXp = leftoverXp;
         updateHologramPreset(location, "LEVEL");
     }
     // ---------     Adder      ---------
     // ---------     Getter      ---------
 
-    public int getLevelxp(){
-        return levelxp;
+    public int getLevelXp(){
+        return levelXp;
     }
     public String getBlockUID(){
         return blockUID;
@@ -274,8 +269,9 @@ public class TycoonBlock {
     public int getLevel() {
         return level;
     }
-    public int getTotalxp() {
-        return totalxp;
+    @Deprecated
+    public int getTotalXp() {
+        return totalXp;
     }
     public double getProgress() {
         return progress;
@@ -283,9 +279,11 @@ public class TycoonBlock {
     public Location getLocation() {
         return location;
     }
+    @Deprecated
     public OfflinePlayer getOfflineOwner() {
         return owner;
     }
+    @Deprecated
     public Player getOwner() {
         if (owner.getPlayer() != null) return owner.getPlayer();
         else return null;
@@ -317,15 +315,18 @@ public class TycoonBlock {
     public void setLevel(int level) {
         this.level = level;
     }
-    public void setLevelxp(int levelxp) {
-        this.levelxp = levelxp;
+    public void setLevelXp(int levelXp) {
+        this.levelXp = levelXp;
     }
-    public void setTotalxp(int totalxp) {
-        this.totalxp = totalxp;
+    @Deprecated
+    public void setTotalXp(int totalXp) {
+        this.totalXp = totalXp;
     }
+    @Deprecated
     public void setProgress(double progress) {
         this.progress = progress;
     }
+    @Deprecated
     public void setOwner(Player owner) {
         this.owner = owner;
     }

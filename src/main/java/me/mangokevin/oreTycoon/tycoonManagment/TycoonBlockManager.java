@@ -104,7 +104,7 @@ public class TycoonBlockManager {
             data.set(path + "ownerName", tycoon.getOwnerName());
 
             data.set(path + "level", tycoon.getLevel());
-            data.set(path + "xp", tycoon.getLevelxp());
+            data.set(path + "xp", tycoon.getLevelXp());
             data.set(path + "isActive", tycoon.isActive());
 
             if (tycoon.getLastSpawnedBlock() != null) {
@@ -165,7 +165,7 @@ public class TycoonBlockManager {
                 // Falls er einen Spielernamen braucht, nimm Bukkit.getOfflinePlayer(ownerUUID).getName()
                 TycoonBlock block = new TycoonBlock(loc, ownerUUID, active, spawnInterval, plugin, levelManager);
                 block.setLevel(level);
-                block.setLevelxp(xp);
+                block.setLevelXp(xp);
 
                 if (type != null) {
                     block.setLastSpawnedBlock(type);

@@ -4,10 +4,8 @@ import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 
 public class LevelManager {
 
-    private final int BASE_XP = 100;
-    private final int MULTIPLIER = 25;
-    /**
-     * Quadratische Formel: 100 + (level^2 * 25)
+
+     /* Quadratische Formel: 100 + (level^2 * 25)
      * Level 1 -> 125 XP
      * Level 2 -> 200 XP
      * Level 5 -> 725 XP
@@ -18,6 +16,8 @@ public class LevelManager {
      * Wenn wir wollen, dass Level 1 -> Level 2 genau 200 XP braucht:
      */
     public int getXpNeededForLevel(int level) {
+        int BASE_XP = 100;
+        int MULTIPLIER = 25;
         System.out.println("[LevelManager] getXpNeededForLevel " + level + " is " + (BASE_XP + (level * level * MULTIPLIER)));
         return BASE_XP + (level * level * MULTIPLIER);
     }
@@ -42,7 +42,7 @@ public class LevelManager {
 
     public void handleXpGain(TycoonBlock tycoonBlock, int gainedXp) {
         // WICHTIG: Nutze getLevelxp() (den aktuellen Fortschritt im Level)
-        int currentXpProgress = tycoonBlock.getLevelxp();
+        int currentXpProgress = tycoonBlock.getLevelXp();
         int currentLevel = tycoonBlock.getLevel();
         System.out.println("[LevelManager] Current xp: " + currentXpProgress + " Current Level: " + currentLevel);
         int totalXpInCurrentLevel = currentXpProgress + gainedXp;
@@ -54,7 +54,7 @@ public class LevelManager {
             System.out.println("[LevelManager] Leveled up to " + currentLevel);
         }
 
-        tycoonBlock.setLevelxp(totalXpInCurrentLevel);
+        tycoonBlock.setLevelXp(totalXpInCurrentLevel);
         tycoonBlock.setLevel(currentLevel);
         System.out.println("[LevelManager] Set xp to: "  + totalXpInCurrentLevel + " Level to: " + currentLevel);
         tycoonBlock.updateHologramPreset(tycoonBlock.getLocation(), "XP");
