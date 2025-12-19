@@ -1,6 +1,10 @@
 package me.mangokevin.oreTycoon.levelManagment;
 
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
+import org.bukkit.Effect;
+import org.bukkit.Sound;
+
+import java.util.Objects;
 
 public class LevelManager {
 
@@ -51,6 +55,8 @@ public class LevelManager {
         while (canLevelUp(totalXpInCurrentLevel, currentLevel)) {
             totalXpInCurrentLevel -= getXpNeededForLevel(currentLevel + 1);
             currentLevel++;
+            Objects.requireNonNull(tycoonBlock.getLocation().getWorld()).playEffect(tycoonBlock.getLocation(), Effect.MOBSPAWNER_FLAMES, 1);
+            tycoonBlock.getLocation().getWorld().playSound(tycoonBlock.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, 1, 1.5f);
             System.out.println("[LevelManager] Leveled up to " + currentLevel);
         }
 
@@ -58,6 +64,7 @@ public class LevelManager {
         tycoonBlock.setLevel(currentLevel);
         System.out.println("[LevelManager] Set xp to: "  + totalXpInCurrentLevel + " Level to: " + currentLevel);
         tycoonBlock.updateHologramPreset(tycoonBlock.getLocation(), "XP");
+        tycoonBlock.updateHologramPreset(tycoonBlock.getLocation(), "PROGRESS");
         tycoonBlock.updateHologramPreset(tycoonBlock.getLocation(), "LEVEL");
 
     }

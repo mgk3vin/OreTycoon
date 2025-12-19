@@ -145,7 +145,7 @@ public class TycoonBlock {
         name.add("---  " + getOwnerName() + "'s Tycoon ---");
         hologramData.setText(name);
 
-        hologramData.addLine("Block: " + lastSpawnedBlock);
+        hologramData.addLine("Last Block: " + lastSpawnedBlock);
 
         if (isActive){
             hologramData.addLine("Status: " + ChatColor.GREEN+ true + ChatColor.RESET);
@@ -154,8 +154,8 @@ public class TycoonBlock {
         }
 
         hologramData.addLine("Level: " + level);
-        hologramData.addLine("xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + levelManager.getProgressPercentage(levelXp, level + 1));
-
+        hologramData.addLine("xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + (int) levelManager.getProgressPercentage(levelXp, level + 1) + "%");
+        hologramData.addLine(ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
         hologramData.setBackground(Color.fromARGB(0));
         hologramData.setPersistent(false);
         de.oliver.fancyholograms.api.hologram.Hologram hologram = manager.create(hologramData);
@@ -189,7 +189,7 @@ public class TycoonBlock {
 
         switch (preset) {
             case "BLOCK":
-                hologramLines.set(1, "Block: " + lastSpawnedBlock);
+                hologramLines.set(1, "Last Block: " + lastSpawnedBlock);
                 break;
             case "STATUS":
                 if (isActive) {
@@ -202,13 +202,34 @@ public class TycoonBlock {
                 hologramLines.set(3, "Level: " + level);
                 break;
             case "XP":
-                hologramLines.set(4, "xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + levelManager.getProgressPercentage(levelXp, level + 1));
+                hologramLines.set(4, "xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + (int) levelManager.getProgressPercentage(levelXp, level + 1) + "%");
+                break;
+            case "PROGRESS":
+                hologramLines.set(5, ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
                 break;
             default:
                 break;
         }
         updateHologram(location);
     }
+
+    public String getProgressBar(int bars){
+        double percent = (levelManager.getProgressPercentage(levelXp, level + 1)/100);
+        int progressBars = (int) (bars * percent);
+        int leftOverBars = (bars - progressBars);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(ChatColor.GREEN);
+        for (int i = 0; i < progressBars; i++) {
+            sb.append("|");
+        }
+        sb.append(ChatColor.GRAY);
+        for (int i = 0; i < leftOverBars; i++) {
+            sb.append("|");
+        }
+        return sb.toString();
+    }
+
     @Deprecated
     public void editHologram(Location location, int line, String text) {
         if (getHologram(location) != null) {
