@@ -190,6 +190,7 @@ public class TycoonBlockManager {
                 int y = section.getInt(path + "y");
                 int z = section.getInt(path + "z");
 
+                assert worldName != null;
                 World world = Bukkit.getWorld(worldName);
                 if (world == null) continue;
                 Location loc = new Location(world, x, y, z);
@@ -207,6 +208,7 @@ public class TycoonBlockManager {
                 boolean active = section.getBoolean(path + "isActive");
                 long  creationTime = section.getLong(path + "creationDate");
                 int index = section.getInt(path + "index");
+
                 String tycoonMaterialString = section.getString(path + "material");
                 assert tycoonMaterialString != null;
                 Material tycoonMaterial = Material.getMaterial(tycoonMaterialString);
@@ -223,6 +225,7 @@ public class TycoonBlockManager {
                 block.setLevelXp(xp);
                 block.setCreationTime(creationTime);
                 block.setIndex(index);
+                System.out.println("[BlockManager] Loading Tycoon " + block.getLevel() + "|" + block.getLevelXp() + "|" + block.getIndex() + "|" + block.getMaterial().toString());
 
                 if (type != null) {
                     block.setLastSpawnedBlock(type);
@@ -243,11 +246,16 @@ public class TycoonBlockManager {
                     }
                 }
 
-                block.createHologram(); // Hologramm neu starten
+                //block.createHologram(); // Hologramm neu starten
 
             } catch (Exception e) {
                 plugin.getLogger().severe("Fehler beim Laden von Tycoon " + key + ": " + e.getMessage());
             }
+        }
+        for (TycoonBlock block : tycoonBlocks.values()) {
+            block.createHologram();
+            System.out.println("[BlockManager] Loading Hologram " + block.getLevel() + "|" + block.getLevelXp() + "|" + block.getIndex() + "|" + block.getMaterial());
+
         }
     }
     // ---------------- Filesave working ----------------
