@@ -1,10 +1,11 @@
 package me.mangokevin.oreTycoon;
 
-import me.mangokevin.oreTycoon.commands.TycoonCmd;
+import me.mangokevin.oreTycoon.commands.tycooncmds.TycoonCmd;
+import me.mangokevin.oreTycoon.commands.tycooncmds.TycoonTabCompleter;
+import me.mangokevin.oreTycoon.commands.tycooncmds.toggle_selected;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
-import me.mangokevin.oreTycoon.listener.BlockBreakListener;
-import me.mangokevin.oreTycoon.listener.BlockInteractListener;
-import me.mangokevin.oreTycoon.listener.BlockPlacedListener;
+import me.mangokevin.oreTycoon.listener.*;
+import me.mangokevin.oreTycoon.papiExpansion.PlaceholderExpansion;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -37,12 +38,19 @@ public final class OreTycoon extends JavaPlugin {
             @SuppressWarnings("unused")
             MultiverseCoreApi coreApi = provider.getProvider();
         }
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new PlaceholderExpansion(blockManager).register();
+            getLogger().info("PlaceholderAPI Expansion enabled!");
+        }
 
         //-----------------------   Listeners & Commands    -----------------------
         getServer().getPluginManager().registerEvents(new BlockPlacedListener(this, blockManager), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(this, blockManager, levelManager), this);
         getServer().getPluginManager().registerEvents(new BlockInteractListener(this, blockManager), this);
+        getServer().getPluginManager().registerEvents(new TycoonManipulationListener(blockManager), this);
+        getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
         Objects.requireNonNull(getCommand("tycoon")).setExecutor(new TycoonCmd(this, blockManager));
+        Objects.requireNonNull(getCommand("tycoon")).setTabCompleter(new TycoonTabCompleter());
         //-----------------------   Listeners & Commands    -----------------------
     }
 

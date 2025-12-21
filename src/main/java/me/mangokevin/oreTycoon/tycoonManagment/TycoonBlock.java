@@ -19,6 +19,9 @@ public class TycoonBlock {
     private final Location location;
     private OfflinePlayer owner;
     private final UUID ownerUuid;
+    private final Material material;
+    private long creationTime;
+    private int index;
 
     private int level;
     private int totalXp;
@@ -35,13 +38,15 @@ public class TycoonBlock {
     Block block;
     public static final Map<Location, String> hologramMap = new HashMap<>();
 
-    private final Set<Block> activeOres = new HashSet<>();
+    private final Set<Block> activeBlocks = new HashSet<>();
 
     HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
 
     private final OreTycoon plugin;
+    private final TycoonBlockManager blockManager;
     private final LevelManager levelManager;
 
+    private final HashMap<Material, Integer> ressourceMaterials = new HashMap<>();
 
     private final List<Material> TYCOON_RESOURCE_MATERIALS = Arrays.asList(
             Material.COAL_ORE,
@@ -52,20 +57,25 @@ public class TycoonBlock {
             // Fügen Sie hier weitere Materialien hinzu
     );
 
-    public TycoonBlock(Location location, UUID ownerUuid, boolean isActive, int spawnInterval, OreTycoon plugin, LevelManager levelManager) {
+    public TycoonBlock(Location location, UUID ownerUuid, Material material, boolean isActive, int spawnInterval, OreTycoon plugin, TycoonBlockManager blockManager, LevelManager levelManager) {
         this.location = location;
         this.block = location.getBlock();
         this.ownerUuid = ownerUuid;
         this.owner = Bukkit.getOfflinePlayer(ownerUuid);
+        this.material = material;
         this.isActive = isActive;
         this.plugin = plugin;
+        this.blockManager = blockManager;
         this.levelManager = levelManager;
+        this.creationTime = System.currentTimeMillis();
         level = 1;
         totalXp = 0;
         levelXp = 0;
         progress = 0;
+        index = -1;
 
         this.spawnInterval = spawnInterval;
+        fillRessources();
 
         this.blockUID = Objects.requireNonNull(this.location.getWorld()).getName() + "_" +
                 this.location.getBlockX() + "_" +
@@ -81,6 +91,20 @@ public class TycoonBlock {
                 trySpawnRessource();
             }
         }
+    }
+
+
+    public void fillRessources(){
+        //Material : weight in procent
+        ressourceMaterials.put(Material.STONE, 20);
+        ressourceMaterials.put(Material.DIRT, 5);
+        ressourceMaterials.put(Material.GRANITE, 10);
+        ressourceMaterials.put(Material.DIORITE, 10);
+        ressourceMaterials.put(Material.ANDESITE, 15);
+        ressourceMaterials.put(Material.GRAVEL, 10);
+        ressourceMaterials.put(Material.COAL_ORE, 10);
+        ressourceMaterials.put(Material.IRON_ORE, 15);
+        ressourceMaterials.put(Material.COPPER_ORE, 5);
     }
     public void trySpawnRessource() {
         Location center = getLocation();
@@ -102,11 +126,12 @@ public class TycoonBlock {
 
         if (spawnBlock.getType().equals(Material.AIR)) {
             //Valid Spawn point
-            Material material = getRandomMaterial();
+            Material material = getRandomMaterial(ressourceMaterials);
+            if (material == null) return;
             spawnBlock.setType(material);
             //Gespawnten Block merken!
             //spawnedBlocksMap.put(spawnBlock.getLocation(), spawnBlock);
-            activeOres.add(spawnBlock);
+            activeBlocks.add(spawnBlock);
 
             spawnBlock.setMetadata("tycoon_id", new FixedMetadataValue(plugin, blockUID));
 
@@ -119,21 +144,70 @@ public class TycoonBlock {
         }
 
     }
+    @Deprecated
     private Material getRandomMaterial() {
         Random rand = new Random();
         int randint = rand.nextInt(0, TYCOON_RESOURCE_MATERIALS.size());
 
         return TYCOON_RESOURCE_MATERIALS.get(randint);
     }
+    private Material getRandomMaterial(HashMap<Material, Integer> map) {
+        int totalWeight = 0;
+        for (int weight : map.values()) {
+            totalWeight += weight;
+        }
+        int randomValue = new Random().nextInt(totalWeight);
+        int currentSum = 0;
+        for (Map.Entry<Material, Integer> entry : map.entrySet()) {
+            currentSum += entry.getValue();
+            if (randomValue < currentSum) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
 
     public boolean containsBlock(Block block) {
-        return activeOres.contains(block);
+        return activeBlocks.contains(block);
     }
     public void removeBlock(Block block) {
-        activeOres.remove(block);
+        activeBlocks.remove(block);
     }
 
-    // ---------     BlockHologram      ---------
+    // ---------     SpawnedBlockHologram      ---------
+    public void displayXpHologram(Block brokenBlock, int xp) {
+        Location l = new Location(brokenBlock.getWorld(), brokenBlock.getX()+0.5, brokenBlock.getY()+1.5, brokenBlock.getZ()+0.5);
+        World world = brokenBlock.getWorld();
+
+        hologramUID = "SpawnedBlockHolo_" + l.getBlockX() + "_" + l.getBlockY() + "_" + l.getBlockZ() + "_" + getOwnerName();
+
+        TextHologramData hologramData = new TextHologramData(hologramUID, l);
+
+        List<String> name = new LinkedList<>();
+        name.add(ChatColor.GREEN + "+" + xp);
+        hologramData.setText(name);
+        hologramData.setBackground(Color.fromARGB(0));
+        hologramData.setPersistent(false);
+        Hologram hologram = manager.create(hologramData);
+        manager.addHologram(hologram);
+
+        hologramMap.put(brokenBlock.getLocation(), hologramUID);
+        hologram.queueUpdate();
+
+        world.playSound(l, Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
+    }
+    public void removeXpHologram(Block block) {
+        Hologram hologram = getHologram(block.getLocation());
+
+        if (hologram != null) {
+            manager.removeHologram(hologram);
+            hologram.queueUpdate();
+        }
+    }
+    // ---------     SpawnedBlockHologram      ---------
+
+
+    // ---------     TycoonHologram      ---------
     public void createHologram() {
         Location l = new Location(block.getWorld(), block.getX()+0.5, block.getY()+1.5, block.getZ()+0.5);
 
@@ -141,8 +215,16 @@ public class TycoonBlock {
 
         TextHologramData hologramData = new TextHologramData(hologramUID, l);
 
+        List<TycoonBlock> tycoonBlockList = blockManager.getTycoonBlocksFromPlayer(ownerUuid);
+
+        for (TycoonBlock tycoonBlock : tycoonBlockList) {
+            if (tycoonBlock.getBlockUID().equals(blockUID)) {
+                index = tycoonBlockList.indexOf(tycoonBlock);
+            }
+        }
+
         List<String> name = new LinkedList<>();
-        name.add("---  " + getOwnerName() + "'s Tycoon ---");
+        name.add("[ " + getOwnerName() + "'s Tycoon #" + index + " ]");
         hologramData.setText(name);
 
         hologramData.addLine("Last Block: " + lastSpawnedBlock);
@@ -158,7 +240,7 @@ public class TycoonBlock {
         hologramData.addLine(ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
         hologramData.setBackground(Color.fromARGB(0));
         hologramData.setPersistent(false);
-        de.oliver.fancyholograms.api.hologram.Hologram hologram = manager.create(hologramData);
+        Hologram hologram = manager.create(hologramData);
         manager.addHologram(hologram);
 
 
@@ -207,6 +289,15 @@ public class TycoonBlock {
             case "PROGRESS":
                 hologramLines.set(5, ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
                 break;
+            case "ORDER":
+                List<TycoonBlock> tycoonBlockList = blockManager.getTycoonBlocksFromPlayer(ownerUuid);
+
+                for (TycoonBlock tycoonBlock : tycoonBlockList) {
+                    if (tycoonBlock.getBlockUID().equals(blockUID)) {
+                        index = tycoonBlockList.indexOf(tycoonBlock);
+                    }
+                }
+                hologramLines.set(0, "[ " + getOwnerName() + "'s Tycoon #" + index + " ]");
             default:
                 break;
         }
@@ -259,7 +350,7 @@ public class TycoonBlock {
         }
         return null;
     }
-    // ---------     BlockHologram      ---------
+    // ---------     TycoonHologram      ---------
 
 
     // ---------     Adder      ---------
@@ -278,9 +369,14 @@ public class TycoonBlock {
         this.levelXp = leftoverXp;
         updateHologramPreset(location, "LEVEL");
     }
+    public void addActiveBlocks(Block block) {
+        activeBlocks.add(block);
+    }
     // ---------     Adder      ---------
     // ---------     Getter      ---------
-
+    public int getIndex() {
+        return index;
+    }
     public int getLevelXp(){
         return levelXp;
     }
@@ -300,7 +396,7 @@ public class TycoonBlock {
     public Location getLocation() {
         return location;
     }
-    @Deprecated
+
     public OfflinePlayer getOfflineOwner() {
         return owner;
     }
@@ -330,9 +426,21 @@ public class TycoonBlock {
     public String getHologramUID(){
         return hologramUID;
     }
+    public Set<Block> getActiveBlocks(){
+        return activeBlocks;
+    }
+    public Material getMaterial() {
+        return material;
+    }
+    public long getCreationTime() {
+        return creationTime;
+    }
     // ---------     Getter      ---------
 
     // ---------     Setter      ---------
+    public void setIndex(int index) {
+        this.index = index;
+    }
     public void setLevel(int level) {
         this.level = level;
     }
@@ -363,6 +471,9 @@ public class TycoonBlock {
     }
     public void setSpawnInterval(int spawnInterval) {
         this.spawnInterval = spawnInterval;
+    }
+    public void setCreationTime(long creationTime) {
+        this.creationTime = creationTime;
     }
     // ---------     Setter      ---------
 }

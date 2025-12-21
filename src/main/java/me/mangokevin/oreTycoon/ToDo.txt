@@ -1,13 +1,16 @@
 saving tycoons over reset✅
 5x5 rule when placing more tycoons✅
-bukkit runnable timer (Load bar Hologram)
-Random ressources list with weight
-saving tycoon blocks over reset
+bukkit runnable timer (Load bar Hologram)✅
+Random ressources list with weight✅
+saving tycoon blocks over reset✅
+Enum for tycoon type variations
 saving tycoon stats on pickup
 Hologram formatting
 Hologram cooldown
 Clean up TycoonBlockclass
 (Own Hologram system for timer/load bar)
+(tycoon Gui, blocks go into tycoon inventory)
+
 
 
 

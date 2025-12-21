@@ -3,6 +3,7 @@ package me.mangokevin.oreTycoon.listener;
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -10,6 +11,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.metadata.FixedMetadataValue;
 
 public class BlockInteractListener implements Listener {
 
@@ -59,6 +62,23 @@ public class BlockInteractListener implements Listener {
                 event.setCancelled(true);
                 player.sendMessage(ChatColor.AQUA + "Picking up Tycoon Block");
                 blockManager.pickupTycoonBlock(block, player, blockData);
+                return;
+            }
+        }
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK){
+
+            if (event.getHand() == EquipmentSlot.OFF_HAND) return;
+
+            Block b = event.getClickedBlock();
+            Player p = event.getPlayer();
+            if (blockManager.isTycoonBlock(b)) {
+                TycoonBlock tycoonBlock = blockManager.getTycoonBlock(b);
+                event.setCancelled(true);
+//                p.setMetadata("viewing_tycoon", new FixedMetadataValue(plugin, tycoonBlock.getBlockUID()));
+//                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "dm open tycoon_gui " + event.getPlayer().getName());
+                //Replaced by:
+                blockManager.openTycoonSpecificMenu(p, tycoonBlock);
+                System.out.println("Tycoon GUI Opened");
             }
         }
     }

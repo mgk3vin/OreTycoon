@@ -62,6 +62,7 @@ public class BlockBreakListener implements Listener {
             levelManager.handleXpGain(tycoonBlock, 50);
             System.out.println("------------[LM]------------");
             p.sendMessage(ChatColor.GOLD + "Recieved 50 Tycoon xp!");
+            blockManager.playXpBlockHologram(tycoonBlock, block, 50);
 
             tycoonBlock.removeBlock(block);
         }

@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -40,6 +41,7 @@ public class TycoonBlockManager {
     // ! Replaced with @tycoonBlocks
 
     private final Map<Location, TycoonBlock> tycoonBlocks;
+    private final Map<String, TycoonBlock> tycoonBlocksUID;
     private final int maxBlocksPerPlayer;
 
     private static final List<Material> TYCOON_RESOURCE_MATERIALS = Arrays.asList(
@@ -55,6 +57,7 @@ public class TycoonBlockManager {
         this.plugin = plugin;
         this.levelManager = levelManager;
         this.tycoonBlocks = new HashMap<>();
+        this.tycoonBlocksUID = new HashMap<>();
         maxBlocksPerPlayer = plugin.getConfig().getInt("maxBlocksPerPlayer"); //Config hinzufügen✅
 
         new BukkitRunnable() {
@@ -68,6 +71,34 @@ public class TycoonBlockManager {
 
     }
 
+
+    public void openTycoonSpecificMenu(Player player, TycoonBlock tycoonBlock) {
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "dm open tycoon_gui " + player.getName());
+        player.setMetadata("viewing_tycoon", new FixedMetadataValue(plugin, tycoonBlock.getBlockUID()));
+    }
+    public void openTycoonMenu(Player player) {
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "dm open tycoon_menu " + player.getName());
+        player.setMetadata("viewing_tycoon_menu", new FixedMetadataValue(plugin, tycoonBlocks));
+    }
+
+    public List<TycoonBlock> getTycoonBlocksFromPlayer(UUID playerUUID) {
+        List<TycoonBlock> tycoonBlocksList = new ArrayList<>();
+        for (TycoonBlock tycoonBlock : tycoonBlocks.values()) {
+            if (tycoonBlock.getOwnerUuid().equals(playerUUID)) {
+                tycoonBlocksList.add(tycoonBlock);
+            }
+        }
+
+        tycoonBlocksList.sort(new Comparator<TycoonBlock>() {
+            @Override
+            public int compare(TycoonBlock t1, TycoonBlock t2) {
+                return Long.compare(t1.getCreationTime(), t2.getCreationTime());    //neuste Tycoons zuerst
+            }
+        });
+        System.out.println("[BlockManager] returning " + tycoonBlocksList);
+        return tycoonBlocksList;
+    }
+
     @Deprecated
     public void checkTycoonProgress(TycoonBlock block){
         int currentLevel = block.getLevel();
@@ -79,7 +110,18 @@ public class TycoonBlockManager {
         }
     }
 
-    // Filesave broken- ---------------
+    public void playXpBlockHologram(TycoonBlock tycoonBlock, Block block, int xp) {
+        tycoonBlock.displayXpHologram(block,xp);
+        System.out.println("[BlockManager] displayXpHologram");
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                tycoonBlock.removeXpHologram(block);
+                System.out.println("[BlockManager] removeXpHologram");
+            }
+        }.runTaskLater(plugin, 20L * 2);
+    }
+    // ---------------- Filesave working ----------------
     public void saveTycoons(){
         if (!plugin.getDataFolder().exists()) {
             plugin.getDataFolder().mkdirs(); // Erstellt den Ordner, falls er fehlt
@@ -103,13 +145,21 @@ public class TycoonBlockManager {
             data.set(path + "ownerUUID", tycoon.getOwnerUuid().toString());
             data.set(path + "ownerName", tycoon.getOwnerName());
 
+            data.set(path + "material", tycoon.getMaterial().toString());
             data.set(path + "level", tycoon.getLevel());
             data.set(path + "xp", tycoon.getLevelXp());
             data.set(path + "isActive", tycoon.isActive());
+            data.set(path + "creationDate", tycoon.getCreationTime());
+            data.set(path + "index", tycoon.getIndex());
 
             if (tycoon.getLastSpawnedBlock() != null) {
                 data.set(path + "lastSpawnedBlock", tycoon.getLastSpawnedBlock().name());
             }
+            List<String> blockLocs = new ArrayList<>();
+            for (Block block : tycoon.getActiveBlocks()){
+                blockLocs.add(block.getX() + "," + block.getY() + "," + block.getZ());
+            }
+            data.set(path + "spawnedBlocks", blockLocs);
 
             data.set(path + "spawnInterval", tycoon.getSpawnInterval());
             data.set(path + "hologramUID", tycoon.getHologramUID());
@@ -154,8 +204,13 @@ public class TycoonBlockManager {
                 // 3. Restliche Daten
                 int level = section.getInt(path + "level");
                 int xp = section.getInt(path + "xp");
-
                 boolean active = section.getBoolean(path + "isActive");
+                long  creationTime = section.getLong(path + "creationDate");
+                int index = section.getInt(path + "index");
+                String tycoonMaterialString = section.getString(path + "material");
+                assert tycoonMaterialString != null;
+                Material tycoonMaterial = Material.getMaterial(tycoonMaterialString);
+
                 int spawnInterval = section.getInt(path + "spawnInterval");
                 String matName = section.getString(path + "lastSpawnedBlock");
                 Material type = (matName != null) ? Material.getMaterial(matName) : Material.STONE;
@@ -163,14 +218,31 @@ public class TycoonBlockManager {
                 // 4. Objekt erstellen
                 // Wichtig: Nutze deinen Konstruktor.
                 // Falls er einen Spielernamen braucht, nimm Bukkit.getOfflinePlayer(ownerUUID).getName()
-                TycoonBlock block = new TycoonBlock(loc, ownerUUID, active, spawnInterval, plugin, levelManager);
+                TycoonBlock block = new TycoonBlock(loc, ownerUUID, tycoonMaterial, active, spawnInterval, plugin, this,levelManager);
                 block.setLevel(level);
                 block.setLevelXp(xp);
+                block.setCreationTime(creationTime);
+                block.setIndex(index);
 
                 if (type != null) {
                     block.setLastSpawnedBlock(type);
                 }
                 tycoonBlocks.put(loc, block);
+
+                List<String> blockLocs = section.getStringList(path + "spawnedBlocks");
+                for (String s : blockLocs) {
+                    String[] parts = s.split(",");
+                    int bx = Integer.parseInt(parts[0]);
+                    int by = Integer.parseInt(parts[1]);
+                    int bz = Integer.parseInt(parts[2]);
+                    Block b = world.getBlockAt(bx, by, bz);
+
+                    if (b.getType() != Material.AIR) {
+                        System.out.println("[BlockManager] Reloading Block: " + b.getType() + "|" + bx + "," + by + "," + bz);
+                        block.addActiveBlocks(b); // Methode in TycoonBlock, die den Block in die interne Liste packt
+                    }
+                }
+
                 block.createHologram(); // Hologramm neu starten
 
             } catch (Exception e) {
@@ -178,7 +250,7 @@ public class TycoonBlockManager {
             }
         }
     }
-    // Filesave broken ----------------
+    // ---------------- Filesave working ----------------
 
     @Deprecated
     private void loadDropsFromConfig(FileConfiguration config) {
@@ -366,29 +438,29 @@ public class TycoonBlockManager {
     }
 
     public void pickupTycoonBlock(Block block, Player player, TycoonBlock blockData) {
-        giveTycoonBlock(player);
-        removeTycoonBlock(block);
-        stopGenerator(blockData);
+        giveTycoonBlock(player, block.getType());
         blockData.removeHologram(block.getLocation());
         block.setType(Material.AIR);
         player.playSound(player.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_DEPLETE, 1, 1.5F);
+        removeTycoonBlock(block);
+        //stopGenerator(blockData);
+        for (TycoonBlock tycoonBlock : tycoonBlocks.values()) {
+            tycoonBlock.updateHologramPreset(tycoonBlock.getLocation(), "ORDER");
+        }
     }
 
     public void addTycoonBlock(Block placedBlock, UUID playerUuid) {
-        TycoonBlock tycoonBlock = new TycoonBlock(placedBlock.getLocation(), playerUuid, false,5, plugin, levelManager);
-
+        TycoonBlock tycoonBlock = new TycoonBlock(placedBlock.getLocation(), playerUuid, placedBlock.getType(),false,5, plugin, this,levelManager);
         tycoonBlocks.put(placedBlock.getLocation(), tycoonBlock);
-        System.out.println("[OreTycoon] Added Tycoon Block " + playerUuid + " to " + placedBlock.getLocation());
+        tycoonBlocksUID.put(tycoonBlock.getBlockUID(), tycoonBlock);
+        System.out.println("[OreTycoon] Added Tycoon Block " + playerUuid + " index" + tycoonBlock.getIndex());
     }
 
     public void removeTycoonBlock(Block placedBlock) {
-        TycoonBlock removedTycoonBlock = tycoonBlocks.remove(placedBlock.getLocation());
+        //TycoonBlock removedTycoonBlock = tycoonBlocks.remove(placedBlock.getLocation());
+        tycoonBlocks.remove(placedBlock.getLocation());
+        //tycoonBlocksUID.remove(getTycoonBlock(placedBlock).getBlockUID());
 
-        if (removedTycoonBlock != null) {
-            System.out.println("[OreTycoon] Temporarily removed Tycoon Block from " + placedBlock.getLocation());
-            stopGenerator(removedTycoonBlock);
-            // Hier würde später die deleteBlock(loc) Methode aufgerufen!
-        }
 
     }
 
@@ -404,6 +476,11 @@ public class TycoonBlockManager {
     public TycoonBlock getTycoonBlock(Block placedBlock) {
         return tycoonBlocks.get(placedBlock.getLocation());
     }
+    @Deprecated
+    public TycoonBlock getTycoonBlockByUID(String blockUID) {
+        return tycoonBlocksUID.get(blockUID);
+    }
+
 
     public TycoonBlock getTycoonBlock(String blockUID){
         for (TycoonBlock tycoonBlock : tycoonBlocks.values()) {
@@ -415,9 +492,9 @@ public class TycoonBlockManager {
     }
 
 
-    public void giveTycoonBlock(Player p) {
+    public void giveTycoonBlock(Player p, Material type) {
         // 1. Das Item erstellen (ItemStack)
-        ItemStack tycoonBlock = new ItemStack(Material.DIAMOND_BLOCK);
+        ItemStack tycoonBlock = new ItemStack(type, 1);
         ItemMeta meta = tycoonBlock.getItemMeta();
         meta.addEnchant(Enchantment.UNBREAKING, 1, true);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
