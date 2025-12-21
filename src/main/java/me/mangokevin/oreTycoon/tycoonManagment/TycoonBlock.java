@@ -72,7 +72,7 @@ public class TycoonBlock {
         totalXp = 0;
         levelXp = 0;
         progress = 0;
-        index = -1;
+
 
         this.spawnInterval = spawnInterval;
         fillRessources();
@@ -217,9 +217,11 @@ public class TycoonBlock {
 
         List<TycoonBlock> tycoonBlockList = blockManager.getTycoonBlocksFromPlayer(ownerUuid);
 
-        for (TycoonBlock tycoonBlock : tycoonBlockList) {
-            if (tycoonBlock.getBlockUID().equals(blockUID)) {
-                index = tycoonBlockList.indexOf(tycoonBlock);
+        index = -1;
+        for (int i = 0; i < tycoonBlockList.size(); i++) {
+            if (tycoonBlockList.get(i).getBlockUID().equals(blockUID)) {
+                index = i + 1;
+                break;
             }
         }
 
