@@ -42,6 +42,8 @@ public class TycoonBlock {
 
     HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
 
+
+
     private final OreTycoon plugin;
     private final TycoonBlockManager blockManager;
     private final LevelManager levelManager;
@@ -81,6 +83,8 @@ public class TycoonBlock {
                 this.location.getBlockX() + "_" +
                 this.location.getBlockY() + "_" +
                 this.location.getBlockZ();
+
+
     }
 
     public void incrementAndCheck(){
@@ -294,9 +298,11 @@ public class TycoonBlock {
             case "ORDER":
                 List<TycoonBlock> tycoonBlockList = blockManager.getTycoonBlocksFromPlayer(ownerUuid);
 
-                for (TycoonBlock tycoonBlock : tycoonBlockList) {
-                    if (tycoonBlock.getBlockUID().equals(blockUID)) {
-                        index = tycoonBlockList.indexOf(tycoonBlock);
+                index = -1;
+                for (int i = 0; i < tycoonBlockList.size(); i++) {
+                    if (tycoonBlockList.get(i).getBlockUID().equals(blockUID)) {
+                        index = i + 1;
+                        break;
                     }
                 }
                 hologramLines.set(0, "[ " + getOwnerName() + "'s Tycoon #" + index + " ]");
