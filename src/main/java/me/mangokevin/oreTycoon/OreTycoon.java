@@ -7,7 +7,9 @@ import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import me.mangokevin.oreTycoon.listener.*;
 import me.mangokevin.oreTycoon.papiExpansion.PlaceholderExpansion;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
+import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.mvplugins.multiverse.core.MultiverseCoreApi;
@@ -17,10 +19,11 @@ import java.util.Objects;
 public final class OreTycoon extends JavaPlugin {
 
     private TycoonBlockManager blockManager;
+    private TycoonData tdData;
 
-    public OreTycoon() {
+    public OreTycoon() {}
 
-    }
+
 
     @Override
     public void onEnable() {
@@ -28,7 +31,8 @@ public final class OreTycoon extends JavaPlugin {
         saveDefaultConfig();
         LevelManager levelManager = new LevelManager();
         this.blockManager = new TycoonBlockManager(this, levelManager);
-
+        this.tdData = new TycoonData();
+        TycoonData.init(this);
 
         blockManager.loadTycoons();
 
@@ -44,7 +48,7 @@ public final class OreTycoon extends JavaPlugin {
         }
 
         //-----------------------   Listeners & Commands    -----------------------
-        getServer().getPluginManager().registerEvents(new BlockPlacedListener(this, blockManager), this);
+        getServer().getPluginManager().registerEvents(new BlockPlacedListener(this, blockManager, tdData), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(this, blockManager, levelManager), this);
         getServer().getPluginManager().registerEvents(new BlockInteractListener(this, blockManager), this);
         getServer().getPluginManager().registerEvents(new TycoonManipulationListener(blockManager), this);
@@ -52,6 +56,8 @@ public final class OreTycoon extends JavaPlugin {
         Objects.requireNonNull(getCommand("tycoon")).setExecutor(new TycoonCmd(this, blockManager));
         Objects.requireNonNull(getCommand("tycoon")).setTabCompleter(new TycoonTabCompleter());
         //-----------------------   Listeners & Commands    -----------------------
+
+
     }
 
     @Override
@@ -61,4 +67,6 @@ public final class OreTycoon extends JavaPlugin {
         }
         // Plugin shutdown logic
     }
+
+
 }

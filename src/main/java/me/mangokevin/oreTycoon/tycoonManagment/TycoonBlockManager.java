@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -36,6 +37,8 @@ public class TycoonBlockManager {
             "IS_TYCOON_BLOCK"                      // Der eigentliche Schlüsselname
     );
     // ---------     Tycoon Key      ---------
+    //--------  NamespacedKeys  --------
+    //--------  NamespacedKeys  --------
 
     //private static final HashMap<Location, UUID> tycoonBlocks = new HashMap<>();
     // ! Replaced with @tycoonBlocks
@@ -59,6 +62,7 @@ public class TycoonBlockManager {
         this.tycoonBlocks = new HashMap<>();
         this.tycoonBlocksUID = new HashMap<>();
         maxBlocksPerPlayer = plugin.getConfig().getInt("maxBlocksPerPlayer"); //Config hinzufügen✅
+
 
         new BukkitRunnable() {
             @Override
@@ -437,8 +441,17 @@ public class TycoonBlockManager {
         return TYCOON_RESOURCE_MATERIALS.get(randint);
     }
 
+
     public void pickupTycoonBlock(Block block, Player player, TycoonBlock blockData) {
-        giveTycoonBlock(player, block.getType());
+        ItemStack itemInHand = player.getInventory().getItemInMainHand();
+
+
+        if (itemInHand.getType() == Material.AIR) {
+            giveSmartTycoonBlock(blockData, player);
+        }else{
+            player.sendMessage(ChatColor.RED + "Your hand needs to be empty!");
+            return;
+        }
         blockData.removeHologram(block.getLocation());
         block.setType(Material.AIR);
         player.playSound(player.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_DEPLETE, 1, 1.5F);
@@ -454,6 +467,11 @@ public class TycoonBlockManager {
         tycoonBlocks.put(placedBlock.getLocation(), tycoonBlock);
         tycoonBlocksUID.put(tycoonBlock.getBlockUID(), tycoonBlock);
         System.out.println("[OreTycoon] Added Tycoon Block " + playerUuid + " index" + tycoonBlock.getIndex());
+    }
+    public void addTycoonBlock(TycoonBlock block){
+        tycoonBlocks.put(block.getLocation(), block);
+        tycoonBlocksUID.put(block.getBlockUID(), block);
+        System.out.println("[OreTycoon] Added Tycoon Block " + block.getOwnerName() + " index" + block.getIndex());
     }
 
     public void removeTycoonBlock(Block placedBlock) {
@@ -495,6 +513,7 @@ public class TycoonBlockManager {
     public void giveTycoonBlock(Player p, Material type) {
         // 1. Das Item erstellen (ItemStack)
         ItemStack tycoonBlock = new ItemStack(type, 1);
+
         ItemMeta meta = tycoonBlock.getItemMeta();
         meta.addEnchant(Enchantment.UNBREAKING, 1, true);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -511,6 +530,43 @@ public class TycoonBlockManager {
         tycoonBlock.setItemMeta(meta);
         p.getInventory().addItem(tycoonBlock);
     }
+    public void giveSmartTycoonBlock(TycoonBlock tycoonBlock, Player player) {
+
+
+
+
+        ItemStack item = new ItemStack(tycoonBlock.getMaterial(), 1);
+
+        TycoonData.writeToItem(item, tycoonBlock.getLevel(), tycoonBlock.getLevelXp(), tycoonBlock.getCreationTime(), tycoonBlock.getMaterial(), tycoonBlock.getSpawnInterval(), tycoonBlock.getCreationTime());
+        ItemMeta meta = item.getItemMeta();
+
+        if (meta == null) return;
+        meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+//        dataContainer.set(TYCOON_BLOCK_KEY, PersistentDataType.BYTE, (byte) 1);
+
+//        dataContainer.set(LEVEL_KEY, PersistentDataType.INTEGER, tycoonBlock.getLevel());
+//        dataContainer.set(XP_KEY, PersistentDataType.INTEGER, tycoonBlock.getLevelXp());
+//        dataContainer.set(CREATION_KEY, PersistentDataType.LONG, tycoonBlock.getCreationTime());
+//        dataContainer.set(MATERIAL_KEY, PersistentDataType.STRING, tycoonBlock.getMaterial().toString());
+//        dataContainer.set(PROGRESS_KEY, PersistentDataType.DOUBLE, tycoonBlock.getProgress());
+//        dataContainer.set(SPAWNINTERVAL_KEY, PersistentDataType.INTEGER, tycoonBlock.getSpawnInterval());
+
+        List<String> lore = new ArrayList<>();
+        lore.add("§8§m-----------------------");
+        lore.add("§7Level: §e" + tycoonBlock.getLevel());
+        lore.add("§7XP: §f" + tycoonBlock.getLevelXp());
+        lore.add("§7Progress: §f" + tycoonBlock.getProgressBar(20));
+        lore.add("§7Spawnrate: §f" + tycoonBlock.getSpawnInterval() + "s");
+        lore.add("§8§m-----------------------");
+        meta.setLore(lore);
+        meta.setDisplayName("§6§lSaved Tycoon");
+
+        item.setItemMeta(meta);
+
+        player.getInventory().setItemInMainHand(item);
+
+    }
 
     public int getMaxBlocksPerPlayer() {
         return this.maxBlocksPerPlayer;
@@ -518,6 +574,11 @@ public class TycoonBlockManager {
     public LevelManager getLevelManager() {
         return this.levelManager;
     }
+    // ---------     Getter      ---------
+    public NamespacedKey getTycoonBlockKey() {
+        return TYCOON_BLOCK_KEY;
+    }
+    // ---------     Getter      ---------
 
 
 }
