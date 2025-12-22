@@ -60,8 +60,8 @@ public class PlaceholderExpansion extends me.clip.placeholderapi.expansion.Place
 
                 return switch (type){
                     case "level" -> String.valueOf(t.getLevel());
-                    case "status" -> t.isActive() ? "§aOn" : "§cOff";
-                    case "loc" -> t.getLocation().getBlockX() + ", " + t.getLocation().getBlockZ();
+                    case "status" -> t.isActive() ? "true" : "false";
+                    case "location" -> t.getLocation().getBlockX() + ", " + t.getLocation().getBlockZ();
                     case "material" -> t.getMaterial().name();
                     case "exists" -> "true";
                     default -> "default";
