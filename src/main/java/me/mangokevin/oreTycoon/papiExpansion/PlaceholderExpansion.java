@@ -72,6 +72,10 @@ public class PlaceholderExpansion extends me.clip.placeholderapi.expansion.Place
             }
         }
 
+        if (paramsLower.equalsIgnoreCase("limit")) {
+            return String.valueOf(blockManager.getMaxBlocksPerPlayer());
+        }
+
         if (!onlinePlayer.hasMetadata("viewing_tycoon")) return "N/A";
 
         String tycoonUID = onlinePlayer.getMetadata("viewing_tycoon").getFirst().asString();
@@ -88,8 +92,11 @@ public class PlaceholderExpansion extends me.clip.placeholderapi.expansion.Place
             case "progress_bar" -> String.valueOf(tycoonBlock.getProgressBar(20));
             case "status" -> String.valueOf(tycoonBlock.isActive());
             case "owner" -> String.valueOf(tycoonBlock.getOfflineOwner().getName());
-            case "material" -> String.valueOf(tycoonBlock.getMaterial().name());
+            case "material" -> tycoonBlock.getMaterial().name();
             default -> null;
         };
+
+
+
     }
 }
