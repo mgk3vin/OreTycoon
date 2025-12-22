@@ -9,7 +9,7 @@ Hologram formatting
 Hologram cooldown
 Clean up TycoonBlockclass
 (Own Hologram system for timer/load bar)
-(tycoon Gui, blocks go into tycoon inventory)
+(tycoon Gui, blocks go into tycoon inventory)❌
 
 
 

@@ -96,11 +96,18 @@ public class TycoonBlockManager {
         tycoonBlocksList.sort(new Comparator<TycoonBlock>() {
             @Override
             public int compare(TycoonBlock t1, TycoonBlock t2) {
-                return Long.compare(t1.getCreationTime(), t2.getCreationTime());    //neuste Tycoons zuerst
+                return Long.compare(t1.getCreationTime(), t2.getCreationTime());    //letzte Tycoons zuerst
             }
         });
         System.out.println("[BlockManager] returning " + tycoonBlocksList);
         return tycoonBlocksList;
+    }
+    public TycoonBlock getTycoonBlockFromIndex(Player player, int index) {
+        List<TycoonBlock> tycoonBlocksList = getTycoonBlocksFromPlayer(player.getUniqueId());
+        if (index < 1 || index > tycoonBlocksList.size()) {
+            return null;
+        }
+        return tycoonBlocksList.get(index - 1);//1 basiert
     }
 
     @Deprecated

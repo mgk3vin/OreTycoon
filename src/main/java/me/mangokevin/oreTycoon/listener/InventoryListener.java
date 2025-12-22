@@ -24,7 +24,7 @@ public class InventoryListener implements Listener {
         Player player = (Player) event.getPlayer();
         Inventory inventory = event.getInventory();
         if (player.hasMetadata("viewing_tycoon")){
-            if (event.getView().getTitle().contains("§bTycoon Menu")){
+            if (event.getView().getTitle().contains("§bTycoon Stats")){
                 System.out.println("[InventoryListener] Removing " + player.getDisplayName() + " Metadata");
                 player.removeMetadata("viewing_tycoon", plugin);
             }

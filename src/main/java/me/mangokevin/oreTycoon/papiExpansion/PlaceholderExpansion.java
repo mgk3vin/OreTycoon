@@ -93,10 +93,9 @@ public class PlaceholderExpansion extends me.clip.placeholderapi.expansion.Place
             case "status" -> String.valueOf(tycoonBlock.isActive());
             case "owner" -> String.valueOf(tycoonBlock.getOfflineOwner().getName());
             case "material" -> tycoonBlock.getMaterial().name();
+            case "index" -> String.valueOf(tycoonBlock.getIndex());
             default -> null;
         };
-
-
 
     }
 }
