@@ -18,6 +18,7 @@ public class TycoonData {
     private static NamespacedKey MATERIAL;
     private static NamespacedKey SPAWN_INTERVAL;
     private static NamespacedKey CREATION_TIME;
+    public static NamespacedKey TYPE_KEY;
 
     // Wird einmal in der onEnable deiner Main aufgerufen: TycoonData.init(this);
     public static void init(Plugin plugin) {
@@ -28,14 +29,16 @@ public class TycoonData {
         MATERIAL = new NamespacedKey(plugin, "material");
         SPAWN_INTERVAL = new NamespacedKey(plugin, "spawn_interval");
         CREATION_TIME = new NamespacedKey(plugin, "creation_time");
+        TYPE_KEY = new NamespacedKey(plugin, "type");
     }
     // Speichert die Daten eines Tycoons auf ein Item
-    public static void writeToItem(ItemStack item, int level, int xp, long creation, Material material, int spawnInterval, long creationTime) {
+    public static void writeToItem(ItemStack item, int level, int xp, long creation, Material material, int spawnInterval, long creationTime, String type) {
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
 
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
         pdc.set(TYCOON_BLOCK, PersistentDataType.BYTE,  (byte) 1);
+        pdc.set(TYPE_KEY, PersistentDataType.STRING, type);
         pdc.set(LEVEL, PersistentDataType.INTEGER, level);
         pdc.set(XP, PersistentDataType.INTEGER, xp);
         pdc.set(CREATION, PersistentDataType.LONG, creation);
@@ -63,5 +66,8 @@ public class TycoonData {
     }
     public NamespacedKey getSPAWN_INTERVAL_KEY() {
         return SPAWN_INTERVAL;
+    }
+    public NamespacedKey getTYPE_KEY() {
+        return TYPE_KEY;
     }
 }

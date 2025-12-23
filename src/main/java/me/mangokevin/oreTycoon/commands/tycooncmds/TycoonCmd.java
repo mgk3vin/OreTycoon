@@ -3,6 +3,7 @@ package me.mangokevin.oreTycoon.commands.tycooncmds;
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
+import me.mangokevin.oreTycoon.tycoonManagment.TycoonType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -69,8 +70,33 @@ public class TycoonCmd implements CommandExecutor {
 
 
             case "block":
+
                 blockManager.giveTycoonBlock(p, Material.GOLD_BLOCK);
+                blockManager.giveTycoonBlock(p, Material.IRON_BLOCK);
+
                 break;
+            case "give":
+                String type = args[1];
+                if (type == null) {
+                    return true;
+                }
+                switch (type) {
+                    case "wood":
+                        blockManager.giveTycoonBlock(p, TycoonType.WOOD);
+                        return true;
+                    case "coal":
+                        blockManager.giveTycoonBlock(p, TycoonType.COAL);
+                        return true;
+                    case "iron":
+                        blockManager.giveTycoonBlock(p, TycoonType.IRON);
+                        return true;
+                    case "diamond":
+                        blockManager.giveTycoonBlock(p, TycoonType.DIAMOND);
+                        return true;
+                    default:
+                        p.sendMessage(ChatColor.RED + "Not a valid tycoon type!");
+                        return true;
+                }
             case "menu":
 //                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "dm open tycoon_menu " + p.getName());
                 blockManager.openTycoonMenu(p);

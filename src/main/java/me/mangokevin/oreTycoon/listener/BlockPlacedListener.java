@@ -4,6 +4,7 @@ import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
+import me.mangokevin.oreTycoon.tycoonManagment.TycoonType;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -63,13 +64,16 @@ public class BlockPlacedListener implements Listener {
             int xp = pdc.getOrDefault(tycoonData.getXP_KEY(), PersistentDataType.INTEGER, 0);
             int spawnInterval = pdc.getOrDefault(tycoonData.getSPAWN_INTERVAL_KEY(), PersistentDataType.INTEGER, 5);
             long creationTime = System.currentTimeMillis();
+            String tycoonName = pdc.getOrDefault(tycoonData.getTYPE_KEY(), PersistentDataType.STRING, "ERROR");
             System.out.println("[BlockPlacedListener] Loading: " + level + "|" + xp + "|" + spawnInterval + "|" + creationTime);
 
+
+            TycoonType tycoonType = TycoonType.valueOf(tycoonName);
             Material type = event.getBlock().getType();
             Location location = block.getLocation();
             UUID uuid = player.getUniqueId();
 
-            TycoonBlock tycoonBlock = new TycoonBlock(location, uuid, type, false, spawnInterval, oreTycoon, blockManager, blockManager.getLevelManager());
+            TycoonBlock tycoonBlock = new TycoonBlock(tycoonType,location, uuid, false, oreTycoon, blockManager, blockManager.getLevelManager());
 
             tycoonBlock.setLevel(level);
             tycoonBlock.setLevelXp(xp);
