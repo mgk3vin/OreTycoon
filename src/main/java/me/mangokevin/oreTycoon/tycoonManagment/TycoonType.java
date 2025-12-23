@@ -1,18 +1,28 @@
 package me.mangokevin.oreTycoon.tycoonManagment;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
 
 public enum TycoonType {
-    COAL(Material.COAL_BLOCK, "§8Kohle-Tycoon", 100, Map.of(
+    WOOD(Material.CRAFTING_TABLE, ChatColor.GOLD + "Wood Tycoon", 3, Map.of(
+            Material.ACACIA_LOG, 10,
+            Material.BIRCH_LOG, 10,
+            Material.CHERRY_LOG, 10,
+            Material.JUNGLE_LOG, 10,
+            Material.DARK_OAK_LOG, 10,
+            Material.OAK_LOG, 10,
+            Material.SPRUCE_LOG, 10
+    )),
+    COAL(Material.COAL_BLOCK, "§8Coal Tycoon", 5, Map.of(
             Material.STONE, 60, Material.COAL_ORE, 30, Material.COBBLESTONE, 10
     )),
-    IRON(Material.IRON_BLOCK, "§fEisen-Tycoon", 80, Map.of(
+    IRON(Material.IRON_BLOCK, "§fIron Tycoon", 3, Map.of(
             Material.STONE, 40, Material.IRON_ORE, 40, Material.RAW_IRON_BLOCK, 20
     )),
-    DIAMOND(Material.DIAMOND_BLOCK, "§bDiamant-Tycoon", 60, Map.of(
+    DIAMOND(Material.DIAMOND_BLOCK, "§bDiamond Tycoon", 2, Map.of(
             Material.DIAMOND_ORE, 50, Material.DEEPSLATE_DIAMOND_ORE, 40, Material.DIAMOND_BLOCK, 10
     ));
 

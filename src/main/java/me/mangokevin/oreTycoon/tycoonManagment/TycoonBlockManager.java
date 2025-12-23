@@ -8,6 +8,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -23,6 +24,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+
+import static me.mangokevin.oreTycoon.tycoonManagment.TycoonData.TYPE_KEY;
 
 public class TycoonBlockManager {
 
@@ -156,7 +159,9 @@ public class TycoonBlockManager {
             data.set(path + "ownerUUID", tycoon.getOwnerUuid().toString());
             data.set(path + "ownerName", tycoon.getOwnerName());
 
-            data.set(path + "material", tycoon.getMaterial().toString());
+            data.set(path + "type", tycoon.getTycoonType().name());
+
+            data.set(path + "material", tycoon.getTycoonType().getMaterial().toString());
             data.set(path + "level", tycoon.getLevel());
             data.set(path + "xp", tycoon.getLevelXp());
             data.set(path + "isActive", tycoon.isActive());
@@ -210,8 +215,8 @@ public class TycoonBlockManager {
                 String uuidStr = section.getString(path + "ownerUUID");
                 if (uuidStr == null) continue;
                 UUID ownerUUID = UUID.fromString(uuidStr);
-
-
+                String typeStr = section.getString(path + "type");
+                TycoonType tycoonType = TycoonType.valueOf(typeStr);
 
                 // 3. Restliche Daten
                 int level = section.getInt(path + "level");
@@ -231,7 +236,7 @@ public class TycoonBlockManager {
                 // 4. Objekt erstellen
                 // Wichtig: Nutze deinen Konstruktor.
                 // Falls er einen Spielernamen braucht, nimm Bukkit.getOfflinePlayer(ownerUUID).getName()
-                TycoonBlock block = new TycoonBlock(loc, ownerUUID, tycoonMaterial, active, spawnInterval, plugin, this,levelManager);
+                TycoonBlock block = new TycoonBlock(tycoonType ,loc, ownerUUID, active, plugin, this,levelManager);
                 block.setLevel(level);
                 block.setLevelXp(xp);
                 block.setCreationTime(creationTime);
@@ -460,7 +465,6 @@ public class TycoonBlockManager {
     public void pickupTycoonBlock(Block block, Player player, TycoonBlock blockData) {
         ItemStack itemInHand = player.getInventory().getItemInMainHand();
 
-
         if (itemInHand.getType() == Material.AIR) {
             giveSmartTycoonBlock(blockData, player);
         }else{
@@ -477,8 +481,9 @@ public class TycoonBlockManager {
         }
     }
 
-    public void addTycoonBlock(Block placedBlock, UUID playerUuid) {
-        TycoonBlock tycoonBlock = new TycoonBlock(placedBlock.getLocation(), playerUuid, placedBlock.getType(),false,5, plugin, this,levelManager);
+    public void addTycoonBlock(Block placedBlock, UUID playerUuid, TycoonType tycoonType) {
+
+        TycoonBlock tycoonBlock = new TycoonBlock(tycoonType ,placedBlock.getLocation(), playerUuid,false, plugin, this,levelManager);
         tycoonBlocks.put(placedBlock.getLocation(), tycoonBlock);
         tycoonBlocksUID.put(tycoonBlock.getBlockUID(), tycoonBlock);
         System.out.println("[OreTycoon] Added Tycoon Block " + playerUuid + " index" + tycoonBlock.getIndex());
@@ -524,7 +529,7 @@ public class TycoonBlockManager {
         return null;
     }
 
-
+    @Deprecated
     public void giveTycoonBlock(Player p, Material type) {
         // 1. Das Item erstellen (ItemStack)
         ItemStack tycoonBlock = new ItemStack(type, 1);
@@ -545,27 +550,45 @@ public class TycoonBlockManager {
         tycoonBlock.setItemMeta(meta);
         p.getInventory().addItem(tycoonBlock);
     }
+    public void giveTycoonBlock(Player p, TycoonType type) {
+        // Material aus dem Enum holen
+        ItemStack item = new ItemStack(type.getMaterial(), 1);
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return;
+        meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        // 1. Markierung als Tycoon UND Speichern des Typs
+        meta.getPersistentDataContainer().set(TYCOON_BLOCK_KEY, PersistentDataType.BYTE, (byte) 1);
+        // WICHTIG: Hier speichern wir, welcher Enum-Typ es ist (z.B. "COAL")
+        meta.getPersistentDataContainer().set(TYPE_KEY, PersistentDataType.STRING, type.name());
+
+        // 2. Optik
+        meta.setDisplayName(type.getName() + " §7Tycoon");
+        meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+
+        List<String> lore = new ArrayList<>();
+        lore.add("§8§m-----------------------");
+        lore.add("§7Typ: " + type.getName());
+        lore.add("§7Level: §e1");
+        lore.add("§8§m-----------------------");
+        meta.setLore(lore);
+
+        item.setItemMeta(meta);
+        p.getInventory().addItem(item);
+    }
     public void giveSmartTycoonBlock(TycoonBlock tycoonBlock, Player player) {
 
 
+        ItemStack item = new ItemStack(tycoonBlock.getTycoonType().getMaterial(), 1);
 
-
-        ItemStack item = new ItemStack(tycoonBlock.getMaterial(), 1);
-
-        TycoonData.writeToItem(item, tycoonBlock.getLevel(), tycoonBlock.getLevelXp(), tycoonBlock.getCreationTime(), tycoonBlock.getMaterial(), tycoonBlock.getSpawnInterval(), tycoonBlock.getCreationTime());
+        TycoonData.writeToItem(item, tycoonBlock.getLevel(), tycoonBlock.getLevelXp(), tycoonBlock.getCreationTime(), tycoonBlock.getMaterial(), tycoonBlock.getSpawnInterval(), tycoonBlock.getCreationTime(), tycoonBlock.getTycoonType().toString());
         ItemMeta meta = item.getItemMeta();
 
         if (meta == null) return;
         meta.addEnchant(Enchantment.UNBREAKING, 1, true);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-//        dataContainer.set(TYCOON_BLOCK_KEY, PersistentDataType.BYTE, (byte) 1);
 
-//        dataContainer.set(LEVEL_KEY, PersistentDataType.INTEGER, tycoonBlock.getLevel());
-//        dataContainer.set(XP_KEY, PersistentDataType.INTEGER, tycoonBlock.getLevelXp());
-//        dataContainer.set(CREATION_KEY, PersistentDataType.LONG, tycoonBlock.getCreationTime());
-//        dataContainer.set(MATERIAL_KEY, PersistentDataType.STRING, tycoonBlock.getMaterial().toString());
-//        dataContainer.set(PROGRESS_KEY, PersistentDataType.DOUBLE, tycoonBlock.getProgress());
-//        dataContainer.set(SPAWNINTERVAL_KEY, PersistentDataType.INTEGER, tycoonBlock.getSpawnInterval());
 
         List<String> lore = new ArrayList<>();
         lore.add("§8§m-----------------------");
@@ -575,7 +598,7 @@ public class TycoonBlockManager {
         lore.add("§7Spawnrate: §f" + tycoonBlock.getSpawnInterval() + "s");
         lore.add("§8§m-----------------------");
         meta.setLore(lore);
-        meta.setDisplayName("§6§lSaved Tycoon");
+        meta.setDisplayName(tycoonBlock.getTycoonType().getName());
 
         item.setItemMeta(meta);
 

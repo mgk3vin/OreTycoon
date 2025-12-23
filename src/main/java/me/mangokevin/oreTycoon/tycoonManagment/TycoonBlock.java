@@ -22,6 +22,8 @@ public class TycoonBlock {
     private final Material material;
     private long creationTime;
     private int index;
+    private String tycoonDisplayName;
+
 
     private int level;
     private int totalXp;
@@ -33,6 +35,8 @@ public class TycoonBlock {
     private int tickCounter = 0;
     private int spawnInterval;
     private final String blockUID;
+
+    private final TycoonType type;
 
     private String hologramUID;
     Block block;
@@ -48,7 +52,8 @@ public class TycoonBlock {
     private final TycoonBlockManager blockManager;
     private final LevelManager levelManager;
 
-    private final HashMap<Material, Integer> ressourceMaterials = new HashMap<>();
+    private HashMap<Material, Integer> ressourceMaterials = new HashMap<>();
+    private Map<Material, Integer> ressourceMaterialsMap;
 
     private final List<Material> TYCOON_RESOURCE_MATERIALS = Arrays.asList(
             Material.COAL_ORE,
@@ -59,12 +64,11 @@ public class TycoonBlock {
             // Fügen Sie hier weitere Materialien hinzu
     );
 
-    public TycoonBlock(Location location, UUID ownerUuid, Material material, boolean isActive, int spawnInterval, OreTycoon plugin, TycoonBlockManager blockManager, LevelManager levelManager) {
+    public TycoonBlock(TycoonType type,Location location, UUID ownerUuid, boolean isActive, OreTycoon plugin, TycoonBlockManager blockManager, LevelManager levelManager) {
         this.location = location;
         this.block = location.getBlock();
         this.ownerUuid = ownerUuid;
         this.owner = Bukkit.getOfflinePlayer(ownerUuid);
-        this.material = material;
         this.isActive = isActive;
         this.plugin = plugin;
         this.blockManager = blockManager;
@@ -75,8 +79,13 @@ public class TycoonBlock {
         levelXp = 0;
         progress = 0;
 
+        this.type = type;
+        this.material = type.getMaterial();
+        this.spawnInterval = type.getSpawnInterval();
+        this.ressourceMaterialsMap = type.getResources();
+        this.tycoonDisplayName = type.getName();
 
-        this.spawnInterval = spawnInterval;
+
         fillRessources();
 
         this.blockUID = Objects.requireNonNull(this.location.getWorld()).getName() + "_" +
@@ -130,7 +139,7 @@ public class TycoonBlock {
 
         if (spawnBlock.getType().equals(Material.AIR)) {
             //Valid Spawn point
-            Material material = getRandomMaterial(ressourceMaterials);
+            Material material = getRandomMaterial(ressourceMaterialsMap);
             if (material == null) return;
             spawnBlock.setType(material);
             //Gespawnten Block merken!
@@ -155,7 +164,7 @@ public class TycoonBlock {
 
         return TYCOON_RESOURCE_MATERIALS.get(randint);
     }
-    private Material getRandomMaterial(HashMap<Material, Integer> map) {
+    private Material getRandomMaterial(Map<Material, Integer> map) {
         int totalWeight = 0;
         for (int weight : map.values()) {
             totalWeight += weight;
@@ -233,7 +242,7 @@ public class TycoonBlock {
         name.add("[ " + getOwnerName() + "'s Tycoon #" + index + " ]");
         hologramData.setText(name);
 
-        hologramData.addLine("Last Block: " + lastSpawnedBlock);
+        hologramData.addLine(tycoonDisplayName + ChatColor.RESET);
 
         if (isActive){
             hologramData.addLine("Status: " + ChatColor.GREEN+ true + ChatColor.RESET);
@@ -276,8 +285,8 @@ public class TycoonBlock {
 
 
         switch (preset) {
-            case "BLOCK":
-                hologramLines.set(1, "Last Block: " + lastSpawnedBlock);
+            case "BLOCKNAME":
+                hologramLines.set(1, tycoonDisplayName + ChatColor.RESET);
                 break;
             case "STATUS":
                 if (isActive) {
@@ -404,7 +413,9 @@ public class TycoonBlock {
     public Location getLocation() {
         return location;
     }
-
+    public TycoonType getTycoonType() {
+        return type;
+    }
     public OfflinePlayer getOfflineOwner() {
         return owner;
     }
