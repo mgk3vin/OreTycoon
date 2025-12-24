@@ -244,11 +244,7 @@ public class TycoonBlock {
 
         hologramData.addLine(tycoonDisplayName + ChatColor.RESET);
 
-        if (isActive){
-            hologramData.addLine("Status: " + ChatColor.GREEN+ true + ChatColor.RESET);
-        }else{
-            hologramData.addLine("Status: " + ChatColor.RED + false + ChatColor.RESET);
-        }
+        hologramData.addLine("Status: " + isActiveFormatted());
 
         hologramData.addLine("Level: " + level);
         hologramData.addLine("xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + (int) levelManager.getProgressPercentage(levelXp, level + 1) + "%");
@@ -289,11 +285,7 @@ public class TycoonBlock {
                 hologramLines.set(1, tycoonDisplayName + ChatColor.RESET);
                 break;
             case "STATUS":
-                if (isActive) {
-                    hologramLines.set(2, "Status: " + ChatColor.GREEN + true + ChatColor.RESET);
-                }else {
-                    hologramLines.set(2, "Status: " + ChatColor.RED + false + ChatColor.RESET);
-                }
+                hologramLines.set(2, "Status: " + isActiveFormatted());
                 break;
             case "LEVEL":
                 hologramLines.set(3, "Level: " + level);
@@ -407,8 +399,12 @@ public class TycoonBlock {
     public int getTotalXp() {
         return totalXp;
     }
+    @Deprecated
     public double getProgress() {
         return progress;
+    }
+    public int getProgressPercentage() {
+        return (int) levelManager.getProgressPercentage(levelXp, level + 1);
     }
     public Location getLocation() {
         return location;
@@ -432,6 +428,13 @@ public class TycoonBlock {
     }
     public  boolean isActive() {
         return isActive;
+    }
+    public String isActiveFormatted(){
+        if (isActive) {
+            return ChatColor.GREEN + "spawning..." + ChatColor.RESET;
+        }else {
+            return ChatColor.RED + "offline..." + ChatColor.RESET;
+        }
     }
     public Material getLastSpawnedBlock() {
         return lastSpawnedBlock;

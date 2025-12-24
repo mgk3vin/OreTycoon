@@ -1,6 +1,7 @@
 package me.mangokevin.oreTycoon.listener;
 
 import me.mangokevin.oreTycoon.OreTycoon;
+import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.MenuManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
 import org.bukkit.Bukkit;
@@ -18,10 +19,12 @@ public class BlockInteractListener implements Listener {
 
     private final OreTycoon plugin;
     private final TycoonBlockManager blockManager;
+    private final MenuManager menuManager;
 
     public BlockInteractListener(OreTycoon plugin, TycoonBlockManager blockManager) {
         this.plugin = plugin;
         this.blockManager = blockManager;
+        this.menuManager = plugin.getMenuManager();
     }
 
     @EventHandler
@@ -74,10 +77,9 @@ public class BlockInteractListener implements Listener {
             if (blockManager.isTycoonBlock(b)) {
                 TycoonBlock tycoonBlock = blockManager.getTycoonBlock(b);
                 event.setCancelled(true);
-//                p.setMetadata("viewing_tycoon", new FixedMetadataValue(plugin, tycoonBlock.getBlockUID()));
-//                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "dm open tycoon_gui " + event.getPlayer().getName());
+                //blockManager.openTycoonSpecificMenu(p, tycoonBlock);
                 //Replaced by:
-                blockManager.openTycoonSpecificMenu(p, tycoonBlock);
+                menuManager.openTycoonGui(p, tycoonBlock, tycoonBlock.isActive());
                 System.out.println("Tycoon GUI Opened");
             }
         }
