@@ -20,6 +20,8 @@ public class TycoonData {
     private static NamespacedKey CREATION_TIME;
     public static NamespacedKey TYPE_KEY;
     public static NamespacedKey MENU_ACTION_KEY;
+    public static NamespacedKey TYCOON_MENU_ITEM_KEY;
+    public static NamespacedKey TYCOON_MENU_ITEM_INDEX_KEY;
 
     // Wird einmal in der onEnable deiner Main aufgerufen: TycoonData.init(this);
     public static void init(Plugin plugin) {
@@ -32,6 +34,8 @@ public class TycoonData {
         CREATION_TIME = new NamespacedKey(plugin, "creation_time");
         TYPE_KEY = new NamespacedKey(plugin, "type");
         MENU_ACTION_KEY = new NamespacedKey(plugin, "menu_action");
+        TYCOON_MENU_ITEM_KEY = new NamespacedKey(plugin, "tycoon_menu_item");
+        TYCOON_MENU_ITEM_INDEX_KEY = new NamespacedKey(plugin, "tycoon_menu_item_index");
     }
     // Speichert die Daten eines Tycoons auf ein Item
     public static void writeToItem(ItemStack item, int level, int xp, long creation, Material material, int spawnInterval, long creationTime, String type) {
@@ -71,5 +75,8 @@ public class TycoonData {
     }
     public NamespacedKey getTYPE_KEY() {
         return TYPE_KEY;
+    }
+    public NamespacedKey getTycoon_MENU_ITEM_KEY() {
+        return TYCOON_MENU_ITEM_KEY;
     }
 }

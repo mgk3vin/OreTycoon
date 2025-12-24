@@ -8,16 +8,11 @@ import me.mangokevin.oreTycoon.tycoonManagment.TycoonHolder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
-import org.checkerframework.checker.units.qual.C;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,7 +38,7 @@ public class MenuManager {
         List<String> lore = Arrays.asList("§8§m-----------------------",
                 ChatColor.GRAY + "Status: " + ChatColor.RESET + block.isActiveFormatted(),
                 ChatColor.GRAY + "Level: " + block.getLevel(),
-                block.getProgressBar(20) + " " + block.getProgress() + "%",
+                block.getProgressBar(20) + " " + block.getProgressPercentage() + "%",
                 ChatColor.GRAY + "Spawn rate: " + block.getSpawnInterval(),
                 "§8§m-----------------------");
 
@@ -58,9 +53,48 @@ public class MenuManager {
             statsmeta.getPersistentDataContainer().set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "tycoon_toggle");
             inventory.setItem(13, stats);
         }
-
+        ItemStack backToMenu = createItemstack(Material.BARRIER, 1, ChatColor.RED + "Return to the main menu", null, false);
+        inventory.setItem(26, backToMenu);
         openMenu(p, inventory);
 
+    }
+    public void openTycoonMenu(Player p) {
+        Inventory inventory = Bukkit.createInventory(p , 45, "Tycoon Menu");
+        List<TycoonBlock> tycoonBlockList = blockManager.getTycoonBlocksFromPlayer(p.getUniqueId());
+
+        addFiller(inventory, Material.GRAY_STAINED_GLASS_PANE);
+        for (int i = 0; i < tycoonBlockList.size(); i++) {
+            TycoonBlock block = tycoonBlockList.get(i);
+
+            List<String> lore = Arrays.asList("§8§m-----------------------",
+                    ChatColor.GRAY + "Status: " + ChatColor.RESET + block.isActiveFormatted(),
+                    ChatColor.GRAY + "Level: " + block.getLevel(),
+                    block.getProgressBar(20) + " " + block.getProgress() + "%",
+                    ChatColor.GRAY + "Spawn rate: " + block.getSpawnInterval(),
+                    "§8§m-----------------------");
+            ItemStack stats = createItemstack(block.getMaterial(), 1, block.getTycoonType().getName(), lore, block.isActive());
+            ItemMeta statsmeta = stats.getItemMeta();
+            if (statsmeta == null)return;
+            statsmeta.getPersistentDataContainer().set(TycoonData.TYCOON_MENU_ITEM_KEY, PersistentDataType.STRING, "tycoon_menu_item");
+            statsmeta.getPersistentDataContainer().set(TycoonData.TYCOON_MENU_ITEM_INDEX_KEY, PersistentDataType.INTEGER, i + 1);
+            stats.setItemMeta(statsmeta);
+
+            inventory.setItem(19 + i, stats);
+        }
+        if (tycoonBlockList.size() < blockManager.getMaxBlocksPerPlayer()) {
+            for (int i = tycoonBlockList.size(); i < blockManager.getMaxBlocksPerPlayer(); i++) {
+                ItemStack emptySlot = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+                ItemMeta meta = emptySlot.getItemMeta();
+                if (meta == null) return;
+                meta.setDisplayName(ChatColor.GRAY + "" + ChatColor.ITALIC + "Empty Slot");
+                meta.setLore(Arrays.asList(ChatColor.GRAY + "" + ChatColor.ITALIC + "Place down more tycoons to manage them here"));
+
+                emptySlot.setItemMeta(meta);
+                inventory.setItem(19 + i, emptySlot);
+            }
+        }
+
+        openMenu(p, inventory);
     }
     public void refreshTycoonGui(Inventory inventory, TycoonBlock block, Boolean glint) {
         List<String> lore = Arrays.asList("§8§m-----------------------",

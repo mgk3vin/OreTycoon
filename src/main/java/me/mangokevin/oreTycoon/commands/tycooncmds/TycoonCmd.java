@@ -1,6 +1,7 @@
 package me.mangokevin.oreTycoon.commands.tycooncmds;
 
 import me.mangokevin.oreTycoon.OreTycoon;
+import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.MenuManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonType;
@@ -20,10 +21,12 @@ public class TycoonCmd implements CommandExecutor {
 
     private final OreTycoon oreTycoon;
     private final TycoonBlockManager blockManager;
+    private final MenuManager menuManager;
 
     public TycoonCmd(OreTycoon oreTycoon, TycoonBlockManager blockManager) {
         this.oreTycoon = oreTycoon;
         this.blockManager = blockManager;
+        this.menuManager = oreTycoon.getMenuManager();
     }
 
     @Override
@@ -68,7 +71,6 @@ public class TycoonCmd implements CommandExecutor {
                         return true;
                 }
 
-
             case "block":
 
                 blockManager.giveTycoonBlock(p, Material.GOLD_BLOCK);
@@ -98,8 +100,7 @@ public class TycoonCmd implements CommandExecutor {
                         return true;
                 }
             case "menu":
-//                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "dm open tycoon_menu " + p.getName());
-                blockManager.openTycoonMenu(p);
+                menuManager.openTycoonMenu(p);
                 break;
             case "open":
                 int index;

@@ -68,6 +68,9 @@ public final class OreTycoon extends JavaPlugin {
     public MenuManager getMenuManager() {
         return menuManager;
     }
+    public TycoonBlockManager getBlockManager() {
+        return blockManager;
+    }
 
     @Override
     public void onDisable() {
