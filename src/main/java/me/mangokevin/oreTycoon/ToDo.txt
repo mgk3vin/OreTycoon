@@ -8,6 +8,7 @@ saving tycoon stats on pickup
 Hologram formatting
 Hologram cooldown
 Clean up TycoonBlockclass
+Own menu system for easier use
 (Own Hologram system for timer/load bar)
 Higher Levels unlock more spawnblocks (clickable in menu which blocks to spawn must atleast be 5 diff or sum)‼️
 (tycoon Gui, blocks go into tycoon inventory)❌
