@@ -42,10 +42,15 @@ public class MenuListener implements Listener {
             event.setCancelled(true);
 
             PersistentDataContainer pdc = meta.getPersistentDataContainer();
-            if (pdc.has(TycoonData.TYCOON_MENU_ITEM_INDEX_KEY, PersistentDataType.INTEGER)) {
-                int index = pdc.get(TycoonData.TYCOON_MENU_ITEM_INDEX_KEY, PersistentDataType.INTEGER);
-
-                TycoonBlock tycoonBlock = blockManager.getTycoonBlockFromIndex(p, index);
+//            if (pdc.has(TycoonData.TYCOON_MENU_ITEM_INDEX_KEY, PersistentDataType.INTEGER)) {
+//                int index = pdc.get(TycoonData.TYCOON_MENU_ITEM_INDEX_KEY, PersistentDataType.INTEGER);
+//
+//                TycoonBlock tycoonBlock = blockManager.getTycoonBlockFromIndex(p, index);
+//                menuManager.openTycoonGui(p, tycoonBlock, tycoonBlock.isActive());
+//            }
+            if (pdc.has(TycoonData.TYCOON_MENU_ITEM_UID_KEY, PersistentDataType.STRING)) {
+                String blockUID = pdc.get(TycoonData.TYCOON_MENU_ITEM_UID_KEY, PersistentDataType.STRING);
+                TycoonBlock tycoonBlock = blockManager.getTycoonBlock(blockUID);
                 menuManager.openTycoonGui(p, tycoonBlock, tycoonBlock.isActive());
             }
         }
