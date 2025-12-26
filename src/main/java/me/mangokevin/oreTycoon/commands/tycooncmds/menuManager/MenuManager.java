@@ -14,6 +14,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
+import javax.swing.text.StyledEditorKit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -58,11 +60,74 @@ public class MenuManager {
         openMenu(p, inventory);
 
     }
-    public void openTycoonMenu(Player p) {
-        Inventory inventory = Bukkit.createInventory(p , 45, "Tycoon Menu");
+    public void openTycoonMenu(Player p, int page) {
+        List<TycoonBlock> tycoonBlockList = blockManager.getTycoonBlocksFromPlayer(p.getUniqueId());
+        Inventory inventory = Bukkit.createInventory(new TycoonHolder(tycoonBlockList, page), 54, "Tycoon Menu");
+
+        List<Integer> usableSlots = getUsableSlots();
+        int itemsPerPage = usableSlots.size(); // Das sind 14
+        int startIndex = page * itemsPerPage;
+
+        // 1. Zuerst den Hintergrund füllen
+        addFiller(inventory, Material.GRAY_STAINED_GLASS_PANE);
+
+        // 2. NUR EINE Schleife nutzen, um die 14 Slots der aktuellen Seite zu füllen
+        for (int i = 0; i < itemsPerPage; i++) {
+            int tycoonIndex = startIndex + i;
+            int slot = usableSlots.get(i); // Hol den passenden Slot (10-16 oder 28-34)
+
+            if (tycoonIndex < tycoonBlockList.size()) {
+                // Tycoon vorhanden -> Item setzen
+                TycoonBlock block = tycoonBlockList.get(tycoonIndex);
+                //inventory.setItem(slot, createTycoonItem(block));
+                inventory.setItem(slot, createTycoonItem(block));
+            } else if (tycoonIndex < blockManager.getMaxBlocksPerPlayer()) {
+                // Slot ist leer, aber Tycoon-Platz ist theoretisch verfügbar
+                inventory.setItem(slot, createItemstack(Material.BLACK_STAINED_GLASS_PANE, 1,
+                        ChatColor.GRAY + "Freier Slot", null, false));
+            }
+        }
+
+        // Vorherige Seite (Slot 45)
+        if (page > 0) {
+            ItemStack prev = createItemstack(Material.ARROW, 1, "§e<- Seite " + page, null, false);
+            ItemMeta meta = prev.getItemMeta();
+            meta.getPersistentDataContainer().set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "page_prev");
+            prev.setItemMeta(meta);
+            inventory.setItem(45, prev);
+        }
+
+        // Nächste Seite (Slot 53)
+        //if (startIndex + itemsPerPage < tycoonBlockList.size()) {
+        if (startIndex + itemsPerPage < blockManager.getMaxBlocksPerPlayer()) {
+            ItemStack next = createItemstack(Material.ARROW, 1, "§eSeite " + (page + 2) + " ->", null, false);
+            ItemMeta meta = next.getItemMeta();
+            meta.getPersistentDataContainer().set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "page_next");
+            next.setItemMeta(meta);
+            inventory.setItem(53, next);
+        }
+
+        // 4. Toggle All Button
+        inventory.setItem(49, createItemstack(Material.LIME_CONCRETE, 1, ChatColor.GREEN + "Turn all Tycoons on!", null, false));
+
+        openMenu(p, inventory);
+    }
+
+    private List<Integer> getUsableSlots() {
+        List<Integer> slots = new ArrayList<>();
+        // Reihe 2 (Slots 10 bis 16)
+        for (int i = 10; i <= 16; i++) {
+            slots.add(i);
+        }
+        // Reihe 4 (Slots 28 bis 34)
+        for (int i = 28; i <= 34; i++) {
+            slots.add(i);
+        }
+        return slots;
+    }
+    public void refreshTycoonMenu(Inventory inventory,Player p, Boolean isActive){
         List<TycoonBlock> tycoonBlockList = blockManager.getTycoonBlocksFromPlayer(p.getUniqueId());
 
-        addFiller(inventory, Material.GRAY_STAINED_GLASS_PANE);
         for (int i = 0; i < tycoonBlockList.size(); i++) {
             TycoonBlock block = tycoonBlockList.get(i);
 
@@ -82,20 +147,15 @@ public class MenuManager {
 
             inventory.setItem(19 + i, stats);
         }
-        if (tycoonBlockList.size() < blockManager.getMaxBlocksPerPlayer()) {
-            for (int i = tycoonBlockList.size(); i < blockManager.getMaxBlocksPerPlayer(); i++) {
-                ItemStack emptySlot = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
-                ItemMeta meta = emptySlot.getItemMeta();
-                if (meta == null) return;
-                meta.setDisplayName(ChatColor.GRAY + "" + ChatColor.ITALIC + "Empty Slot");
-                meta.setLore(Arrays.asList(ChatColor.GRAY + "" + ChatColor.ITALIC + "Place down more tycoons to manage them here"));
 
-                emptySlot.setItemMeta(meta);
-                inventory.setItem(19 + i, emptySlot);
-            }
+        ItemStack toggleAllTycoons;
+        if (isActive) {
+            toggleAllTycoons = createItemstack(Material.RED_CONCRETE, 1, ChatColor.RED + "Turn all Tycoons off!", null, false);
+        }else{
+            toggleAllTycoons = createItemstack(Material.LIME_CONCRETE, 1, ChatColor.GREEN + "Turn all Tycoons on!", null, false);
         }
 
-        openMenu(p, inventory);
+        inventory.setItem(28, toggleAllTycoons);
     }
     public void refreshTycoonGui(Inventory inventory, TycoonBlock block, Boolean glint) {
         List<String> lore = Arrays.asList("§8§m-----------------------",
@@ -117,7 +177,29 @@ public class MenuManager {
             inventory.setItem(13, stats);
         }
     }
+    public ItemStack createTycoonItem(TycoonBlock block){
+        Boolean glint = block.isActive();
+        List<String> lore = Arrays.asList("§8§m-----------------------",
+                ChatColor.GRAY + "Status: " + ChatColor.RESET + block.isActiveFormatted(),
+                ChatColor.GRAY + "Level: " + block.getLevel(),
+                block.getProgressBar(20) + " " + block.getProgressPercentage() + "%",
+                ChatColor.GRAY + "Spawn rate: " + block.getSpawnInterval(),
+                "§8§m-----------------------");
 
+        ItemStack stats = createItemstack(
+                block.getMaterial(),
+                1,
+                block.getTycoonType().getName(),
+                lore,
+                glint);
+        ItemMeta statsmeta = stats.getItemMeta();
+        if (statsmeta == null) return null;
+        statsmeta.getPersistentDataContainer().set(TycoonData.TYCOON_MENU_ITEM_KEY, PersistentDataType.STRING, "tycoon_menu_item");
+        //statsmeta.getPersistentDataContainer().set(TycoonData.TYCOON_MENU_ITEM_INDEX_KEY, PersistentDataType.INTEGER, i + 1);
+        statsmeta.getPersistentDataContainer().set(TycoonData.TYCOON_MENU_ITEM_UID_KEY, PersistentDataType.STRING, block.getBlockUID());
+        stats.setItemMeta(statsmeta);
+        return stats;
+    }
     public static ItemStack createItemstack(Material material, int amount, String s, List<String> l, Boolean b){
         ItemStack itemstack = new ItemStack(material, amount);
         ItemMeta meta = itemstack.getItemMeta();

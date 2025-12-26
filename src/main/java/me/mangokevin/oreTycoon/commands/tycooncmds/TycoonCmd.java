@@ -100,7 +100,7 @@ public class TycoonCmd implements CommandExecutor {
                         return true;
                 }
             case "menu":
-                menuManager.openTycoonMenu(p);
+                menuManager.openTycoonMenu(p, 0);
                 break;
             case "open":
                 int index;
