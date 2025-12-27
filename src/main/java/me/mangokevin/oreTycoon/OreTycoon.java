@@ -2,6 +2,7 @@ package me.mangokevin.oreTycoon;
 
 import me.mangokevin.oreTycoon.commands.tycooncmds.TycoonCmd;
 import me.mangokevin.oreTycoon.commands.tycooncmds.TycoonTabCompleter;
+import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.InventoryClickListener;
 import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.MenuListener;
 import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.MenuManager;
 import me.mangokevin.oreTycoon.commands.tycooncmds.toggle_selected;
@@ -35,7 +36,7 @@ public final class OreTycoon extends JavaPlugin {
         LevelManager levelManager = new LevelManager();
         this.blockManager = new TycoonBlockManager(this, levelManager);
         this.tdData = new TycoonData();
-        this.menuManager = new MenuManager(this ,blockManager);
+        this.menuManager = new MenuManager(this);
         TycoonData.init(this);
 
         blockManager.loadTycoons();
@@ -57,7 +58,8 @@ public final class OreTycoon extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BlockInteractListener(this, blockManager), this);
         getServer().getPluginManager().registerEvents(new TycoonManipulationListener(blockManager), this);
         getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
-        getServer().getPluginManager().registerEvents(new MenuListener(this), this);
+        //getServer().getPluginManager().registerEvents(new MenuListener(this), this);
+        getServer().getPluginManager().registerEvents(new InventoryClickListener(),this);
         Objects.requireNonNull(getCommand("tycoon")).setExecutor(new TycoonCmd(this, blockManager));
         Objects.requireNonNull(getCommand("tycoon")).setTabCompleter(new TycoonTabCompleter());
         //-----------------------   Listeners & Commands    -----------------------

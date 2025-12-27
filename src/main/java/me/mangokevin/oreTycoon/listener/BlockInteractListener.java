@@ -2,6 +2,7 @@ package me.mangokevin.oreTycoon.listener;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.MenuManager;
+import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.StatsMenu;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
 import org.bukkit.Bukkit;
@@ -79,7 +80,8 @@ public class BlockInteractListener implements Listener {
                 event.setCancelled(true);
                 //blockManager.openTycoonSpecificMenu(p, tycoonBlock);
                 //Replaced by:
-                menuManager.openTycoonGui(p, tycoonBlock, tycoonBlock.isActive());
+//                menuManager.openTycoonGui(p, tycoonBlock, tycoonBlock.isActive());
+                menuManager.openTycoonStats(tycoonBlock, p);
                 System.out.println("Tycoon GUI Opened");
             }
         }
