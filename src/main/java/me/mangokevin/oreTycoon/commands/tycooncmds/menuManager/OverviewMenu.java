@@ -1,0 +1,176 @@
+package me.mangokevin.oreTycoon.commands.tycooncmds.menuManager;
+
+
+import me.mangokevin.oreTycoon.OreTycoon;
+import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
+import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
+import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
+import me.mangokevin.oreTycoon.tycoonManagment.TycoonHolder;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
+
+import javax.swing.text.StyledEditorKit;
+import java.util.Arrays;
+import java.util.List;
+
+public class OverviewMenu implements MenuInterface{
+
+    private final OreTycoon plugin;
+    private final TycoonBlockManager blockManager;
+    private final MenuManager menuManager;
+    private final int page;
+
+
+    public OverviewMenu(OreTycoon plugin, int page) {
+        this.plugin = plugin;
+        this.blockManager = plugin.getBlockManager();
+        this.menuManager = plugin.getMenuManager();
+        this.page = page;
+    }
+
+    @Override
+    public void open(Player player) {
+        List<TycoonBlock> tycoonBlockList = blockManager.getTycoonBlocksFromPlayer(player.getUniqueId());
+        Inventory inventory = Bukkit.createInventory(new TycoonHolder(this), 54, ChatColor.GRAY + "Tycoon Overview");
+
+        MenuManager.addFiller(inventory, Material.GRAY_STAINED_GLASS_PANE);
+        boolean toggleAll = true;
+        int startIndex = page * 14;
+        for (int i = 0; i < 14; i++) {
+            int idx = startIndex + i;
+            if (idx < tycoonBlockList.size()) {
+                if (!tycoonBlockList.get(idx).isActive()) {
+                    toggleAll = false;
+                    break;
+                }
+            }
+        }
+
+        List<Integer> usableSlots = getUsableSlots();
+        int itemsPerPage = usableSlots.size(); // 14
+        startIndex = page * itemsPerPage;
+
+        // Tycoons & Leere Slots füllen
+        for (int i = 0; i < itemsPerPage; i++) {
+            int tycoonIndex = startIndex + i;
+            int slot = usableSlots.get(i);
+
+            if (tycoonIndex < tycoonBlockList.size()) {
+                TycoonBlock block = tycoonBlockList.get(tycoonIndex);
+                inventory.setItem(slot, menuManager.createTycoonItem(block));
+            } else if (tycoonIndex < blockManager.getMaxBlocksPerPlayer()) {
+                inventory.setItem(slot, MenuManager.createItemstack(Material.BLACK_STAINED_GLASS_PANE, 1, "§8Freier Slot", null, false));
+            }
+        }
+
+        // Navigation (PDC-Keys nutzen)
+        if (page > 0) {
+            inventory.setItem(45, createNavArrow("§e<- Seite " + page, "page_prev"));
+        }
+        if (startIndex + itemsPerPage < blockManager.getMaxBlocksPerPlayer()) {
+            inventory.setItem(53, createNavArrow("§eSeite " + (page + 2) + " ->", "page_next"));
+        }
+        ItemStack item;
+        if (toggleAll) {
+            item = MenuManager.createItemstack(Material.RED_CONCRETE, 1, ChatColor.RED + "Turn off #" + (startIndex + 1) + " - #" + (startIndex + itemsPerPage), null, false);
+            ItemMeta itemMeta = item.getItemMeta();
+            if (itemMeta == null) return;
+            PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
+            pdc.set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "toggle_all_off");
+            item.setItemMeta(itemMeta);
+        } else {
+            item = MenuManager.createItemstack(Material.LIME_CONCRETE, 1, ChatColor.GREEN + "Turn on #" + (startIndex + 1) + " - #" + (startIndex + itemsPerPage), null, false);
+            ItemMeta itemMeta = item.getItemMeta();
+            if (itemMeta == null) return;
+            PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
+            pdc.set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "toggle_all_on");
+            item.setItemMeta(itemMeta);
+        }
+        inventory.setItem(49, item);
+        player.openInventory(inventory);
+    }
+
+    @Override
+    public void handleAction(InventoryClickEvent event) {
+        Player player = (Player) event.getWhoClicked();
+        ItemStack item = event.getCurrentItem();
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return;
+        PersistentDataContainer pdc = meta.getPersistentDataContainer();
+
+        if (pdc.has(TycoonData.TYCOON_MENU_ITEM_UID_KEY, PersistentDataType.STRING)) {
+            String blockUIDStr = pdc.get(TycoonData.TYCOON_MENU_ITEM_UID_KEY, PersistentDataType.STRING);
+            TycoonBlock block = blockManager.getTycoonBlock(blockUIDStr);
+            if (block != null) {
+                new StatsMenu(block, plugin).open(player);
+            }
+            return;
+        }
+        if (pdc.has(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING)) {
+            String action = pdc.get(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING);
+            switch (action) {
+                case "toggle_all_off", "toggle_all_on":
+                    toggleTycoons(item.getType(), player);
+                    open(player);
+                    break;
+                case "page_prev":
+                    new OverviewMenu(plugin, page - 1).open(player);
+                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.2f);
+                    break;
+                case "page_next":
+                    new OverviewMenu(plugin, page + 1).open(player);
+                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.2f);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+    }
+
+    // Hilfsmethode für Navigation-Items
+    private ItemStack createNavArrow(String name, String action) {
+        ItemStack arrow = MenuManager.createItemstack(Material.ARROW, 1, name, null, false);
+        ItemMeta meta = arrow.getItemMeta();
+        meta.getPersistentDataContainer().set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, action);
+        arrow.setItemMeta(meta);
+        return arrow;
+    }
+    private void toggleTycoons(Material clickedItem, Player p) {
+        List<TycoonBlock> allTycoons = blockManager.getTycoonBlocksFromPlayer(p.getUniqueId());
+        List<Integer> usableSlots = getUsableSlots();
+        int startIndex = this.page * usableSlots.size();
+
+        // Bestimmen, ob wir ein- oder ausschalten (basierend auf dem aktuellen Button)
+        boolean shouldActivate = clickedItem == Material.LIME_CONCRETE;
+
+        // Nur die Tycoons dieser Seite bearbeiten
+        for (int i = 0; i < usableSlots.size(); i++) {
+            int tycoonIndex = startIndex + i;
+            if (tycoonIndex >= allTycoons.size()) break;
+
+            TycoonBlock block = allTycoons.get(tycoonIndex);
+            block.setActive(shouldActivate);
+        }
+
+        // Sound abspielen
+        p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 0.6f, shouldActivate ? 1.2f : 0.8f);
+
+        // Das Menü komplett neu laden, um alle Items (Tycoons + Button) zu aktualisieren
+        this.open(p);
+
+    }
+    private List<Integer> getUsableSlots() {
+        return Arrays.asList(10, 11, 12, 13, 14, 15, 16, 28, 29, 30, 31, 32, 33, 34);
+    }
+}
