@@ -125,7 +125,7 @@ public class TycoonBlockManager {
                     blockLocation.getWorld().playSound(blockLocation, Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
                     blockLocation.getWorld().spawnParticle(Particle.WHITE_SMOKE, blockLocation, 3);
 
-                    tycoonBlock.addBlocksToInventory(blockLocation.getBlock());
+                    tycoonBlock.tryAddBlocksToInventory(blockLocation.getBlock());
 
                     levelManager.handleXpGain(tycoonBlock, 50);
                     playXpBlockHologram(tycoonBlock, blockLocation.getBlock(), 50);
@@ -174,17 +174,6 @@ public class TycoonBlockManager {
             return null;
         }
         return tycoonBlocksList.get(index - 1);//1 basiert
-    }
-
-    @Deprecated
-    public void checkTycoonProgress(TycoonBlock block){
-        int currentLevel = block.getLevel();
-        int nextLevel = block.getLevel() + 1;
-        double progress = block.getProgress();
-
-        if (progress >= 1.0){
-            block.setLevel(nextLevel);
-        }
     }
 
     public void playXpBlockHologram(TycoonBlock tycoonBlock, Block block, int xp) {
