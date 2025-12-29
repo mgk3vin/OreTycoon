@@ -23,6 +23,7 @@ public class TycoonData {
     public static NamespacedKey TYCOON_MENU_ITEM_KEY;
     public static NamespacedKey TYCOON_MENU_ITEM_INDEX_KEY;
     public static NamespacedKey TYCOON_MENU_ITEM_UID_KEY;
+    public static NamespacedKey BLOCK_IS_AUTOMINED_KEY;
 
     // Wird einmal in der onEnable deiner Main aufgerufen: TycoonData.init(this);
     public static void init(Plugin plugin) {
@@ -38,6 +39,7 @@ public class TycoonData {
         TYCOON_MENU_ITEM_KEY = new NamespacedKey(plugin, "tycoon_menu_item");
         TYCOON_MENU_ITEM_INDEX_KEY = new NamespacedKey(plugin, "tycoon_menu_item_index");
         TYCOON_MENU_ITEM_UID_KEY = new  NamespacedKey(plugin, "tycoon_menu_item_uid");
+        BLOCK_IS_AUTOMINED_KEY = new NamespacedKey(plugin, "block_is_automined");
     }
     // Speichert die Daten eines Tycoons auf ein Item
     public static void writeToItem(ItemStack item, int level, int xp, long creation, Material material, int spawnInterval, long creationTime, String type) {

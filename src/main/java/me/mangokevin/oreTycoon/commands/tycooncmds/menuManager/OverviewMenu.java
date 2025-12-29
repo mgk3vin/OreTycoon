@@ -45,6 +45,7 @@ public class OverviewMenu implements MenuInterface{
 
         MenuManager.addFiller(inventory, Material.GRAY_STAINED_GLASS_PANE);
         boolean toggleAll = true;
+        boolean toggleAllAutoMiner = true;
         int startIndex = page * 14;
         for (int i = 0; i < 14; i++) {
             int idx = startIndex + i;
@@ -55,7 +56,15 @@ public class OverviewMenu implements MenuInterface{
                 }
             }
         }
-
+        for (int i = 0; i < 14; i++) {
+            int idx = startIndex + i;
+            if (idx < tycoonBlockList.size()) {
+                if (!tycoonBlockList.get(idx).isAutoMinerEnabled()) {
+                    toggleAllAutoMiner = false;
+                    break;
+                }
+            }
+        }
         List<Integer> usableSlots = getUsableSlots();
         int itemsPerPage = usableSlots.size(); // 14
         startIndex = page * itemsPerPage;
@@ -96,6 +105,23 @@ public class OverviewMenu implements MenuInterface{
             pdc.set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "toggle_all_on");
             item.setItemMeta(itemMeta);
         }
+        ItemStack toggleAutoMiner;
+        if (toggleAllAutoMiner) {
+            toggleAutoMiner = MenuManager.createItemstack(Material.IRON_PICKAXE, 1, ChatColor.GREEN + "Auto Miner Enabled", null, true);
+            ItemMeta itemMeta = toggleAutoMiner.getItemMeta();
+            if (itemMeta == null) return;
+            PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
+            pdc.set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "autominer_enabled");
+            toggleAutoMiner.setItemMeta(itemMeta);
+        }else{
+            toggleAutoMiner = MenuManager.createItemstack(Material.IRON_PICKAXE, 1, ChatColor.RED + "Auto Miner Disabled", null, false);
+            ItemMeta itemMeta = toggleAutoMiner.getItemMeta();
+            if (itemMeta == null) return;
+            PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
+            pdc.set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "autominer_disabled");
+            toggleAutoMiner.setItemMeta(itemMeta);
+        }
+        inventory.setItem(47, toggleAutoMiner);
         inventory.setItem(49, item);
         player.openInventory(inventory);
     }
@@ -121,7 +147,12 @@ public class OverviewMenu implements MenuInterface{
             switch (action) {
                 case "toggle_all_off", "toggle_all_on":
                     toggleTycoons(item.getType(), player);
-                    open(player);
+                    break;
+                case "autominer_enabled":
+                    toggleTycoonsAutoMiner(false, player);
+                    break;
+                case "autominer_disabled":
+                    toggleTycoonsAutoMiner(true, player);
                     break;
                 case "page_prev":
                     new OverviewMenu(plugin, page - 1).open(player);
@@ -145,6 +176,29 @@ public class OverviewMenu implements MenuInterface{
         meta.getPersistentDataContainer().set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, action);
         arrow.setItemMeta(meta);
         return arrow;
+    }
+    private void toggleTycoonsAutoMiner(boolean toggle, Player p) {
+        List<TycoonBlock> allTycoons = blockManager.getTycoonBlocksFromPlayer(p.getUniqueId());
+        List<Integer> usableSlots = getUsableSlots();
+        int startIndex = this.page * usableSlots.size();
+
+        // Bestimmen, ob wir ein- oder ausschalten (basierend auf dem aktuellen Button)
+
+
+        // Nur die Tycoons dieser Seite bearbeiten
+        for (int i = 0; i < usableSlots.size(); i++) {
+            int tycoonIndex = startIndex + i;
+            if (tycoonIndex >= allTycoons.size()) break;
+
+            TycoonBlock block = allTycoons.get(tycoonIndex);
+            block.setAutoMinerEnabled(toggle);
+        }
+
+        // Sound abspielen
+        p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 0.6f, toggle ? 1.2f : 0.8f);
+
+        // Das Menü komplett neu laden, um alle Items (Tycoons + Button) zu aktualisieren
+        this.open(p);
     }
     private void toggleTycoons(Material clickedItem, Player p) {
         List<TycoonBlock> allTycoons = blockManager.getTycoonBlocksFromPlayer(p.getUniqueId());
