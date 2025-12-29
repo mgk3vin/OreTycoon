@@ -37,6 +37,14 @@ public class StatsMenu implements MenuInterface {
 
         inventory.setItem(13, menuManager.createTycoonItem(tycoonBlock));
         inventory.setItem(26, MenuManager.createItemstack(Material.BARRIER, 1, ChatColor.RED + "⬅️Back to Overview", null, false));
+        if (tycoonBlock.isAutoMinerEnabled()) {
+            inventory.setItem(22, MenuManager.createItemstack(Material.IRON_PICKAXE, 1, ChatColor.GREEN + "Auto Miner Enabled", null, true));
+        } else {
+            inventory.setItem(22, MenuManager.createItemstack(Material.IRON_PICKAXE, 1, ChatColor.RED + "Auto Miner Disabled", null, false));
+        }
+
+        inventory.setItem(18, MenuManager.createItemstack(Material.CHEST_MINECART, 1, ChatColor.GOLD + "Inventory", null, false));
+
         player.openInventory(inventory);
     }
 
@@ -49,7 +57,21 @@ public class StatsMenu implements MenuInterface {
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
 
         if (event.getSlot() == 26) {
-            menuManager.openTycoonOverview(player, 0);
+            int itemsPerPage = 14;
+            int page;
+            if (tycoonBlock.getIndex() >= 0){
+                page = tycoonBlock.getIndex() / itemsPerPage;
+            }else{
+                page = 0;
+            }
+            menuManager.openTycoonOverview(player, page);
+        }
+        if (event.getSlot() == 18) {
+            player.openInventory(tycoonBlock.getInventory());
+        }
+        if (event.getSlot() == 22) {
+            tycoonBlock.setAutoMinerEnabled(!tycoonBlock.isAutoMinerEnabled());
+            open(player);
         }
         if (event.getSlot() == 13) {
             tycoonBlock.setActive(!tycoonBlock.isActive());

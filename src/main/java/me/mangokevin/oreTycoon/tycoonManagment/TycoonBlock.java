@@ -10,6 +10,8 @@ import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.*;
@@ -23,7 +25,7 @@ public class TycoonBlock {
     private long creationTime;
     private int index;
     private String tycoonDisplayName;
-
+    private final String blockUID;
 
     private int level;
     private int totalXp;
@@ -31,10 +33,16 @@ public class TycoonBlock {
     private double progress;
 
     private boolean isActive;
-    private Material lastSpawnedBlock;
+    private Material lastSpawnedMaterial;
+    private Block lastSpawnBlock;
     private int tickCounter = 0;
     private int spawnInterval;
-    private final String blockUID;
+    private int miningTickCounter = 0;
+    private int miningInterval;
+
+
+    private final Inventory inventory;
+    private boolean autoMinerEnabled;
 
     private final TycoonType type;
 
@@ -43,6 +51,7 @@ public class TycoonBlock {
     public static final Map<Location, String> hologramMap = new HashMap<>();
 
     private final Set<Block> activeBlocks = new HashSet<>();
+    private List<Location> spawnedBlockLocations = new ArrayList<>();
 
     HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
 
@@ -79,13 +88,17 @@ public class TycoonBlock {
         levelXp = 0;
         progress = 0;
 
+        this.inventory = Bukkit.createInventory(null, 27, "Tycoon Inventory #" + getIndex());
+        this.autoMinerEnabled = false;
+
         this.type = type;
         this.material = type.getMaterial();
         this.spawnInterval = type.getSpawnInterval();
+        this.miningInterval = type.getMiningInterval();
         this.ressourceMaterialsMap = type.getResources();
         this.tycoonDisplayName = type.getName();
 
-
+        this.spawnedBlockLocations = new ArrayList<>();
         fillRessources();
 
         this.blockUID = Objects.requireNonNull(this.location.getWorld()).getName() + "_" +
@@ -103,6 +116,35 @@ public class TycoonBlock {
             if (isActive) {
                 trySpawnRessource();
             }
+        }
+        // 2. Der Auto-Miner Timer (Erz abbauen)
+        // Wir prüfen: Ist der Modus an UND ist der Tycoon aktiv?
+        if (autoMinerEnabled) {
+            miningTickCounter++;
+
+            if (miningTickCounter >= miningInterval) {
+                miningTickCounter = 0;
+                // Wichtig: Nur versuchen abzubauen, wenn dort auch wirklich ein Block steht!
+                Random random = new Random();
+                for (Block block : activeBlocks) {
+                    spawnedBlockLocations.add(block.getLocation());
+                }
+                if (spawnedBlockLocations.isEmpty()) {return;}
+                Location spawnedBlockLoc;
+                if (spawnedBlockLocations.size() == 1) {
+                    spawnedBlockLoc = spawnedBlockLocations.getFirst();
+                }else {
+                    spawnedBlockLoc = spawnedBlockLocations.get(random.nextInt(0, spawnedBlockLocations.size() - 1));
+                }
+
+                if (spawnedBlockLoc.getBlock().getType() != Material.AIR) {
+                    setAutoMinerEnabled(blockManager.tryAutoMining(this, spawnedBlockLoc, owner.getPlayer()));
+                }
+            }
+        } else {
+            // Falls der Miner aus ist, setzen wir den Counter zurück,
+            // damit er nicht "vorlädt" für den Moment des Einschaltens.
+            miningTickCounter = 0;
         }
     }
 
@@ -149,11 +191,18 @@ public class TycoonBlock {
             spawnBlock.setMetadata("tycoon_id", new FixedMetadataValue(plugin, blockUID));
 
             //tycoonBlock.manipulateHologram(tycoonBlock.getLocation(), material.name());
-            setLastSpawnedBlock(material);
+            setLastSpawnedMaterial(material);
+            lastSpawnBlock = spawnBlock;
             updateHologramPreset(getLocation(), "BLOCK");
             assert world != null;
             world.playSound(randomLocation, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.5f);
             world.spawnParticle(Particle.EXPLOSION, randomLocation, 1);
+
+//            if (autoMinerEnabled) {
+//                if (!blockManager.tryAutoMining(this, spawnBlock.getLocation(), owner.getPlayer())){
+//                    autoMinerEnabled = false;
+//                }
+//            }
         }
 
     }
@@ -381,6 +430,32 @@ public class TycoonBlock {
     public void addActiveBlocks(Block block) {
         activeBlocks.add(block);
     }
+    public boolean addBlocksToInventory(Block block) {
+        ItemStack item = new ItemStack(block.getType());
+
+        if (canFitItem(inventory, item)) {
+            inventory.addItem(item);
+            return true;
+        } else  {
+            return false;
+        }
+    }
+    public boolean canFitItem(Inventory inv, ItemStack item) {
+        // 1. Gibt es überhaupt einen komplett leeren Slot?
+        if (inv.firstEmpty() != -1) return true;
+
+        // 2. Wenn kein leerer Slot da ist, prüfe, ob ein existierender Stack
+        // des gleichen Typs noch Platz für weitere Items hat.
+        for (ItemStack content : inv.getContents()) {
+            if (content != null && content.isSimilar(item)) {
+                if (content.getAmount() < content.getMaxStackSize()) {
+                    return true; // Es ist noch Platz in diesem Stack
+                }
+            }
+        }
+
+        return false; // Absolut kein Platz mehr
+    }
     // ---------     Adder      ---------
     // ---------     Getter      ---------
     public int getIndex() {
@@ -436,8 +511,8 @@ public class TycoonBlock {
             return ChatColor.RED + "offline..." + ChatColor.RESET;
         }
     }
-    public Material getLastSpawnedBlock() {
-        return lastSpawnedBlock;
+    public Material getLastSpawnedMaterial() {
+        return lastSpawnedMaterial;
     }
     public int getTickCounter() {
         return tickCounter;
@@ -456,6 +531,12 @@ public class TycoonBlock {
     }
     public long getCreationTime() {
         return creationTime;
+    }
+    public boolean isAutoMinerEnabled() {
+        return autoMinerEnabled;
+    }
+    public Inventory getInventory() {
+        return inventory;
     }
     // ---------     Getter      ---------
 
@@ -485,8 +566,8 @@ public class TycoonBlock {
         this.isActive = isActive;
         updateHologramPreset(location, "STATUS");
     }
-    public void setLastSpawnedBlock(Material lastSpawnedBlock) {
-        this.lastSpawnedBlock = lastSpawnedBlock;
+    public void setLastSpawnedMaterial(Material lastSpawnedMaterial) {
+        this.lastSpawnedMaterial = lastSpawnedMaterial;
     }
     public void setTickCounter(int tickCounter) {
         this.tickCounter = tickCounter;
@@ -496,6 +577,9 @@ public class TycoonBlock {
     }
     public void setCreationTime(long creationTime) {
         this.creationTime = creationTime;
+    }
+    public void setAutoMinerEnabled(boolean autoMinerEnabled) {
+        this.autoMinerEnabled = autoMinerEnabled;
     }
     // ---------     Setter      ---------
 }

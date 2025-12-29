@@ -8,7 +8,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -19,6 +18,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -76,6 +76,69 @@ public class TycoonBlockManager {
             }
         }.runTaskTimer(plugin, 0, 20L); // Läuft jede Sekunde
 
+    }
+    public boolean tryAutoMining(TycoonBlock tycoonBlock, Location blockLocation, Player player) {
+//        tycoonBlock.setAutoMinerEnabled(true);
+        ItemStack item = new ItemStack(blockLocation.getBlock().getType());
+        ItemMeta itemMeta = item.getItemMeta();
+        if (itemMeta == null) return false;
+        PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
+        pdc.set(TycoonData.BLOCK_IS_AUTOMINED_KEY, PersistentDataType.STRING, "block_is_automined");
+        if (!tycoonBlock.canFitItem(tycoonBlock.getInventory(), item)){
+            return false;
+        }
+        new BukkitRunnable() {
+
+            float progress = 0.0f;
+            @Override
+            public void run() {
+                // 1. Punkte zentrieren (damit sie aus der Mitte der Blöcke kommen)
+                Location start = tycoonBlock.getLocation().clone().add(0.5, 0.5, 0.5);
+                Location target = blockLocation.clone().add(0.5, 0.5, 0.5);
+
+                // 2. Vektor vom Start zum Ziel berechnen
+                Vector direction = target.toVector().subtract(start.toVector());
+                double distance = start.distance(target); // Gesamtlänge der Strecke
+
+                // 3. Den Vektor normalisieren (auf die Länge 1 bringen) und skalieren
+                // Wir wollen alle 0.2 Blöcke einen Partikel
+                double spacing = 0.2;
+                direction.normalize().multiply(spacing);
+
+                // 4. Die Linie entlanglaufen und Partikel spawnen
+                Location current = start.clone();
+                for (double i = 0; i < distance; i += spacing) {
+                    // Partikel spawnen (z.B. Dust für farbige Laser oder End_Rod für Magie)
+                    start.getWorld().spawnParticle(Particle.DUST, current, 1, 0, 0, 0, 0, new Particle.DustOptions(Color.RED, 0.5f));
+
+                    // Den Punkt ein Stück weiter in Richtung Ziel schieben
+                    current.add(direction);
+                }
+                // 2. Vibrations-Sound (leise)
+                if (progress % 0.2 < 0.05) {
+                    start.getWorld().playSound(start, Sound.BLOCK_NOTE_BLOCK_HAT, 0.2f, 0.5f + progress);
+                }
+                progress += 0.1f;
+
+                if (progress >= 1.0f) {
+
+                    blockLocation.getWorld().playSound(blockLocation, Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
+                    blockLocation.getWorld().spawnParticle(Particle.WHITE_SMOKE, blockLocation, 3);
+
+                    tycoonBlock.addBlocksToInventory(blockLocation.getBlock());
+
+                    levelManager.handleXpGain(tycoonBlock, 50);
+                    playXpBlockHologram(tycoonBlock, blockLocation.getBlock(), 50);
+                    tycoonBlock.removeBlock(blockLocation.getBlock());
+
+                    blockLocation.getBlock().setType(Material.AIR);
+                    pdc.remove(TycoonData.BLOCK_IS_AUTOMINED_KEY);
+                    this.cancel();
+                }
+
+            }
+        }.runTaskTimer(plugin, 0, 3L);
+        return true;
     }
 
 
@@ -165,11 +228,12 @@ public class TycoonBlockManager {
             data.set(path + "level", tycoon.getLevel());
             data.set(path + "xp", tycoon.getLevelXp());
             data.set(path + "isActive", tycoon.isActive());
+            data.set(path + "isAutoMinerEnabled", tycoon.isAutoMinerEnabled());
             data.set(path + "creationDate", tycoon.getCreationTime());
             data.set(path + "index", tycoon.getIndex());
 
-            if (tycoon.getLastSpawnedBlock() != null) {
-                data.set(path + "lastSpawnedBlock", tycoon.getLastSpawnedBlock().name());
+            if (tycoon.getLastSpawnedMaterial() != null) {
+                data.set(path + "lastSpawnedBlock", tycoon.getLastSpawnedMaterial().name());
             }
             List<String> blockLocs = new ArrayList<>();
             for (Block block : tycoon.getActiveBlocks()){
@@ -222,6 +286,7 @@ public class TycoonBlockManager {
                 int level = section.getInt(path + "level");
                 int xp = section.getInt(path + "xp");
                 boolean active = section.getBoolean(path + "isActive");
+                boolean autoMinerEnabled = section.getBoolean(path + "isAutoMinerEnabled");
                 long  creationTime = section.getLong(path + "creationDate");
                 int index = section.getInt(path + "index");
 
@@ -237,6 +302,7 @@ public class TycoonBlockManager {
                 // Wichtig: Nutze deinen Konstruktor.
                 // Falls er einen Spielernamen braucht, nimm Bukkit.getOfflinePlayer(ownerUUID).getName()
                 TycoonBlock block = new TycoonBlock(tycoonType ,loc, ownerUUID, active, plugin, this,levelManager);
+                block.setAutoMinerEnabled(autoMinerEnabled);
                 block.setLevel(level);
                 block.setLevelXp(xp);
                 block.setCreationTime(creationTime);
@@ -244,7 +310,7 @@ public class TycoonBlockManager {
                 System.out.println("[BlockManager] Loading Tycoon " + block.getLevel() + "|" + block.getLevelXp() + "|" + block.getIndex() + "|" + block.getMaterial().toString());
 
                 if (type != null) {
-                    block.setLastSpawnedBlock(type);
+                    block.setLastSpawnedMaterial(type);
                 }
                 tycoonBlocks.put(loc, block);
 
@@ -446,7 +512,7 @@ public class TycoonBlockManager {
             spawnBlock.setType(material);
 
             //tycoonBlock.manipulateHologram(tycoonBlock.getLocation(), material.name());
-            tycoonBlock.setLastSpawnedBlock(material);
+            tycoonBlock.setLastSpawnedMaterial(material);
             tycoonBlock.updateHologramPreset(tycoonBlock.getLocation(), "BLOCK");
             player.playSound(randomLocation, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.5f);
             player.spawnParticle(Particle.EXPLOSION, randomLocation, 1);

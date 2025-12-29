@@ -37,6 +37,7 @@ public class BlockBreakListener implements Listener {
 
         Player p = event.getPlayer();
 
+
         if (blockData != null) {
             // JA! Es ist ein registrierter Tycoon Block.
             //p.sendMessage(ChatColor.AQUA + "Broke Tycoon Block");
@@ -58,9 +59,14 @@ public class BlockBreakListener implements Listener {
 
         TycoonBlock tycoonBlock = blockManager.getTycoonContainsBlock(block);
         if (tycoonBlock != null) {
-            System.out.println("------------[LM]------------");
+            if (tycoonBlock.isAutoMinerEnabled()){
+                event.setCancelled(true);
+                p.sendMessage(ChatColor.RED + "Cant mine blocks while auto miner is enabled!");
+                return;
+            }
+//            System.out.println("------------[LM]------------");
             levelManager.handleXpGain(tycoonBlock, 50);
-            System.out.println("------------[LM]------------");
+//            System.out.println("------------[LM]------------");
             p.sendMessage(ChatColor.GOLD + "Recieved 50 Tycoon xp!");
             blockManager.playXpBlockHologram(tycoonBlock, block, 50);
 
