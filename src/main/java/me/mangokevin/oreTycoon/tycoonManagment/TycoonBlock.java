@@ -9,7 +9,6 @@ import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -19,22 +18,20 @@ import java.util.*;
 public class TycoonBlock {
 
     private final Location location;
-    private OfflinePlayer owner;
+    private final OfflinePlayer owner;
     private final UUID ownerUuid;
     private final Material material;
     private long creationTime;
     private int index;
-    private String tycoonDisplayName;
+    private final String tycoonDisplayName;
     private final String blockUID;
 
     private int level;
-    private int totalXp;
     private int levelXp;
-    private double progress;
 
     private boolean isActive;
     private Material lastSpawnedMaterial;
-    private Block lastSpawnBlock;
+
     private int tickCounter = 0;
     private int spawnInterval;
     private int miningTickCounter = 0;
@@ -61,17 +58,8 @@ public class TycoonBlock {
     private final TycoonBlockManager blockManager;
     private final LevelManager levelManager;
 
-    private HashMap<Material, Integer> ressourceMaterials = new HashMap<>();
-    private Map<Material, Integer> ressourceMaterialsMap;
+    private final Map<Material, Integer> ressourceMaterialsMap;
 
-    private final List<Material> TYCOON_RESOURCE_MATERIALS = Arrays.asList(
-            Material.COAL_ORE,
-            Material.IRON_ORE,
-            Material.GOLD_ORE,
-            Material.DIAMOND_ORE,
-            Material.EMERALD_ORE
-            // Fügen Sie hier weitere Materialien hinzu
-    );
 
     public TycoonBlock(TycoonType type,Location location, UUID ownerUuid, boolean isActive, OreTycoon plugin, TycoonBlockManager blockManager, LevelManager levelManager) {
         this.location = location;
@@ -84,9 +72,7 @@ public class TycoonBlock {
         this.levelManager = levelManager;
         this.creationTime = System.currentTimeMillis();
         level = 1;
-        totalXp = 0;
         levelXp = 0;
-        progress = 0;
 
         this.inventory = Bukkit.createInventory(null, 27, "Tycoon Inventory #" + getIndex());
         this.autoMinerEnabled = false;
@@ -99,7 +85,7 @@ public class TycoonBlock {
         this.tycoonDisplayName = type.getName();
 
         this.spawnedBlockLocations = new ArrayList<>();
-        fillRessources();
+
 
         this.blockUID = Objects.requireNonNull(this.location.getWorld()).getName() + "_" +
                 this.location.getBlockX() + "_" +
@@ -138,7 +124,7 @@ public class TycoonBlock {
                 }
 
                 if (spawnedBlockLoc.getBlock().getType() != Material.AIR) {
-                    setAutoMinerEnabled(blockManager.tryAutoMining(this, spawnedBlockLoc, owner.getPlayer()));
+                    setAutoMinerEnabled(blockManager.tryAutoMining(this, spawnedBlockLoc));
                 }
             }
         } else {
@@ -148,19 +134,6 @@ public class TycoonBlock {
         }
     }
 
-
-    public void fillRessources(){
-        //Material : weight in procent
-        ressourceMaterials.put(Material.STONE, 20);
-        ressourceMaterials.put(Material.DIRT, 5);
-        ressourceMaterials.put(Material.GRANITE, 10);
-        ressourceMaterials.put(Material.DIORITE, 10);
-        ressourceMaterials.put(Material.ANDESITE, 15);
-        ressourceMaterials.put(Material.GRAVEL, 10);
-        ressourceMaterials.put(Material.COAL_ORE, 10);
-        ressourceMaterials.put(Material.IRON_ORE, 15);
-        ressourceMaterials.put(Material.COPPER_ORE, 5);
-    }
     public void trySpawnRessource() {
         Location center = getLocation();
         World world = center.getWorld();
@@ -192,26 +165,13 @@ public class TycoonBlock {
 
             //tycoonBlock.manipulateHologram(tycoonBlock.getLocation(), material.name());
             setLastSpawnedMaterial(material);
-            lastSpawnBlock = spawnBlock;
             updateHologramPreset(getLocation(), "BLOCK");
             assert world != null;
             world.playSound(randomLocation, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.5f);
             world.spawnParticle(Particle.EXPLOSION, randomLocation, 1);
 
-//            if (autoMinerEnabled) {
-//                if (!blockManager.tryAutoMining(this, spawnBlock.getLocation(), owner.getPlayer())){
-//                    autoMinerEnabled = false;
-//                }
-//            }
         }
 
-    }
-    @Deprecated
-    private Material getRandomMaterial() {
-        Random rand = new Random();
-        int randint = rand.nextInt(0, TYCOON_RESOURCE_MATERIALS.size());
-
-        return TYCOON_RESOURCE_MATERIALS.get(randint);
     }
     private Material getRandomMaterial(Map<Material, Integer> map) {
         int totalWeight = 0;
@@ -379,21 +339,6 @@ public class TycoonBlock {
         return sb.toString();
     }
 
-    @Deprecated
-    public void editHologram(Location location, int line, String text) {
-        if (getHologram(location) != null) {
-            Hologram hologram = getHologram(location);
-            HologramData data = hologram.getData();
-            //TextHologramData textHologramData = (TextHologramData) data;
-            List<String> hologramLines = ((TextHologramData) data).getText();
-
-            hologramLines.set(line, text);
-
-            System.out.println("[TycoonBlockHolo] Editing hologram - " + hologram.getName());
-
-            hologram.queueUpdate();
-        }
-    }
     public Hologram getHologram(Location location) {
         if (hologramMap.containsKey(location)) {
             String uniqueId = hologramMap.get(location);
@@ -412,32 +357,14 @@ public class TycoonBlock {
 
 
     // ---------     Adder      ---------
-    @Deprecated
-    public void addTotalXp(int amount) {
-        this.totalXp += amount;
-        updateHologramPreset(location, "XP");
-    }
-    @Deprecated
-    public void addLevelXp(int amount) {
-        this.levelXp += amount;
-    }
-    @Deprecated
-    public void levelUp(int leftoverXp){
-        this.level++;
-        this.levelXp = leftoverXp;
-        updateHologramPreset(location, "LEVEL");
-    }
     public void addActiveBlocks(Block block) {
         activeBlocks.add(block);
     }
-    public boolean addBlocksToInventory(Block block) {
+    public void tryAddBlocksToInventory(Block block) {
         ItemStack item = new ItemStack(block.getType());
 
         if (canFitItem(inventory, item)) {
             inventory.addItem(item);
-            return true;
-        } else  {
-            return false;
         }
     }
     public boolean canFitItem(Inventory inv, ItemStack item) {
@@ -470,14 +397,6 @@ public class TycoonBlock {
     public int getLevel() {
         return level;
     }
-    @Deprecated
-    public int getTotalXp() {
-        return totalXp;
-    }
-    @Deprecated
-    public double getProgress() {
-        return progress;
-    }
     public int getProgressPercentage() {
         return (int) levelManager.getProgressPercentage(levelXp, level + 1);
     }
@@ -489,11 +408,6 @@ public class TycoonBlock {
     }
     public OfflinePlayer getOfflineOwner() {
         return owner;
-    }
-    @Deprecated
-    public Player getOwner() {
-        if (owner.getPlayer() != null) return owner.getPlayer();
-        else return null;
     }
     public String getOwnerName() {
         return owner.getName();
@@ -513,9 +427,6 @@ public class TycoonBlock {
     }
     public Material getLastSpawnedMaterial() {
         return lastSpawnedMaterial;
-    }
-    public int getTickCounter() {
-        return tickCounter;
     }
     public int getSpawnInterval() {
         return spawnInterval;
@@ -550,27 +461,12 @@ public class TycoonBlock {
     public void setLevelXp(int levelXp) {
         this.levelXp = levelXp;
     }
-    @Deprecated
-    public void setTotalXp(int totalXp) {
-        this.totalXp = totalXp;
-    }
-    @Deprecated
-    public void setProgress(double progress) {
-        this.progress = progress;
-    }
-    @Deprecated
-    public void setOwner(Player owner) {
-        this.owner = owner;
-    }
     public void setActive(boolean isActive) {
         this.isActive = isActive;
         updateHologramPreset(location, "STATUS");
     }
     public void setLastSpawnedMaterial(Material lastSpawnedMaterial) {
         this.lastSpawnedMaterial = lastSpawnedMaterial;
-    }
-    public void setTickCounter(int tickCounter) {
-        this.tickCounter = tickCounter;
     }
     public void setSpawnInterval(int spawnInterval) {
         this.spawnInterval = spawnInterval;

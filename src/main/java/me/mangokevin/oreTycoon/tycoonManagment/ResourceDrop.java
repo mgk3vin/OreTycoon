@@ -2,6 +2,7 @@ package me.mangokevin.oreTycoon.tycoonManagment;
 
 import org.bukkit.Material;
 
+@Deprecated
 public class ResourceDrop {
 
     private final Material material;

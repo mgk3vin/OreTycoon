@@ -43,9 +43,6 @@ public class TycoonBlockManager {
     //--------  NamespacedKeys  --------
     //--------  NamespacedKeys  --------
 
-    //private static final HashMap<Location, UUID> tycoonBlocks = new HashMap<>();
-    // ! Replaced with @tycoonBlocks
-
     private final Map<Location, TycoonBlock> tycoonBlocks;
     private final Map<String, TycoonBlock> tycoonBlocksUID;
     private final int maxBlocksPerPlayer;
@@ -77,8 +74,7 @@ public class TycoonBlockManager {
         }.runTaskTimer(plugin, 0, 20L); // Läuft jede Sekunde
 
     }
-    public boolean tryAutoMining(TycoonBlock tycoonBlock, Location blockLocation, Player player) {
-//        tycoonBlock.setAutoMinerEnabled(true);
+    public boolean tryAutoMining(TycoonBlock tycoonBlock, Location blockLocation) {
         ItemStack item = new ItemStack(blockLocation.getBlock().getType());
         ItemMeta itemMeta = item.getItemMeta();
         if (itemMeta == null) return false;
@@ -125,7 +121,7 @@ public class TycoonBlockManager {
                     blockLocation.getWorld().playSound(blockLocation, Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
                     blockLocation.getWorld().spawnParticle(Particle.WHITE_SMOKE, blockLocation, 3);
 
-                    tycoonBlock.addBlocksToInventory(blockLocation.getBlock());
+                    tycoonBlock.tryAddBlocksToInventory(blockLocation.getBlock());
 
                     levelManager.handleXpGain(tycoonBlock, 50);
                     playXpBlockHologram(tycoonBlock, blockLocation.getBlock(), 50);
@@ -174,17 +170,6 @@ public class TycoonBlockManager {
             return null;
         }
         return tycoonBlocksList.get(index - 1);//1 basiert
-    }
-
-    @Deprecated
-    public void checkTycoonProgress(TycoonBlock block){
-        int currentLevel = block.getLevel();
-        int nextLevel = block.getLevel() + 1;
-        double progress = block.getProgress();
-
-        if (progress >= 1.0){
-            block.setLevel(nextLevel);
-        }
     }
 
     public void playXpBlockHologram(TycoonBlock tycoonBlock, Block block, int xp) {
@@ -249,7 +234,7 @@ public class TycoonBlockManager {
             plugin.getLogger().info("Alle Tycoons wurden erfolgreich in tycoons.yml gespeichert!");
         } catch (IOException e) {
             plugin.getLogger().severe("Fehler beim Speichern der Tycoons: " + e.getMessage());
-        };
+        }
     }
     public void loadTycoons(){
         File file = new File(plugin.getDataFolder(), "tycoons.yml");
@@ -292,7 +277,6 @@ public class TycoonBlockManager {
 
                 String tycoonMaterialString = section.getString(path + "material");
                 assert tycoonMaterialString != null;
-                Material tycoonMaterial = Material.getMaterial(tycoonMaterialString);
 
                 int spawnInterval = section.getInt(path + "spawnInterval");
                 String matName = section.getString(path + "lastSpawnedBlock");
