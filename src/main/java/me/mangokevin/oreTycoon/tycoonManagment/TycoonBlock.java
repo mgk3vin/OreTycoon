@@ -124,7 +124,7 @@ public class TycoonBlock {
                 }
 
                 if (spawnedBlockLoc.getBlock().getType() != Material.AIR) {
-                    setAutoMinerEnabled(blockManager.tryAutoMining(this, spawnedBlockLoc, owner.getPlayer()));
+                    setAutoMinerEnabled(blockManager.tryAutoMining(this, spawnedBlockLoc));
                 }
             }
         } else {
