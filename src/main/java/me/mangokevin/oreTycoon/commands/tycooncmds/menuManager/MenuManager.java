@@ -11,6 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -49,22 +50,25 @@ public class MenuManager {
                 1,
                 block.getTycoonType().getName() + " #" + block.getIndex(),
                 lore,
-                glint);
+                glint,
+                true);
         ItemMeta statsmeta = stats.getItemMeta();
         if (statsmeta == null) return null;
         statsmeta.getPersistentDataContainer().set(TycoonData.TYCOON_MENU_ITEM_KEY, PersistentDataType.STRING, "tycoon_menu_item");
-        //statsmeta.getPersistentDataContainer().set(TycoonData.TYCOON_MENU_ITEM_INDEX_KEY, PersistentDataType.INTEGER, i + 1);
         statsmeta.getPersistentDataContainer().set(TycoonData.TYCOON_MENU_ITEM_UID_KEY, PersistentDataType.STRING, block.getBlockUID());
         stats.setItemMeta(statsmeta);
         return stats;
     }
-    public static ItemStack createItemstack(Material material, int amount, String s, List<String> l, Boolean b){
+    public static ItemStack createItemstack(Material material, int amount, String name, List<String> lore, Boolean glint, Boolean hideAttributes){
         ItemStack itemstack = new ItemStack(material, amount);
         ItemMeta meta = itemstack.getItemMeta();
         if(meta != null){
-            meta.setDisplayName(s);
-            meta.setLore(l);
-            meta.setEnchantmentGlintOverride(b);
+            meta.setDisplayName(name);
+            meta.setLore(lore);
+            meta.setEnchantmentGlintOverride(glint);
+            if (hideAttributes){
+                meta.addItemFlags(ItemFlag.values());
+            }
             itemstack.setItemMeta(meta);
         }
         return itemstack;
@@ -87,6 +91,6 @@ public class MenuManager {
 
     }
     public static ItemStack  createFiller(Material material){
-        return createItemstack(material, 1, " ", null, false);
+        return createItemstack(material, 1, " ", null, false, true);
     }
 }

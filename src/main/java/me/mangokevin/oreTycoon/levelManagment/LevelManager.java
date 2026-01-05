@@ -22,7 +22,7 @@ public class LevelManager {
     public int getXpNeededForLevel(int level) {
         int BASE_XP = 100;
         int MULTIPLIER = 25;
-        System.out.println("[LevelManager] getXpNeededForLevel " + level + " is " + (BASE_XP + (level * level * MULTIPLIER)));
+//        System.out.println("[LevelManager] getXpNeededForLevel " + level + " is " + (BASE_XP + (level * level * MULTIPLIER)));
         return BASE_XP + (level * level * MULTIPLIER);
     }
 
@@ -35,12 +35,12 @@ public class LevelManager {
         if (xp <= 0) return 0.0;
 
         // FIX: Cast auf (double) VOR der Division, sonst kommt 0 raus!
-        System.out.println("[LevelManager] Xp needed is " + needed + " out of " + xp + " for level " + level + " | Percent: " + Math.round(((double) xp / needed) * 100.0));
+//        System.out.println("[LevelManager] Xp needed is " + needed + " out of " + xp + " for level " + level + " | Percent: " + Math.round(((double) xp / needed) * 100.0));
         return Math.round(((double) xp / needed) * 100.0);
     }
 
     public boolean canLevelUp(int xp, int level) {
-        System.out.println("[LevelManager] canLevelup is " + (xp >= getXpNeededForLevel(level + 1)) + " because " + xp + " | " + getXpNeededForLevel(level + 1));
+//        System.out.println("[LevelManager] canLevelup is " + (xp >= getXpNeededForLevel(level + 1)) + " because " + xp + " | " + getXpNeededForLevel(level + 1));
         return xp >= getXpNeededForLevel(level + 1);
     }
 
@@ -48,7 +48,7 @@ public class LevelManager {
         // WICHTIG: Nutze getLevelxp() (den aktuellen Fortschritt im Level)
         int currentXpProgress = tycoonBlock.getLevelXp();
         int currentLevel = tycoonBlock.getLevel();
-        System.out.println("[LevelManager] Current xp: " + currentXpProgress + " Current Level: " + currentLevel);
+//        System.out.println("[LevelManager] Current xp: " + currentXpProgress + " Current Level: " + currentLevel);
         int totalXpInCurrentLevel = currentXpProgress + gainedXp;
 
         // Prüfen gegen die Kosten des aktuellen Levels
@@ -57,12 +57,12 @@ public class LevelManager {
             currentLevel++;
             Objects.requireNonNull(tycoonBlock.getLocation().getWorld()).playEffect(tycoonBlock.getLocation(), Effect.MOBSPAWNER_FLAMES, 1);
             tycoonBlock.getLocation().getWorld().playSound(tycoonBlock.getLocation(), Sound.BLOCK_ANVIL_USE, 1, 1.5f);
-            System.out.println("[LevelManager] Leveled up to " + currentLevel);
+//            System.out.println("[LevelManager] Leveled up to " + currentLevel);
         }
 
         tycoonBlock.setLevelXp(totalXpInCurrentLevel);
         tycoonBlock.setLevel(currentLevel);
-        System.out.println("[LevelManager] Set xp to: "  + totalXpInCurrentLevel + " Level to: " + currentLevel);
+//        System.out.println("[LevelManager] Set xp to: "  + totalXpInCurrentLevel + " Level to: " + currentLevel);
         tycoonBlock.updateHologramPreset(tycoonBlock.getLocation(), "XP");
         tycoonBlock.updateHologramPreset(tycoonBlock.getLocation(), "PROGRESS");
         tycoonBlock.updateHologramPreset(tycoonBlock.getLocation(), "LEVEL");
