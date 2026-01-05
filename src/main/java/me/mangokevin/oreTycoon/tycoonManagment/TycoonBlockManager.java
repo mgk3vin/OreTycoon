@@ -1,6 +1,7 @@
 package me.mangokevin.oreTycoon.tycoonManagment;
 
 import me.mangokevin.oreTycoon.OreTycoon;
+import me.mangokevin.oreTycoon.commands.tycooncmds.tycoonEvents.TycoonAutoMinedEvent;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -121,11 +122,13 @@ public class TycoonBlockManager {
                     blockLocation.getWorld().playSound(blockLocation, Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
                     blockLocation.getWorld().spawnParticle(Particle.WHITE_SMOKE, blockLocation, 3);
 
-                    tycoonBlock.tryAddBlocksToInventory(blockLocation.getBlock());
 
-                    levelManager.handleXpGain(tycoonBlock, 50);
-                    playXpBlockHologram(tycoonBlock, blockLocation.getBlock(), 50);
-                    tycoonBlock.removeBlock(blockLocation.getBlock());
+                    //tycoonBlock.getTycoonInventory().addItem(item);
+                    ItemStack item =  new ItemStack(blockLocation.getBlock().getType());
+                    TycoonAutoMinedEvent event = new TycoonAutoMinedEvent(tycoonBlock, item);
+                    Bukkit.getPluginManager().callEvent(event);
+
+                    tycoonBlock.handleReward(blockLocation.getBlock());
 
                     blockLocation.getBlock().setType(Material.AIR);
                     pdc.remove(TycoonData.BLOCK_IS_AUTOMINED_KEY);

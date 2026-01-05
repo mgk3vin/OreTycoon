@@ -6,6 +6,8 @@ depend:
   - FancyHolograms
   - PlaceholderAPI
   - Multiverse-Core
+  - Vault
+  - Essentials
 commands:
   tycoon:
     description: Recieve the tycoon block

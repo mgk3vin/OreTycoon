@@ -6,12 +6,18 @@ import de.oliver.fancyholograms.api.data.HologramData;
 import de.oliver.fancyholograms.api.data.TextHologramData;
 import de.oliver.fancyholograms.api.hologram.Hologram;
 import me.mangokevin.oreTycoon.OreTycoon;
+import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.MenuManager;
+import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.TycoonInventory;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
 
@@ -29,16 +35,19 @@ public class TycoonBlock {
     private int level;
     private int levelXp;
 
+    private double storedBalance;
+
     private boolean isActive;
     private Material lastSpawnedMaterial;
 
     private int tickCounter = 0;
     private int spawnInterval;
     private int miningTickCounter = 0;
-    private int miningInterval;
+    private final int miningInterval;
 
 
     private final Inventory inventory;
+    private final TycoonInventory tycoonInventory;
     private boolean autoMinerEnabled;
 
     private final TycoonType type;
@@ -73,8 +82,8 @@ public class TycoonBlock {
         this.creationTime = System.currentTimeMillis();
         level = 1;
         levelXp = 0;
+        storedBalance = 0;
 
-        this.inventory = Bukkit.createInventory(null, 27, "Tycoon Inventory #" + getIndex());
         this.autoMinerEnabled = false;
 
         this.type = type;
@@ -93,7 +102,10 @@ public class TycoonBlock {
                 this.location.getBlockZ();
 
 
+        this.tycoonInventory = new TycoonInventory(this, plugin);
+        this.inventory = Bukkit.createInventory(new TycoonHolder(this.tycoonInventory), 36, tycoonDisplayName);
     }
+
 
     public void incrementAndCheck(){
         tickCounter++;
@@ -133,7 +145,50 @@ public class TycoonBlock {
             miningTickCounter = 0;
         }
     }
+    public void handleReward(Block block) {
+        levelManager.handleXpGain(this, 50);
+        blockManager.playXpBlockHologram(this, block, 50);
+        //storedBalance += 100;
+        removeBlock(block);
 
+    }
+    public void sellInventory(Inventory inventory, Player player) {
+        Economy econ = OreTycoon.getEconomy();
+        double worth = PriceUtility.calculateWorth(inventory);
+        System.out.println("TycoonBlock Calculate Worth: " + worth);
+        if (worth <= 0) return;
+        econ.depositPlayer(player, worth);
+        player.sendMessage(ChatColor.GREEN + "Sold items worth: " + econ.format(worth));
+        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.3f, 1);
+        cleanInventory(inventory);
+    }
+    public void cleanInventory(Inventory inventory) {
+        for (int i = 0; i < inventory.getSize(); i++) {
+            ItemStack item = inventory.getItem(i);
+
+            if(item==null || item.getType() == Material.AIR)continue;
+
+            ItemMeta meta = item.getItemMeta();
+            if (meta == null) {
+                inventory.setItem(i, null);
+                continue;
+            }
+
+            if (!meta.getPersistentDataContainer().has(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING)) {
+                inventory.setItem(i, null);
+            }
+        }
+    }
+    public void withdrawBalance(Player player){
+        Economy economy = OreTycoon.getEconomy();
+
+        if (storedBalance > 0) {
+            economy.depositPlayer(player, storedBalance);
+            player.sendMessage(ChatColor.GREEN + "You collected " + economy.format(storedBalance) + " from your tycoon!");
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.5f, 1);
+            storedBalance = 0;
+        }
+    }
     public void trySpawnRessource() {
         Location center = getLocation();
         World world = center.getWorld();
@@ -448,6 +503,12 @@ public class TycoonBlock {
     }
     public Inventory getInventory() {
         return inventory;
+    }
+    public double getStoredBalance(){
+        return storedBalance;
+    }
+    public TycoonInventory getTycoonInventory() {
+        return tycoonInventory;
     }
     // ---------     Getter      ---------
 

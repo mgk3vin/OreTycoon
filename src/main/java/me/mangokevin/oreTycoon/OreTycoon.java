@@ -6,13 +6,17 @@ import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.InventoryClickLis
 import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.MenuListener;
 import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.MenuManager;
 import me.mangokevin.oreTycoon.commands.tycooncmds.toggle_selected;
+import me.mangokevin.oreTycoon.commands.tycooncmds.tycoonListener.TycoonAutoMineListener;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import me.mangokevin.oreTycoon.listener.*;
 import me.mangokevin.oreTycoon.papiExpansion.PlaceholderExpansion;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
+import net.ess3.api.IEssentials;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.mvplugins.multiverse.core.MultiverseCoreApi;
@@ -24,6 +28,8 @@ public final class OreTycoon extends JavaPlugin {
     private TycoonBlockManager blockManager;
     private TycoonData tdData;
     private MenuManager menuManager;
+    private static Economy econ = null;
+    private static IEssentials essentials;
 
     public OreTycoon() {}
 
@@ -39,6 +45,7 @@ public final class OreTycoon extends JavaPlugin {
         this.menuManager = new MenuManager(this);
         TycoonData.init(this);
 
+
         blockManager.loadTycoons();
 
         // TODO: Generate Tycoon Islands with Preset
@@ -51,6 +58,24 @@ public final class OreTycoon extends JavaPlugin {
             new PlaceholderExpansion(blockManager).register();
             getLogger().info("PlaceholderAPI Expansion enabled!");
         }
+        //-----------------------   Vault setup    -----------------------
+        if (!setupEconomy() ) {
+            getLogger().severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
+        //-----------------------   Vault setup    -----------------------
+        //-----------------------   Essentials setup    -----------------------
+        Plugin essPlugin = Bukkit.getPluginManager().getPlugin("Essentials");
+
+        if (essPlugin != null && essPlugin.isEnabled()) {
+            essentials = (IEssentials) essPlugin;
+            getLogger().info("EssentialsX erfolgreich verknüpft.");
+        } else {
+            getLogger().severe("EssentialsX wurde nicht gefunden! Preise können nicht berechnet werden.");
+        }
+        //-----------------------   Essentials setup    -----------------------
 
         //-----------------------   Listeners & Commands    -----------------------
         getServer().getPluginManager().registerEvents(new BlockPlacedListener(this, blockManager, tdData), this);
@@ -58,8 +83,8 @@ public final class OreTycoon extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BlockInteractListener(this, blockManager), this);
         getServer().getPluginManager().registerEvents(new TycoonManipulationListener(blockManager), this);
         getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
-        //getServer().getPluginManager().registerEvents(new MenuListener(this), this);
         getServer().getPluginManager().registerEvents(new InventoryClickListener(),this);
+        getServer().getPluginManager().registerEvents(new TycoonAutoMineListener(), this);
         Objects.requireNonNull(getCommand("tycoon")).setExecutor(new TycoonCmd(this, blockManager));
         Objects.requireNonNull(getCommand("tycoon")).setTabCompleter(new TycoonTabCompleter());
         //-----------------------   Listeners & Commands    -----------------------
@@ -74,6 +99,23 @@ public final class OreTycoon extends JavaPlugin {
         return blockManager;
     }
 
+    private boolean setupEconomy() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            return false;
+        }
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            return false;
+        }
+        econ = rsp.getProvider();
+        return econ != null;
+    }
+    public static Economy getEconomy() {
+        return econ;
+    }
+    public static IEssentials getEssentials() {
+        return essentials;
+    }
     @Override
     public void onDisable() {
         if (blockManager != null) {
