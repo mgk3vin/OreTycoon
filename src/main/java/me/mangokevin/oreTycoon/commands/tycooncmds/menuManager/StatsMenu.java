@@ -49,7 +49,7 @@ public class StatsMenu implements MenuInterface {
         ItemStack worth = MenuManager.createItemstack(
                 Material.GREEN_STAINED_GLASS_PANE,
                 1,
-                ChatColor.GREEN + "Sell all: " + currentWorth + "$",
+                ChatColor.GREEN + "Sell all: " + "$" + PriceUtility.formatMoney(currentWorth),
                 null,
                 false,
                 true

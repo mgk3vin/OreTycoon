@@ -55,7 +55,7 @@ public class TycoonInventory implements MenuInterface {
         ItemStack item = MenuManager.createItemstack(
                 Material.GREEN_STAINED_GLASS_PANE,
                 1,
-                ChatColor.GREEN + "Sell all: " + currentWorth + "$",
+                ChatColor.GREEN + "Sell all: " + "$" + PriceUtility.formatMoney(currentWorth) ,
                 null,
                 false,
                 true
@@ -70,6 +70,7 @@ public class TycoonInventory implements MenuInterface {
         );
         ItemMeta backToMenuItemMeta = backToMenu.getItemMeta();
         if (backToMenuItemMeta == null) return;
+        backToMenuItemMeta.getPersistentDataContainer().set(TycoonData.MENU_ITEM_KEY, PersistentDataType.STRING, "menu_item");
         backToMenuItemMeta.getPersistentDataContainer().set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "return");
         backToMenu.setItemMeta(backToMenuItemMeta);
         inventory.setItem(35, backToMenu);
