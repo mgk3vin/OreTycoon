@@ -148,17 +148,16 @@ public class TycoonBlock {
     public void handleReward(Block block) {
         levelManager.handleXpGain(this, 50);
         blockManager.playXpBlockHologram(this, block, 50);
-        //storedBalance += 100;
         removeBlock(block);
 
     }
     public void sellInventory(Inventory inventory, Player player) {
         Economy econ = OreTycoon.getEconomy();
         double worth = PriceUtility.calculateWorth(inventory);
-        System.out.println("TycoonBlock Calculate Worth: " + worth);
+        System.out.println("TycoonBlock Calculate Worth: " + "$" + PriceUtility.formatMoney(worth));
         if (worth <= 0) return;
         econ.depositPlayer(player, worth);
-        player.sendMessage(ChatColor.GREEN + "Sold items worth: " + econ.format(worth));
+        player.sendMessage(ChatColor.GREEN + "Sold items worth: " + "$" + PriceUtility.formatMoney(worth));
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.3f, 1);
         cleanInventory(inventory);
     }
@@ -179,6 +178,7 @@ public class TycoonBlock {
             }
         }
     }
+    @Deprecated
     public void withdrawBalance(Player player){
         Economy economy = OreTycoon.getEconomy();
 

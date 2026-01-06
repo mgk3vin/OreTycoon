@@ -8,6 +8,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 public class PriceUtility {
     public static double calculateWorth(Inventory inventory){
@@ -23,8 +25,30 @@ public class PriceUtility {
             if(price!=null){
                 worth += price.doubleValue() * item.getAmount();
             }
-            Console.log("Worth: " + worth + " Price: " + price + " Item: " + item.getType().name());
         }
         return worth;
+    }
+    private static final NumberFormat fmt = NumberFormat.getCompactNumberInstance(
+            Locale.US, NumberFormat.Style.SHORT);
+
+    public static String formatMoney(double value) {
+        fmt.setMaximumFractionDigits(2); // Max 2 Nachkommastellen (z.B. 1.25k)
+        return fmt.format(value);
+    }
+    @Deprecated
+    public static String formatWorth(double value){
+        if (value < 1000) return String.format("%.2f", value);
+
+        // Definition der Suffixe
+        String[] suffixes = new String[]{"", "k", "M", "B", "T", "Q"};
+        int index = 0;
+
+        while (value >= 1000 && index < suffixes.length - 1) {
+            value /= 1000;
+            index++;
+        }
+
+        // Gibt z.B. 1.25k oder 5.0M zurück
+        return String.format("%.2f%s", value, suffixes[index]);
     }
 }

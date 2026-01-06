@@ -2,6 +2,7 @@ package me.mangokevin.oreTycoon.tycoonManagment;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.commands.tycooncmds.tycoonEvents.TycoonAutoMinedEvent;
+import me.mangokevin.oreTycoon.commands.tycooncmds.utility.Console;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -220,9 +221,31 @@ public class TycoonBlockManager {
             data.set(path + "creationDate", tycoon.getCreationTime());
             data.set(path + "index", tycoon.getIndex());
 
+            //---------- Not used ----------
             if (tycoon.getLastSpawnedMaterial() != null) {
                 data.set(path + "lastSpawnedBlock", tycoon.getLastSpawnedMaterial().name());
             }
+            //---------- Not used ----------
+
+            //---------- Inventory save ----------
+            List<String> inventoryItems = new ArrayList<>();
+            for (ItemStack item : tycoon.getInventory()) {
+                if (item == null) continue;
+
+                ItemMeta meta = item.getItemMeta();
+                if (meta == null) continue;
+
+                PersistentDataContainer pdc = meta.getPersistentDataContainer();
+                if (pdc.has(TycoonData.MENU_ITEM_KEY) || pdc.has(TycoonData.MENU_ACTION_KEY)) continue;
+                for (int i = 0; i < item.getAmount(); i++) {
+                    inventoryItems.add(item.getType().name());
+                }
+
+                Console.log("[BlockManager] saving inventory item: " + item.getAmount() + "x " + item.getType().name());
+            }
+            data.set(path + "inventoryItems", inventoryItems);
+            //---------- Inventory save ----------
+
             List<String> blockLocs = new ArrayList<>();
             for (Block block : tycoon.getActiveBlocks()){
                 blockLocs.add(block.getX() + "," + block.getY() + "," + block.getZ());
@@ -300,6 +323,18 @@ public class TycoonBlockManager {
                     block.setLastSpawnedMaterial(type);
                 }
                 tycoonBlocks.put(loc, block);
+
+                //---------- Inventory Load ----------
+                List<String> inventoryItems = section.getStringList(path + "inventoryItems");
+                for (String inventoryItem : inventoryItems) {
+                    Material item = Material.getMaterial(inventoryItem);
+                    if (item != null) {
+                        ItemStack itemStack = new ItemStack(item);
+                        block.getTycoonInventory().addItem(itemStack);
+                        Console.log("added " + inventoryItem + " to inventory");
+                    }
+                }
+                //---------- Inventory Load ----------
 
                 List<String> blockLocs = section.getStringList(path + "spawnedBlocks");
                 for (String s : blockLocs) {
@@ -401,58 +436,6 @@ public class TycoonBlockManager {
         return count;
     }
 
-
-    @Deprecated
-    public boolean isObstructed(TycoonBlock tycoonBlock, Player player) {
-
-        Location location = tycoonBlock.getLocation();
-        World world = location.getWorld();
-        int centerX = location.getBlockX();
-        int centerZ = location.getBlockZ();
-        int centerY = location.getBlockY();
-
-        for (int x = centerX -2; x <=  centerX + 2; x++) {
-            for (int z = centerZ -2; z <=  centerZ + 2; z++) {
-                //for (int z = centerZ -2; z <=  centerZ + 2; z++) {}   optional für 3d scan mit y
-
-                Location checkLocation = new Location(world, x, centerY, z);
-                if (isTycoonBlock(checkLocation)){
-                    player.sendMessage(ChatColor.RED + "Tycoon blocks must be placed atleast 5 blocks away from eachother!");
-                    return true;
-                }else {
-                    return false;
-                }
-            }
-        }
-        return false;
-    }
-
-    @Deprecated
-    public void startGenerator(TycoonBlock tycoonBlock, Player player) {
-        if (this.generatorTask != null) {
-            stopGenerator(tycoonBlock);
-        }
-        tycoonBlock.setActive(true);
-        tycoonBlock.updateHologramPreset(tycoonBlock.getLocation(), "STATUS");
-        this.generatorTask = new BukkitRunnable() {
-            @Override
-            public void run() {
-                tycoonBlock.trySpawnRessource();
-            }
-        }.runTaskTimer(plugin, 0, 20L * 5);
-
-
-    }
-    @Deprecated
-    public void stopGenerator(TycoonBlock tycoonBlock) {
-        if (this.generatorTask != null) {
-            this.generatorTask.cancel();
-            tycoonBlock.setActive(false);
-            tycoonBlock.updateHologramPreset(tycoonBlock.getLocation(), "STATUS");
-        }
-
-    }
-
     public boolean isObstructed(Location location, Player player) {
         World world = location.getWorld();
         int centerX = location.getBlockX();
@@ -461,13 +444,12 @@ public class TycoonBlockManager {
 
         for (int x = centerX - 4; x <=  centerX + 4; x++) {
             for (int z = centerZ - 4; z <=  centerZ + 4; z++) {
-                //for (int z = centerZ -2; z <=  centerZ + 2; z++) {}   optional für 3d scan mit y
-
-                Location checkLocation = new Location(world, x, centerY, z);
-                //System.out.println("[OreTycoon] checkLocation: " + centerX + "|" + centerY + "|" + centerZ);
-                if (isTycoonBlock(checkLocation)){
-                    player.sendMessage(ChatColor.RED + "Tycoon blocks must be placed atleast 5 blocks away from eachother!");
-                    return true;
+                for (int y = centerY -2; y <=  centerY + 2; y++) {
+                    Location checkLocation = new Location(world, x, y, z);
+                    if (isTycoonBlock(checkLocation)){
+                        player.sendMessage(ChatColor.RED + "Tycoon blocks must be placed atleast 5 blocks away from eachother!");
+                        return true;
+                    }
                 }
             }
         }

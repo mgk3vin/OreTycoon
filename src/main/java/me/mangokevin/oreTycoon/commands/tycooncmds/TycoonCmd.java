@@ -2,6 +2,7 @@ package me.mangokevin.oreTycoon.commands.tycooncmds;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.MenuManager;
+import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.OverviewMenu;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonType;
@@ -19,14 +20,14 @@ import java.util.List;
 
 public class TycoonCmd implements CommandExecutor {
 
-    private final OreTycoon oreTycoon;
+    private final OreTycoon plugin;
     private final TycoonBlockManager blockManager;
     private final MenuManager menuManager;
 
-    public TycoonCmd(OreTycoon oreTycoon, TycoonBlockManager blockManager) {
-        this.oreTycoon = oreTycoon;
+    public TycoonCmd(OreTycoon plugin, TycoonBlockManager blockManager) {
+        this.plugin = plugin;
         this.blockManager = blockManager;
-        this.menuManager = oreTycoon.getMenuManager();
+        this.menuManager = plugin.getMenuManager();
     }
 
     @Override
@@ -38,7 +39,7 @@ public class TycoonCmd implements CommandExecutor {
 
         if (args.length == 0) {
             //Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "dm open tycoon_menu " + p.getName());
-            blockManager.openTycoonMenu(p);
+            new OverviewMenu(plugin, 0).open(p);
             return true;
         }
         String action = args[0].toLowerCase();
@@ -48,6 +49,10 @@ public class TycoonCmd implements CommandExecutor {
                 handleToggle(p);
                 break;
             case "toggle_all":
+                if (args.length < 2) {
+                    p.sendMessage(ChatColor.RED + "Incorrect arguments. Use /tycoon toggle_all <on/off>");
+                    return true;
+                }
                 List<TycoonBlock> tycoonBlockList = blockManager.getTycoonBlocksFromPlayer(p.getUniqueId());
                 String state;
                 if (args[1] == null) {
@@ -78,6 +83,10 @@ public class TycoonCmd implements CommandExecutor {
 
                 break;
             case "give":
+                if (args.length < 2) {
+                    p.sendMessage(ChatColor.RED + "Usage: /tycoon give <type>");
+                    return true;
+                }
                 String type = args[1];
                 if (type == null) {
                     return true;
@@ -102,7 +111,11 @@ public class TycoonCmd implements CommandExecutor {
             case "menu":
                 menuManager.openTycoonOverview(p, 0);
                 break;
-            case "open":
+            case "open", "info", "stats":
+                if (args.length < 2) {
+                    p.sendMessage(ChatColor.RED + "Incorrect arguments. Use /tycoon open <index>");
+                    return true;
+                }
                 int index;
                 if (args[1] == null) {
                     p.sendMessage(ChatColor.RED + "Incorrect arguments. Use /tycoon open <index>");
