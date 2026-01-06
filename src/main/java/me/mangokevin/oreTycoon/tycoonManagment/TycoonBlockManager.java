@@ -365,34 +365,6 @@ public class TycoonBlockManager {
     }
     // ---------------- Filesave working ----------------
 
-    @Deprecated
-    private void loadDropsFromConfig(FileConfiguration config) {
-        // Holen Sie die Liste der Sektionen unter 'tycoon-generator.drops'
-        List<Map<?, ?>> dropsList = config.getMapList("tycoon-generator.drops");
-
-        for (Map<?, ?> dropMap : dropsList) {
-            String materialName = (String) dropMap.get("material");
-            Double chance = (Double) dropMap.get("chance");
-
-            // --- ⚠️ WICHTIG: Die sichere Konvertierung ---
-            Material material = Material.getMaterial(materialName);
-
-            if (material == null) {
-                // Das Material existiert nicht (z.B. Tippfehler oder alte Version)
-                plugin.getLogger().warning("Ungültiges Material in der Konfig: " + materialName + ". Wird ignoriert.");
-                continue; // Springe zum nächsten Eintrag
-            }
-
-            if (chance == null) {
-                plugin.getLogger().warning("Fehlende Chance für Material " + materialName + " in der Konfig. Wird ignoriert.");
-                continue;
-            }
-
-            // Füge den validierten Drop zur aktiven Liste hinzu
-            //possibleDrops.add(new ResourceDrop(material, chance));
-        }
-    }
-
     public boolean isTycoonBlock(@NotNull ItemStack placedItem) {
 
         if (placedItem.getItemMeta().getPersistentDataContainer().has(TYCOON_BLOCK_KEY, PersistentDataType.BYTE)) {
@@ -457,47 +429,6 @@ public class TycoonBlockManager {
         return false;
     }
 
-    @Deprecated //moved to TycoonBlock class
-    public void trySpawnRessource(TycoonBlock tycoonBlock, Player player) {
-        Location center = tycoonBlock.getLocation();
-        World world = center.getWorld();
-        Random rand = new Random();
-
-        // 1. Definiere das 5x5 Areal (vom Zentrum aus -2 bis +2)
-        int minX = center.getBlockX() - 2;
-        int maxX = center.getBlockX() + 2;
-        int minZ = center.getBlockZ() - 2;
-        int maxZ = center.getBlockZ() + 2;
-        int fixedY = center.getBlockY(); // Wir spawnen nur auf der Y-Ebene des Tycoon-Block
-
-        int randomX = rand.nextInt(maxX - minX + 1) + minX;
-        int randomZ = rand.nextInt(maxZ - minZ + 1) + minZ;
-
-        Location randomLocation = new Location(center.getWorld(), randomX, fixedY, randomZ);
-        Block spawnBlock = randomLocation.getBlock();
-
-        if (spawnBlock.getType().equals(Material.AIR)) {
-            //Valid Spawn point
-            Material material = randomMaterial();
-            spawnBlock.setType(material);
-
-            //tycoonBlock.manipulateHologram(tycoonBlock.getLocation(), material.name());
-            tycoonBlock.setLastSpawnedMaterial(material);
-            tycoonBlock.updateHologramPreset(tycoonBlock.getLocation(), "BLOCK");
-            player.playSound(randomLocation, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.5f);
-            player.spawnParticle(Particle.EXPLOSION, randomLocation, 1);
-        }
-    }
-
-    @Deprecated //moved to TycoonBlock class
-    private Material randomMaterial() {
-        Random rand = new Random();
-        int randint = rand.nextInt(0, TYCOON_RESOURCE_MATERIALS.size());
-
-        return TYCOON_RESOURCE_MATERIALS.get(randint);
-    }
-
-
     public void pickupTycoonBlock(Block block, Player player, TycoonBlock blockData) {
         ItemStack itemInHand = player.getInventory().getItemInMainHand();
 
@@ -511,7 +442,13 @@ public class TycoonBlockManager {
         block.setType(Material.AIR);
         player.playSound(player.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_DEPLETE, 1, 1.5F);
         removeTycoonBlock(block);
-        //stopGenerator(blockData);
+        // Destroying all active blocks from the tycoon
+        for (Block activeBlock : blockData.getActiveBlocks()) {
+            if (activeBlock.getType() != Material.AIR) {
+                activeBlock.setType(Material.AIR);
+                activeBlock.getWorld().playEffect(activeBlock.getLocation(), Effect.SPONGE_DRY,0);
+            }
+        }
         for (TycoonBlock tycoonBlock : tycoonBlocks.values()) {
             tycoonBlock.updateHologramPreset(tycoonBlock.getLocation(), "ORDER");
         }
