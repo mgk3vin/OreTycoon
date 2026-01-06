@@ -19,6 +19,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.checkerframework.checker.units.qual.C;
 
 import javax.swing.text.StyledEditorKit;
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -72,6 +73,21 @@ public class MenuManager {
             itemstack.setItemMeta(meta);
         }
         return itemstack;
+    }
+    public static ItemStack createItemstack(Material material, int amount, String name, List<String> lore, String KEY){
+        ItemStack item = createItemstack(material, amount, name, lore, false, null);
+        ItemMeta meta = item.getItemMeta();
+        if(meta != null){
+            PersistentDataContainer pdc = meta.getPersistentDataContainer();
+            switch (KEY){
+                case "menu_item":
+                    pdc.set(TycoonData.MENU_ITEM_KEY, PersistentDataType.STRING, KEY);
+                    break;
+            }
+        }
+
+
+        return item;
     }
 
     public static void addFiller(Inventory inventory, Material material){

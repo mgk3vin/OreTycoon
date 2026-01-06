@@ -251,6 +251,22 @@ public class TycoonBlock {
         activeBlocks.remove(block);
     }
 
+    public void teleportPlayer(Player player) {
+        Location teleportLoc = getLocation();
+        boolean isSave = false;
+        for (int i = 0; i < 2; i++) {
+            isSave = getLocation().clone().add(0, i + 1, 0).getBlock().getType().equals(Material.AIR);
+            if (!isSave) {
+                player.sendMessage(ChatColor.RED + "Teleport destination is obstructed!");
+                break;
+            }
+        }
+        if (isSave) {
+            player.teleport(teleportLoc.clone().add(0.5, 1, 0.5));
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1.0f, 1);
+        }
+    }
+
     // ---------     SpawnedBlockHologram      ---------
     public void displayXpHologram(Block brokenBlock, int xp) {
         Location l = new Location(brokenBlock.getWorld(), brokenBlock.getX()+0.5, brokenBlock.getY()+1.5, brokenBlock.getZ()+0.5);

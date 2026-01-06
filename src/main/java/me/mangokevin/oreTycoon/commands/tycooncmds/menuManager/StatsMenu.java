@@ -40,6 +40,15 @@ public class StatsMenu implements MenuInterface {
 
         inventory.setItem(13, menuManager.createTycoonItem(tycoonBlock));
         inventory.setItem(26, MenuManager.createItemstack(Material.BARRIER, 1, ChatColor.RED + "Back to Overview", null, false, true));
+
+        ItemStack teleport = MenuManager.createItemstack(Material.ENDER_PEARL, 1, ChatColor.DARK_PURPLE + "Teleport to Tycoon", null, false, true);
+        ItemMeta teleportMeta = teleport.getItemMeta();
+        if (teleportMeta != null) {
+            teleportMeta.getPersistentDataContainer().set(TycoonData.MENU_ITEM_KEY, PersistentDataType.STRING, "menu_item");
+            teleportMeta.getPersistentDataContainer().set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "teleport");
+            teleport.setItemMeta(teleportMeta);
+        }
+        inventory.setItem(20, teleport);
         if (tycoonBlock.isAutoMinerEnabled()) {
             inventory.setItem(22, MenuManager.createItemstack(Material.IRON_PICKAXE, 1, ChatColor.GREEN + "Auto Miner Enabled", null, true, true));
         } else {
@@ -56,6 +65,7 @@ public class StatsMenu implements MenuInterface {
         );
         inventory.setItem(24, worth);
         inventory.setItem(18, MenuManager.createItemstack(Material.CHEST_MINECART, 1, ChatColor.GOLD + "Inventory", null, false, true));
+
 
     }
 
@@ -76,6 +86,9 @@ public class StatsMenu implements MenuInterface {
                 break;
             case 18:
                 new TycoonInventory(tycoonBlock, plugin).open(player);
+                break;
+            case 20:
+                tycoonBlock.teleportPlayer(player);
                 break;
             case 22:
                 tycoonBlock.setAutoMinerEnabled(!tycoonBlock.isAutoMinerEnabled());
