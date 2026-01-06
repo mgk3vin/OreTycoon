@@ -1,7 +1,9 @@
 package me.mangokevin.oreTycoon.tycoonManagment;
 
+import me.mangokevin.oreTycoon.commands.tycooncmds.utility.StorageUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -9,6 +11,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TycoonData {
     private static NamespacedKey TYCOON_BLOCK;
@@ -19,12 +22,14 @@ public class TycoonData {
     private static NamespacedKey SPAWN_INTERVAL;
     private static NamespacedKey CREATION_TIME;
     public static NamespacedKey TYPE_KEY;
+    public static NamespacedKey INVENTORY_KEY;
     public static NamespacedKey MENU_ACTION_KEY;
     public static NamespacedKey TYCOON_MENU_ITEM_KEY;
     public static NamespacedKey MENU_ITEM_KEY;
     public static NamespacedKey TYCOON_MENU_ITEM_INDEX_KEY;
     public static NamespacedKey TYCOON_MENU_ITEM_UID_KEY;
     public static NamespacedKey BLOCK_IS_AUTOMINED_KEY;
+
 
     // Wird einmal in der onEnable deiner Main aufgerufen: TycoonData.init(this);
     public static void init(Plugin plugin) {
@@ -36,6 +41,7 @@ public class TycoonData {
         SPAWN_INTERVAL = new NamespacedKey(plugin, "spawn_interval");
         CREATION_TIME = new NamespacedKey(plugin, "creation_time");
         TYPE_KEY = new NamespacedKey(plugin, "type");
+        INVENTORY_KEY = new NamespacedKey(plugin, "inventory");
         MENU_ACTION_KEY = new NamespacedKey(plugin, "menu_action");
         TYCOON_MENU_ITEM_KEY = new NamespacedKey(plugin, "tycoon_menu_item");
         TYCOON_MENU_ITEM_INDEX_KEY = new NamespacedKey(plugin, "tycoon_menu_item_index");
@@ -44,7 +50,7 @@ public class TycoonData {
         MENU_ITEM_KEY = new NamespacedKey(plugin, "menu_item");
     }
     // Speichert die Daten eines Tycoons auf ein Item
-    public static void writeToItem(ItemStack item, int level, int xp, long creation, Material material, int spawnInterval, long creationTime, String type) {
+    public static void writeToItem(ItemStack item, int level, int xp, long creation, Material material, int spawnInterval, long creationTime, String type, Inventory inventory) {
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
 
@@ -57,6 +63,10 @@ public class TycoonData {
         pdc.set(MATERIAL, PersistentDataType.STRING, material.toString());
         pdc.set(SPAWN_INTERVAL, PersistentDataType.INTEGER, spawnInterval);
         pdc.set(CREATION_TIME, PersistentDataType.LONG, creationTime);
+
+        byte[] byteArray = StorageUtils.toByteArray(inventory);
+
+        pdc.set(INVENTORY_KEY, PersistentDataType.BYTE_ARRAY, byteArray);
 
         item.setItemMeta(meta); // DAS speichert es wirklich auf das Item!
     }

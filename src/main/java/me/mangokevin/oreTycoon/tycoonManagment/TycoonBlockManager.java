@@ -11,6 +11,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -617,7 +618,7 @@ public class TycoonBlockManager {
 
         ItemStack item = new ItemStack(tycoonBlock.getTycoonType().getMaterial(), 1);
 
-        TycoonData.writeToItem(item, tycoonBlock.getLevel(), tycoonBlock.getLevelXp(), tycoonBlock.getCreationTime(), tycoonBlock.getMaterial(), tycoonBlock.getSpawnInterval(), tycoonBlock.getCreationTime(), tycoonBlock.getTycoonType().toString());
+        TycoonData.writeToItem(item, tycoonBlock.getLevel(), tycoonBlock.getLevelXp(), tycoonBlock.getCreationTime(), tycoonBlock.getMaterial(), tycoonBlock.getSpawnInterval(), tycoonBlock.getCreationTime(), tycoonBlock.getTycoonType().toString(), tycoonBlock.getInventory());
         ItemMeta meta = item.getItemMeta();
 
         if (meta == null) return;
@@ -631,14 +632,30 @@ public class TycoonBlockManager {
         lore.add("§7XP: §f" + tycoonBlock.getLevelXp());
         lore.add("§7Progress: §f" + tycoonBlock.getProgressBar(20));
         lore.add("§7Spawnrate: §f" + tycoonBlock.getSpawnInterval() + "s");
+        lore.add("§8§m-------§r§8Inventory§m--------");
+        lore.addAll(inventoryItemsToLore(tycoonBlock.getInventory()));
         lore.add("§8§m-----------------------");
         meta.setLore(lore);
         meta.setDisplayName(tycoonBlock.getTycoonType().getName());
+
 
         item.setItemMeta(meta);
 
         player.getInventory().setItemInMainHand(item);
 
+    }
+    private List<String> inventoryItemsToLore(Inventory inventory) {
+        List<String> itemList = new ArrayList<>();
+        for (ItemStack item : inventory.getContents()) {
+            if (item == null|| item.getType() == Material.AIR) continue;
+
+            ItemMeta meta = item.getItemMeta();
+            if (meta == null) continue;
+            if (meta.getPersistentDataContainer().has(TycoonData.MENU_ITEM_KEY, PersistentDataType.STRING)) {continue;}
+
+            itemList.add(ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + item.getAmount() + "x " + item.getType().name().toLowerCase());
+        }
+        return itemList;
     }
 
     public int getMaxBlocksPerPlayer() {

@@ -1,6 +1,7 @@
 package me.mangokevin.oreTycoon.listener;
 
 import me.mangokevin.oreTycoon.OreTycoon;
+import me.mangokevin.oreTycoon.commands.tycooncmds.utility.StorageUtils;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
@@ -68,6 +69,7 @@ public class BlockPlacedListener implements Listener {
             System.out.println("[BlockPlacedListener] Loading: " + level + "|" + xp + "|" + spawnInterval + "|" + creationTime);
 
 
+
             TycoonType tycoonType = TycoonType.valueOf(tycoonName);
             Material type = event.getBlock().getType();
             Location location = block.getLocation();
@@ -83,6 +85,12 @@ public class BlockPlacedListener implements Listener {
 
             blockManager.getTycoonBlock(block).createHologram();
             block.getWorld().playSound(block.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_SET_SPAWN, 1.0f, 1.5f);
+
+            if (pdc.has(TycoonData.INVENTORY_KEY, PersistentDataType.BYTE_ARRAY)){
+                byte[] byteArray =  pdc.get(TycoonData.INVENTORY_KEY, PersistentDataType.BYTE_ARRAY);
+
+                StorageUtils.fromByteArray(byteArray, tycoonBlock.getInventory());
+            }
 
         }
 
