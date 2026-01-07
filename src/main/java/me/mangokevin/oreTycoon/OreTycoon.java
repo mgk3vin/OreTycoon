@@ -39,14 +39,13 @@ public final class OreTycoon extends JavaPlugin {
     public void onEnable() {
         // Plugin startup logic
         saveDefaultConfig();
+
         LevelManager levelManager = new LevelManager();
         this.blockManager = new TycoonBlockManager(this, levelManager);
         this.tdData = new TycoonData();
         this.menuManager = new MenuManager(this);
         TycoonData.init(this);
 
-
-        blockManager.loadTycoons();
 
         // TODO: Generate Tycoon Islands with Preset
         RegisteredServiceProvider<MultiverseCoreApi> provider = Bukkit.getServicesManager().getRegistration(MultiverseCoreApi.class);
@@ -89,7 +88,7 @@ public final class OreTycoon extends JavaPlugin {
         Objects.requireNonNull(getCommand("tycoon")).setTabCompleter(new TycoonTabCompleter());
         //-----------------------   Listeners & Commands    -----------------------
 
-
+        blockManager.loadTycoons();
     }
 
     public MenuManager getMenuManager() {

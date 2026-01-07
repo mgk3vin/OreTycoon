@@ -6,8 +6,8 @@ import de.oliver.fancyholograms.api.data.HologramData;
 import de.oliver.fancyholograms.api.data.TextHologramData;
 import de.oliver.fancyholograms.api.hologram.Hologram;
 import me.mangokevin.oreTycoon.OreTycoon;
-import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.MenuManager;
 import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.TycoonInventory;
+import me.mangokevin.oreTycoon.commands.tycooncmds.tycoonEvents.TycoonAutoMinedEvent;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
@@ -17,7 +17,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
 import java.util.*;
 
@@ -112,7 +115,7 @@ public class TycoonBlock {
         if (tickCounter >= spawnInterval) {
             tickCounter = 0;
             if (isActive) {
-                trySpawnRessource();
+                trySpawnResource();
             }
         }
         // 2. Der Auto-Miner Timer (Erz abbauen)
@@ -136,7 +139,7 @@ public class TycoonBlock {
                 }
 
                 if (spawnedBlockLoc.getBlock().getType() != Material.AIR) {
-                    setAutoMinerEnabled(blockManager.tryAutoMining(this, spawnedBlockLoc));
+                    setAutoMinerEnabled(tryAutoMining(this, spawnedBlockLoc));
                 }
             }
         } else {
@@ -160,6 +163,7 @@ public class TycoonBlock {
         player.sendMessage(ChatColor.GREEN + "Sold items worth: " + "$" + PriceUtility.formatMoney(worth));
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.3f, 1);
         cleanInventory(inventory);
+        updateHologramPreset(location, "WORTH");
     }
     public void cleanInventory(Inventory inventory) {
         for (int i = 0; i < inventory.getSize(); i++) {
@@ -189,7 +193,7 @@ public class TycoonBlock {
             storedBalance = 0;
         }
     }
-    public void trySpawnRessource() {
+    public void trySpawnResource() {
         Location center = getLocation();
         World world = center.getWorld();
         Random rand = new Random();
@@ -228,6 +232,73 @@ public class TycoonBlock {
         }
 
     }
+    //---------- AutoMiner ----------
+    public boolean tryAutoMining(TycoonBlock tycoonBlock, Location blockLocation) {
+        ItemStack item = new ItemStack(blockLocation.getBlock().getType());
+        ItemMeta itemMeta = item.getItemMeta();
+        if (itemMeta == null) return false;
+        PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
+        pdc.set(TycoonData.BLOCK_IS_AUTOMINED_KEY, PersistentDataType.STRING, "block_is_automined");
+        if (!tycoonBlock.canFitItem(tycoonBlock.getInventory(), item)){
+            return false;
+        }
+        new BukkitRunnable() {
+
+            float progress = 0.0f;
+            @Override
+            public void run() {
+                // 1. Punkte zentrieren (damit sie aus der Mitte der Blöcke kommen)
+                Location start = tycoonBlock.getLocation().clone().add(0.5, 0.5, 0.5);
+                Location target = blockLocation.clone().add(0.5, 0.5, 0.5);
+
+                // 2. Vektor vom Start zum Ziel berechnen
+                Vector direction = target.toVector().subtract(start.toVector());
+                double distance = start.distance(target); // Gesamtlänge der Strecke
+
+                // 3. Den Vektor normalisieren (auf die Länge 1 bringen) und skalieren
+                // Wir wollen alle 0.2 Blöcke einen Partikel
+                double spacing = 0.2;
+                direction.normalize().multiply(spacing);
+
+                // 4. Die Linie entlanglaufen und Partikel spawnen
+                Location current = start.clone();
+                for (double i = 0; i < distance; i += spacing) {
+                    // Partikel spawnen (z.B. Dust für farbige Laser oder End_Rod für Magie)
+                    start.getWorld().spawnParticle(Particle.DUST, current, 1, 0, 0, 0, 0, new Particle.DustOptions(Color.RED, 0.5f));
+
+                    // Den Punkt ein Stück weiter in Richtung Ziel schieben
+                    current.add(direction);
+                }
+                // 2. Vibrations-Sound (leise)
+                if (progress % 0.2 < 0.05) {
+                    start.getWorld().playSound(start, Sound.BLOCK_NOTE_BLOCK_HAT, 0.2f, 0.5f + progress);
+                }
+                progress += 0.1f;
+
+                if (progress >= 1.0f) {
+
+                    blockLocation.getWorld().playSound(blockLocation, Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
+                    blockLocation.getWorld().spawnParticle(Particle.WHITE_SMOKE, blockLocation, 3);
+
+
+                    //tycoonBlock.getTycoonInventory().addItem(item);
+                    ItemStack item =  new ItemStack(blockLocation.getBlock().getType());
+                    TycoonAutoMinedEvent event = new TycoonAutoMinedEvent(tycoonBlock, item);
+                    Bukkit.getPluginManager().callEvent(event);
+
+                    tycoonBlock.handleReward(blockLocation.getBlock());
+
+                    blockLocation.getBlock().setType(Material.AIR);
+                    pdc.remove(TycoonData.BLOCK_IS_AUTOMINED_KEY);
+                    this.cancel();
+                }
+
+            }
+        }.runTaskTimer(plugin, 0, 3L);
+        return true;
+    }
+    //---------- AutoMiner ----------
+
     private Material getRandomMaterial(Map<Material, Integer> map) {
         int totalWeight = 0;
         for (int weight : map.values()) {
@@ -329,8 +400,12 @@ public class TycoonBlock {
         hologramData.addLine("Level: " + level);
         hologramData.addLine("xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + (int) levelManager.getProgressPercentage(levelXp, level + 1) + "%");
         hologramData.addLine(ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
-        hologramData.setBackground(Color.fromARGB(0));
+        double currentWorth = PriceUtility.calculateWorth(inventory);
+        hologramData.addLine(ChatColor.RESET + "Inventory Worth: "+ ChatColor.GREEN +"$" + PriceUtility.formatMoney(currentWorth));
+        hologramData.setBackground(Color.fromARGB(60, 0, 0, 0));
         hologramData.setPersistent(false);
+        hologramData.setTextShadow(true);
+        hologramData.setSeeThrough(false);
         Hologram hologram = manager.create(hologramData);
         manager.addHologram(hologram);
 
@@ -376,6 +451,8 @@ public class TycoonBlock {
             case "PROGRESS":
                 hologramLines.set(5, ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
                 break;
+            case "WORTH", "BALANCE":
+                hologramLines.set(6, ChatColor.RESET + "Inventory Worth: "+ ChatColor.GREEN + "$" + ChatColor.GREEN + PriceUtility.formatMoney(PriceUtility.calculateWorth(inventory)));
             case "ORDER":
                 List<TycoonBlock> tycoonBlockList = blockManager.getTycoonBlocksFromPlayer(ownerUuid);
 

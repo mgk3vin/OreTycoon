@@ -6,6 +6,7 @@ import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.OverviewMenu;
 import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.StatsMenu;
 import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.TycoonInventory;
 import me.mangokevin.oreTycoon.commands.tycooncmds.tycoonEvents.TycoonAutoMinedEvent;
+import me.mangokevin.oreTycoon.commands.tycooncmds.utility.Console;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonHolder;
 import org.bukkit.Bukkit;
@@ -31,41 +32,40 @@ public class TycoonAutoMineListener implements Listener {
                 }
             }
         }
+        //Refresh Tycoon Hologram Worth
+        tycoon.updateHologramPreset(tycoon.getLocation(), "WORTH");
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             Inventory openInventory = player.getOpenInventory().getTopInventory();
-            System.out.println("[TycoonAutoMineListener] " + player.getDisplayName() + " is being checked for inventory");
             if (openInventory.getHolder() instanceof TycoonHolder tycoonHolder) {
                 MenuInterface menu = tycoonHolder.getMenu();
                 if (menu == null) {
-                    Bukkit.getLogger().warning("[OreTycoon] Menu is NULL!");
                     continue;
                 };
-                System.out.println("[TycoonAutoMineListener] menu is not null");
 
                 switch (menu){
                     case TycoonInventory tycoonInventory -> {
                         if (tycoonInventory.getTycoonBlock().equals(tycoon)) {
                             tycoonInventory.refresh(player, openInventory);
+                            Console.log("Refreshing tycoon inventory");
                         }
                     }
                     case StatsMenu statsMenu -> {
                         if (statsMenu.getTycoonBlock().equals(tycoon)) {
                             statsMenu.open(player);
-                            System.out.println("Opening stats menu");
+                            Console.log("Refreshing stats menu");
                         }
-                        System.out.println("Refreshing stats menu");
+
                         statsMenu.refresh(player, openInventory);
                     }
                     case OverviewMenu overviewMenu -> {
                         if (tycoon.getOfflineOwner().getUniqueId().equals(player.getUniqueId())) {
                             overviewMenu.refresh(player, openInventory);
+                            Console.log("Refreshing overview menu");
                         }
                     }
                     default -> {}
                 }
-            }else {
-                Bukkit.getLogger().warning("[TycoonAutoMineListener] Holder is not instance of TycoonHolder");
             }
         }
 

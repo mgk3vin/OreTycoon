@@ -77,6 +77,7 @@ public class TycoonBlockManager {
         }.runTaskTimer(plugin, 0, 20L); // Läuft jede Sekunde
 
     }
+    @Deprecated //Moved to Tycoonblock class
     public boolean tryAutoMining(TycoonBlock tycoonBlock, Location blockLocation) {
         ItemStack item = new ItemStack(blockLocation.getBlock().getType());
         ItemMeta itemMeta = item.getItemMeta();
@@ -351,7 +352,6 @@ public class TycoonBlockManager {
                     }
                 }
 
-                //block.createHologram(); // Hologramm neu starten
 
             } catch (Exception e) {
                 plugin.getLogger().severe("Fehler beim Laden von Tycoon " + key + ": " + e.getMessage());
@@ -359,8 +359,7 @@ public class TycoonBlockManager {
         }
         for (TycoonBlock block : tycoonBlocks.values()) {
             block.createHologram();
-            System.out.println("[BlockManager] Loading Hologram " + block.getLevel() + "|" + block.getLevelXp() + "|" + block.getIndex() + "|" + block.getMaterial());
-
+            Console.log("[BlockManager] Creating Hologram: " + PriceUtility.calculateWorth(block.getInventory()));
         }
     }
     // ---------------- Filesave working ----------------
