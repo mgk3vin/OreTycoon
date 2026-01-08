@@ -6,13 +6,20 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class StatsMenu implements MenuInterface {
     private final OreTycoon plugin;
@@ -38,33 +45,56 @@ public class StatsMenu implements MenuInterface {
     public void refresh(Player player, Inventory inventory) {
         MenuManager.addFiller(inventory, Material.GRAY_STAINED_GLASS_PANE);
 
-        inventory.setItem(13, menuManager.createTycoonItem(tycoonBlock));
-        inventory.setItem(26, MenuManager.createItemstack(Material.BARRIER, 1, ChatColor.RED + "Back to Overview", null, false, true));
-
-        ItemStack teleport = MenuManager.createItemstack(Material.ENDER_PEARL, 1, ChatColor.DARK_PURPLE + "Teleport to Tycoon", null, false, true);
-        ItemMeta teleportMeta = teleport.getItemMeta();
-        if (teleportMeta != null) {
-            teleportMeta.getPersistentDataContainer().set(TycoonData.MENU_ITEM_KEY, PersistentDataType.STRING, "menu_item");
-            teleportMeta.getPersistentDataContainer().set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "teleport");
-            teleport.setItemMeta(teleportMeta);
+        ItemStack tycoonItem = menuManager.createTycoonItem(tycoonBlock);
+        ItemMeta tycoonMeta = tycoonItem.getItemMeta();
+        if (tycoonMeta != null) {
+            List<String> lore = tycoonMeta.getLore();
+            lore.add(ChatColor.YELLOW + "[Left click to toggle status]");
+            lore.add(ChatColor.YELLOW + "[Right click to teleport]");
+            tycoonMeta.setLore(lore);
+            tycoonItem.setItemMeta(tycoonMeta);
         }
-        inventory.setItem(20, teleport);
+        inventory.setItem(13, tycoonItem);
+        inventory.setItem(26, MenuManager.createItemstack(Material.OAK_DOOR, 1, ChatColor.RED + "Back to Overview", null, false, true));
+
         if (tycoonBlock.isAutoMinerEnabled()) {
             inventory.setItem(22, MenuManager.createItemstack(Material.IRON_PICKAXE, 1, ChatColor.GREEN + "Auto Miner Enabled", null, true, true));
         } else {
             inventory.setItem(22, MenuManager.createItemstack(Material.IRON_PICKAXE, 1, ChatColor.RED + "Auto Miner Disabled", null, false, true));
         }
-        double currentWorth = PriceUtility.calculateWorth(tycoonBlock.getInventory());
-        ItemStack worth = MenuManager.createItemstack(
-                Material.GREEN_STAINED_GLASS_PANE,
+//        double currentWorth = PriceUtility.calculateWorth(tycoonBlock.getInventory());
+//        ItemStack worth = MenuManager.createItemstack(
+//                Material.GREEN_STAINED_GLASS_PANE,
+//                1,
+//                ChatColor.GREEN + "Sell all: " + "$" + PriceUtility.formatMoney(currentWorth),
+//                null,
+//                false,
+//                true
+//        );
+        ItemStack levelPath = MenuManager.createItemstack(Material.NETHER_STAR,
                 1,
-                ChatColor.GREEN + "Sell all: " + "$" + PriceUtility.formatMoney(currentWorth),
+                ChatColor.AQUA + "Level path",
                 null,
-                false,
-                true
-        );
-        inventory.setItem(24, worth);
-        inventory.setItem(18, MenuManager.createItemstack(Material.CHEST_MINECART, 1, ChatColor.GOLD + "Inventory", null, false, true));
+                true,
+                true,
+                "level_path");
+        inventory.setItem(20, levelPath);
+
+        ItemStack upgrades = MenuManager.createItemstack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE,
+                1,
+                ChatColor.AQUA + "Upgrades",
+                null, true,
+                true,
+                "upgrades");
+        inventory.setItem(24, upgrades);
+
+        List<String> inventoryLore = Arrays.asList("§8§m-----------------------",
+                ChatColor.WHITE + "Worth: "  + ChatColor.GREEN + PriceUtility.calculateWorthFormatted(tycoonBlock.getInventory()),
+                "§8§m-----------------------",
+                ChatColor.YELLOW + "[Left click to open]",
+                ChatColor.YELLOW + "[Right click to sell]"
+                );
+        inventory.setItem(18, MenuManager.createItemstack(Material.CHEST_MINECART, 1, ChatColor.GOLD + "Inventory", inventoryLore, false, true));
 
 
     }
@@ -75,20 +105,30 @@ public class StatsMenu implements MenuInterface {
         Inventory inventory = event.getInventory();
         ItemStack item = event.getCurrentItem();
         ItemMeta meta = item.getItemMeta();
+        ClickType inventoryClick = event.getClick();
         if (meta == null) return;
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
 
         switch (event.getSlot()) {
             case 13:
-                tycoonBlock.setActive(!tycoonBlock.isActive());
-                inventory.setItem(13, menuManager.createTycoonItem(tycoonBlock));
-                player.playSound(player.getLocation(), Sound.BLOCK_LEVER_CLICK, 1f, 1f);
+                if (inventoryClick == ClickType.LEFT) {
+                    tycoonBlock.setActive(!tycoonBlock.isActive());
+                    inventory.setItem(13, menuManager.createTycoonItem(tycoonBlock));
+                    player.playSound(player.getLocation(), Sound.BLOCK_LEVER_CLICK, 1f, 1f);
+                }else if (inventoryClick == ClickType.RIGHT) {
+                    tycoonBlock.teleportPlayer(player);
+                }
                 break;
             case 18:
-                new TycoonInventory(tycoonBlock, plugin).open(player);
+                if (inventoryClick == ClickType.LEFT) {
+                    new TycoonInventory(tycoonBlock, plugin).open(player);
+                }else if (inventoryClick == ClickType.RIGHT) {
+                    tycoonBlock.sellInventory(tycoonBlock.getInventory(), player);
+                    refresh(player, inventory);
+                }
                 break;
             case 20:
-                tycoonBlock.teleportPlayer(player);
+                //openLevelPath
                 break;
             case 22:
                 tycoonBlock.setAutoMinerEnabled(!tycoonBlock.isAutoMinerEnabled());
@@ -96,11 +136,9 @@ public class StatsMenu implements MenuInterface {
                 refresh(player, inventory);
                 break;
             case 24:
-                //tycoonBlock.withdrawBalance(player);
-                tycoonBlock.sellInventory(tycoonBlock.getInventory(), player);
-                refresh(player, inventory);
-                //tycoonBlock.sellInventory(tycoonBlock.getInventory(), player);
-                //refresh(player, tycoonBlock.getInventory());
+//                tycoonBlock.sellInventory(tycoonBlock.getInventory(), player);
+//                refresh(player, inventory);
+                new TycoonUpgradeMenu(tycoonBlock).open(player);
                 break;
             case 26:
                 int itemsPerPage = 14;

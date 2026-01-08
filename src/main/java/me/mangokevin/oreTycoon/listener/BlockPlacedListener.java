@@ -2,10 +2,7 @@ package me.mangokevin.oreTycoon.listener;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.commands.tycooncmds.utility.StorageUtils;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonType;
+import me.mangokevin.oreTycoon.tycoonManagment.*;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -75,7 +72,14 @@ public class BlockPlacedListener implements Listener {
             Location location = block.getLocation();
             UUID uuid = player.getUniqueId();
 
-            TycoonBlock tycoonBlock = new TycoonBlock(tycoonType,location, uuid, false, oreTycoon, blockManager, blockManager.getLevelManager());
+            //========== Load Upgrades ==========
+            TycoonUpgrades upgrades = new TycoonUpgrades();
+            upgrades.setSpawnRateLevel(pdc.getOrDefault(TycoonData.TYCOON_SPAWN_RATE_LEVEL_KEY, PersistentDataType.INTEGER, 1));
+            upgrades.setMiningRateLevel(pdc.getOrDefault(TycoonData.TYCOON_MINING_RATE_LEVEL_KEY, PersistentDataType.INTEGER, 1));
+            upgrades.setSellMultiplierLevel(pdc.getOrDefault(TycoonData.TYCOON_SELL_MULTIPLIER_LEVEL_KEY, PersistentDataType.INTEGER, 1));
+            //========== Load Upgrades ==========
+
+            TycoonBlock tycoonBlock = new TycoonBlock(tycoonType,location, uuid, false, oreTycoon, upgrades);
 
             tycoonBlock.setLevel(level);
             tycoonBlock.setLevelXp(xp);
@@ -83,7 +87,7 @@ public class BlockPlacedListener implements Listener {
 
             blockManager.addTycoonBlock(tycoonBlock);
 
-            blockManager.getTycoonBlock(block).createHologram();
+
             block.getWorld().playSound(block.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_SET_SPAWN, 1.0f, 1.5f);
 
             if (pdc.has(TycoonData.INVENTORY_KEY, PersistentDataType.BYTE_ARRAY)){
@@ -92,6 +96,7 @@ public class BlockPlacedListener implements Listener {
                 StorageUtils.fromByteArray(byteArray, tycoonBlock.getInventory());
             }
 
+            blockManager.getTycoonBlock(block).createHologram();
         }
 
     }

@@ -28,6 +28,7 @@ public final class OreTycoon extends JavaPlugin {
     private TycoonBlockManager blockManager;
     private TycoonData tdData;
     private MenuManager menuManager;
+    private LevelManager levelManager;
     private static Economy econ = null;
     private static IEssentials essentials;
 
@@ -40,7 +41,7 @@ public final class OreTycoon extends JavaPlugin {
         // Plugin startup logic
         saveDefaultConfig();
 
-        LevelManager levelManager = new LevelManager();
+        this.levelManager = new LevelManager();
         this.blockManager = new TycoonBlockManager(this, levelManager);
         this.tdData = new TycoonData();
         this.menuManager = new MenuManager(this);
@@ -96,6 +97,9 @@ public final class OreTycoon extends JavaPlugin {
     }
     public TycoonBlockManager getBlockManager() {
         return blockManager;
+    }
+    public LevelManager getLevelManager() {
+        return levelManager;
     }
 
     private boolean setupEconomy() {

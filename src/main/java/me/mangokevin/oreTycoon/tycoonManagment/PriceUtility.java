@@ -28,6 +28,9 @@ public class PriceUtility {
         }
         return worth;
     }
+    public static String calculateWorthFormatted(Inventory inventory){
+        return "$" + formatMoney(calculateWorth(inventory));
+    }
     private static final NumberFormat fmt = NumberFormat.getCompactNumberInstance(
             Locale.US, NumberFormat.Style.SHORT);
 

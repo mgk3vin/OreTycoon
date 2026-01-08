@@ -63,8 +63,8 @@ public class PlaceholderExpansion extends me.clip.placeholderapi.expansion.Place
                     case "status" -> t.isActive() ? "true" : "false";
                     case "location" -> t.getLocation().getBlockX() + ", " + t.getLocation().getBlockZ();
                     case "material" -> t.getMaterial().name();
-                    case "spawninterval" -> String.valueOf(t.getSpawnInterval());
-                    case "spawnrate" -> String.valueOf(t.getSpawnInterval());
+                    case "spawninterval" -> String.valueOf(t.getSpawnRate());
+                    case "spawnrate" -> String.valueOf(t.getSpawnRate());
                     case "exists" -> "true";
                     default -> "default";
                 };
