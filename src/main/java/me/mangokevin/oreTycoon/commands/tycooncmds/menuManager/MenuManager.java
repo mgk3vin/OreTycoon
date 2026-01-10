@@ -48,6 +48,7 @@ public class MenuManager {
         ItemMeta statsmeta = stats.getItemMeta();
         if (statsmeta == null) return null;
         statsmeta.getPersistentDataContainer().set(TycoonData.TYCOON_MENU_ITEM_KEY, PersistentDataType.STRING, "tycoon_menu_item");
+        statsmeta.getPersistentDataContainer().set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "tycoon_menu_item");
         statsmeta.getPersistentDataContainer().set(TycoonData.TYCOON_MENU_ITEM_UID_KEY, PersistentDataType.STRING, block.getBlockUID());
         stats.setItemMeta(statsmeta);
         return stats;

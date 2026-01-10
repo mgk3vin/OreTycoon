@@ -13,6 +13,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,6 +42,7 @@ public class StatsMenu implements MenuInterface {
     public void refresh(Player player, Inventory inventory) {
         MenuManager.addFiller(inventory, Material.GRAY_STAINED_GLASS_PANE);
 
+        //Tycoon Icon
         ItemStack tycoonItem = menuManager.createTycoonItem(tycoonBlock);
         ItemMeta tycoonMeta = tycoonItem.getItemMeta();
         if (tycoonMeta != null) {
@@ -51,25 +53,40 @@ public class StatsMenu implements MenuInterface {
             tycoonItem.setItemMeta(tycoonMeta);
         }
         inventory.setItem(13, tycoonItem);
-        inventory.setItem(26, MenuManager.createItemstack(Material.OAK_DOOR, 1, ChatColor.RED + "Back to Overview", null, false, true));
 
+        //Return to Overviewmenu icon
+        inventory.setItem(26, MenuManager.createItemstack(Material.OAK_DOOR,
+                1,
+                ChatColor.RED + "<- Back to Overview",
+                null,
+                false,
+                true,
+                "return"));
+
+
+        //Autominer icon
         List<String> minerLore = Arrays.asList("§8§m-----------------------",
                 ChatColor.GREEN + "~" + PriceUtility.calculateWorthPerHour(tycoonBlock.getMiningRateFormatted(), tycoonBlock.getAverageWorth()) + "/h",
                 "§8§m-----------------------");
         if (tycoonBlock.isAutoMinerEnabled()) {
-            inventory.setItem(22, MenuManager.createItemstack(Material.IRON_PICKAXE, 1, ChatColor.GREEN + "Auto Miner Enabled", minerLore, true, true));
+            inventory.setItem(22, MenuManager.createItemstack(Material.IRON_PICKAXE,
+                    1,
+                    ChatColor.GREEN + "Auto Miner Enabled",
+                    minerLore,
+                    true,
+                    true,
+                    "toggle_autominer_off"));
         } else {
-            inventory.setItem(22, MenuManager.createItemstack(Material.IRON_PICKAXE, 1, ChatColor.RED + "Auto Miner Disabled", minerLore, false, true));
+            inventory.setItem(22, MenuManager.createItemstack(Material.IRON_PICKAXE,
+                    1,
+                    ChatColor.RED + "Auto Miner Disabled",
+                    minerLore,
+                    false,
+                    true,
+                    "toggle_autominer_on"));
         }
-//        double currentWorth = PriceUtility.calculateWorth(tycoonBlock.getInventory());
-//        ItemStack worth = MenuManager.createItemstack(
-//                Material.GREEN_STAINED_GLASS_PANE,
-//                1,
-//                ChatColor.GREEN + "Sell all: " + "$" + PriceUtility.formatMoney(currentWorth),
-//                null,
-//                false,
-//                true
-//        );
+
+        //Level Path icon
         ItemStack levelPath = MenuManager.createItemstack(Material.NETHER_STAR,
                 1,
                 ChatColor.AQUA + "Level path",
@@ -79,6 +96,7 @@ public class StatsMenu implements MenuInterface {
                 "level_path");
         inventory.setItem(20, levelPath);
 
+        //Upgrades Icon
         ItemStack upgrades = MenuManager.createItemstack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE,
                 1,
                 ChatColor.AQUA + "Upgrades",
@@ -87,6 +105,7 @@ public class StatsMenu implements MenuInterface {
                 "upgrades");
         inventory.setItem(24, upgrades);
 
+        //Inventory Icon
         List<String> inventoryLore = Arrays.asList("§8§m-----------------------",
                 ChatColor.WHITE + "Worth: "  + ChatColor.GREEN + PriceUtility.calculateWorthFormatted(tycoonBlock.getInventory()),
                 ChatColor.WHITE + "Storage: " + tycoonBlock.getStorageStatisticFormatted() + " items",
@@ -94,7 +113,13 @@ public class StatsMenu implements MenuInterface {
                 ChatColor.YELLOW + "[Left click to open]",
                 ChatColor.YELLOW + "[Right click to sell]"
                 );
-        inventory.setItem(18, MenuManager.createItemstack(Material.CHEST_MINECART, 1, ChatColor.GOLD + "Inventory", inventoryLore, false, true));
+        inventory.setItem(18, MenuManager.createItemstack(Material.CHEST_MINECART,
+                1,
+                ChatColor.GOLD + "Inventory",
+                inventoryLore,
+                false,
+                true,
+                "inventory"));
 
 
     }
@@ -108,9 +133,10 @@ public class StatsMenu implements MenuInterface {
         ClickType inventoryClick = event.getClick();
         if (meta == null) return;
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
-
-        switch (event.getSlot()) {
-            case 13:
+        String action = pdc.get(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING);
+        if (action == null) return;
+        switch (action) {
+            case "tycoon_menu_item":
                 if (inventoryClick == ClickType.LEFT) {
                     tycoonBlock.setActive(!tycoonBlock.isActive());
                     refresh(player, inventory);
@@ -124,28 +150,7 @@ public class StatsMenu implements MenuInterface {
                     tycoonBlock.teleportPlayer(player);
                 }
                 break;
-            case 18:
-                if (inventoryClick == ClickType.LEFT) {
-                    new TycoonInventory(tycoonBlock, plugin).open(player);
-                }else if (inventoryClick == ClickType.RIGHT) {
-                    tycoonBlock.sellInventory(tycoonBlock.getInventory(), player);
-                    refresh(player, inventory);
-                }
-                break;
-            case 20:
-                new TycoonLevelPath(tycoonBlock, 0, plugin).open(player);
-                break;
-            case 22:
-                tycoonBlock.setAutoMinerEnabled(!tycoonBlock.isAutoMinerEnabled());
-//                open(player);
-                refresh(player, inventory);
-                break;
-            case 24:
-//                tycoonBlock.sellInventory(tycoonBlock.getInventory(), player);
-//                refresh(player, inventory);
-                new TycoonUpgradeMenu(tycoonBlock, plugin).open(player);
-                break;
-            case 26:
+            case "return":
                 int itemsPerPage = 14;
                 int page;
                 if (tycoonBlock.getIndex() >= 0){
@@ -155,7 +160,27 @@ public class StatsMenu implements MenuInterface {
                 }
                 new OverviewMenu(plugin, page).open(player);
                 break;
-            default:
+            case "level_path":
+                new TycoonLevelPath(tycoonBlock, 0, plugin).open(player);
+                break;
+            case "upgrades":
+                new TycoonUpgradeMenu(tycoonBlock, plugin).open(player);
+                break;
+            case "inventory":
+                if (inventoryClick == ClickType.LEFT) {
+                    new TycoonInventory(tycoonBlock, plugin).open(player);
+                }else if (inventoryClick == ClickType.RIGHT) {
+                    tycoonBlock.sellInventory(tycoonBlock.getInventory(), player);
+                    refresh(player, inventory);
+                }
+                break;
+            case "toggle_autominer_off":
+                tycoonBlock.setAutoMinerEnabled(false);
+                refresh(player, inventory);
+                break;
+            case "toggle_autominer_on":
+                tycoonBlock.setAutoMinerEnabled(true);
+                refresh(player, inventory);
                 break;
         }
 
