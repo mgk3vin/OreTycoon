@@ -83,6 +83,7 @@ public class TycoonInventory implements MenuInterface {
     }
     public boolean addItem(ItemStack item){
         Inventory inv = tycoonBlock.getInventory();
+        if (!(tycoonBlock.canFitItem(inv, item))) {return false;}
         for (int i = 0; i < 27; i++){
             ItemStack slotItem = inv.getItem(i);
 

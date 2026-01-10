@@ -1,5 +1,6 @@
 package me.mangokevin.oreTycoon.commands.tycooncmds.menuManager;
 
+import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -20,9 +21,10 @@ import java.util.List;
 
 public class TycoonUpgradeMenu implements MenuInterface{
     private final TycoonBlock tycoonBlock;
-
-    public TycoonUpgradeMenu(TycoonBlock tycoonBlock) {
+    private final OreTycoon plugin;
+    public TycoonUpgradeMenu(TycoonBlock tycoonBlock, OreTycoon plugin) {
         this.tycoonBlock = tycoonBlock;
+        this.plugin = plugin;
     }
 
     @Override
@@ -78,6 +80,16 @@ public class TycoonUpgradeMenu implements MenuInterface{
                 true,
                 "upgradeWorthMultiplier");
         inventory.setItem(24,worthMultiplier);
+
+        //Return button
+        ItemStack returnItem = MenuManager.createItemstack(Material.BARRIER,
+                1,
+                ChatColor.RED + "<- Back to Stats Menu",
+                null,
+                false,
+                true,
+                "return");
+        inventory.setItem(44, returnItem);
     }
 
     @Override
@@ -103,7 +115,9 @@ public class TycoonUpgradeMenu implements MenuInterface{
                     tycoonBlock.upgradeSellMultiplier(player);
                     refresh(player,inventory);
                     break;
-
+                case "return":
+                    new StatsMenu(tycoonBlock, plugin).open(player);
+                    break;
                 case null:
                     break;
                 default:

@@ -6,18 +6,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -57,10 +53,13 @@ public class StatsMenu implements MenuInterface {
         inventory.setItem(13, tycoonItem);
         inventory.setItem(26, MenuManager.createItemstack(Material.OAK_DOOR, 1, ChatColor.RED + "Back to Overview", null, false, true));
 
+        List<String> minerLore = Arrays.asList("§8§m-----------------------",
+                ChatColor.GREEN + "~" + PriceUtility.calculateWorthPerHour(tycoonBlock.getMiningRateFormatted(), tycoonBlock.getAverageWorth()) + "/h",
+                "§8§m-----------------------");
         if (tycoonBlock.isAutoMinerEnabled()) {
-            inventory.setItem(22, MenuManager.createItemstack(Material.IRON_PICKAXE, 1, ChatColor.GREEN + "Auto Miner Enabled", null, true, true));
+            inventory.setItem(22, MenuManager.createItemstack(Material.IRON_PICKAXE, 1, ChatColor.GREEN + "Auto Miner Enabled", minerLore, true, true));
         } else {
-            inventory.setItem(22, MenuManager.createItemstack(Material.IRON_PICKAXE, 1, ChatColor.RED + "Auto Miner Disabled", null, false, true));
+            inventory.setItem(22, MenuManager.createItemstack(Material.IRON_PICKAXE, 1, ChatColor.RED + "Auto Miner Disabled", minerLore, false, true));
         }
 //        double currentWorth = PriceUtility.calculateWorth(tycoonBlock.getInventory());
 //        ItemStack worth = MenuManager.createItemstack(
@@ -90,6 +89,7 @@ public class StatsMenu implements MenuInterface {
 
         List<String> inventoryLore = Arrays.asList("§8§m-----------------------",
                 ChatColor.WHITE + "Worth: "  + ChatColor.GREEN + PriceUtility.calculateWorthFormatted(tycoonBlock.getInventory()),
+                ChatColor.WHITE + "Storage: " + tycoonBlock.getStorageStatisticFormatted() + " items",
                 "§8§m-----------------------",
                 ChatColor.YELLOW + "[Left click to open]",
                 ChatColor.YELLOW + "[Right click to sell]"
@@ -113,8 +113,13 @@ public class StatsMenu implements MenuInterface {
             case 13:
                 if (inventoryClick == ClickType.LEFT) {
                     tycoonBlock.setActive(!tycoonBlock.isActive());
-                    inventory.setItem(13, menuManager.createTycoonItem(tycoonBlock));
-                    player.playSound(player.getLocation(), Sound.BLOCK_LEVER_CLICK, 1f, 1f);
+                    refresh(player, inventory);
+                    if (tycoonBlock.isActive()) {
+                        player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 2f, 1.5f);
+                    }else {
+                        player.playSound(player.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 2f, 0.6f);
+                    }
+
                 }else if (inventoryClick == ClickType.RIGHT) {
                     tycoonBlock.teleportPlayer(player);
                 }
@@ -128,7 +133,7 @@ public class StatsMenu implements MenuInterface {
                 }
                 break;
             case 20:
-                //openLevelPath
+                new TycoonLevelPath(tycoonBlock, 0, plugin).open(player);
                 break;
             case 22:
                 tycoonBlock.setAutoMinerEnabled(!tycoonBlock.isAutoMinerEnabled());
@@ -138,7 +143,7 @@ public class StatsMenu implements MenuInterface {
             case 24:
 //                tycoonBlock.sellInventory(tycoonBlock.getInventory(), player);
 //                refresh(player, inventory);
-                new TycoonUpgradeMenu(tycoonBlock).open(player);
+                new TycoonUpgradeMenu(tycoonBlock, plugin).open(player);
                 break;
             case 26:
                 int itemsPerPage = 14;

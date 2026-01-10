@@ -219,6 +219,12 @@ public class TycoonBlockManager {
             data.set(path + "miningRate", tycoon.getMiningRate());
             data.set(path + "miningRateLevel", tycoon.getMiningRateLevel());
             data.set(path + "sellMultiplierLevel", tycoon.getSellMultiplierLevel());
+
+            data.set(path + "inventoryStorageLevel", tycoon.getTycoonUpgrades().getInventoryStorageLevel());
+
+            //Claimed Levels
+            List<Integer> claimedLevels = tycoon.getTycoonUpgrades().getClaimedLevels();
+            data.set(path + "claimedLevels", claimedLevels);
             //========== Save Upgrade Attributes ==========
 
             data.set(path + "material", tycoon.getTycoonType().getMaterial().toString());
@@ -315,12 +321,16 @@ public class TycoonBlockManager {
                 int spawnRateLevel = section.getInt(path + "spawnRateLevel");
                 int miningRateLevel = section.getInt(path + "miningRateLevel");
                 int sellMultiplierLevel = section.getInt(path + "sellMultiplierLevel");
+                int inventoryStorageLevel = section.getInt(path + "inventoryStorageLevel");
+                List<Integer> claimedLevels = section.getIntegerList(path + "claimedLevels");
 
                 TycoonUpgrades tycoonUpgrades = new  TycoonUpgrades();
                 if(tycoonUpgrades != null){
                     tycoonUpgrades.setSpawnRateLevel(spawnRateLevel);
                     tycoonUpgrades.setMiningRateLevel(miningRateLevel);
                     tycoonUpgrades.setSellMultiplierLevel(sellMultiplierLevel);
+                    tycoonUpgrades.setInventoryStorageLevel(inventoryStorageLevel);
+                    tycoonUpgrades.setClaimedLevels(claimedLevels);
                 }
                 //========== Load Upgrade Attributes ==========
 

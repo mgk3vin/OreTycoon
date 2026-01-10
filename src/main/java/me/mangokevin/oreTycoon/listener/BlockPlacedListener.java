@@ -17,6 +17,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class BlockPlacedListener implements Listener {
@@ -59,10 +61,10 @@ public class BlockPlacedListener implements Listener {
 
 
             int level = pdc.getOrDefault(tycoonData.getLEVEL_KEY() ,PersistentDataType.INTEGER, 1);
-            int xp = pdc.getOrDefault(tycoonData.getXP_KEY(), PersistentDataType.INTEGER, 0);
+            int xp = pdc.getOrDefault(TycoonData.XP, PersistentDataType.INTEGER, 0);
             int spawnInterval = pdc.getOrDefault(tycoonData.getSPAWN_INTERVAL_KEY(), PersistentDataType.INTEGER, 5);
             long creationTime = System.currentTimeMillis();
-            String tycoonName = pdc.getOrDefault(tycoonData.getTYPE_KEY(), PersistentDataType.STRING, "ERROR");
+            String tycoonName = pdc.getOrDefault(TycoonData.TYPE_KEY, PersistentDataType.STRING, "ERROR");
             System.out.println("[BlockPlacedListener] Loading: " + level + "|" + xp + "|" + spawnInterval + "|" + creationTime);
 
 
@@ -77,6 +79,19 @@ public class BlockPlacedListener implements Listener {
             upgrades.setSpawnRateLevel(pdc.getOrDefault(TycoonData.TYCOON_SPAWN_RATE_LEVEL_KEY, PersistentDataType.INTEGER, 1));
             upgrades.setMiningRateLevel(pdc.getOrDefault(TycoonData.TYCOON_MINING_RATE_LEVEL_KEY, PersistentDataType.INTEGER, 1));
             upgrades.setSellMultiplierLevel(pdc.getOrDefault(TycoonData.TYCOON_SELL_MULTIPLIER_LEVEL_KEY, PersistentDataType.INTEGER, 1));
+            upgrades.setInventoryStorageLevel(pdc.getOrDefault(TycoonData.TYCOON_MAX_INVENTORY_STORAGE_KEY, PersistentDataType.INTEGER, 1));
+
+            //Load claimed Levels from String
+            String claimedLevelsData = pdc.get(TycoonData.TYCOON_CLAIMED_LEVELS_KEY, PersistentDataType.STRING);
+            if (claimedLevelsData != null && !claimedLevelsData.trim().isEmpty()) {
+                String[] claimedLevels = pdc.get(TycoonData.TYCOON_CLAIMED_LEVELS_KEY, PersistentDataType.STRING).split(",");
+                List<Integer> claimedLevelsList = new ArrayList<>();
+                for (String claimedLevel : claimedLevels) {
+                    claimedLevelsList.add(Integer.parseInt(claimedLevel));
+                }
+                upgrades.setClaimedLevels(claimedLevelsList);
+            }
+
             //========== Load Upgrades ==========
 
             TycoonBlock tycoonBlock = new TycoonBlock(tycoonType,location, uuid, false, oreTycoon, upgrades);

@@ -23,7 +23,6 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
-
 import java.util.*;
 
 public class TycoonBlock {
@@ -48,7 +47,6 @@ public class TycoonBlock {
 
     private int tickCounter = 0;
     private int miningTickCounter = 0;
-
 
 
     private final Inventory inventory;
@@ -79,6 +77,9 @@ public class TycoonBlock {
     private int sellMultiplierLevel;
     private double maxSellMultiplier = 3.0;
 
+    private int inventoryStorage;
+    private int inventoryStorageLevel;
+
     private final TycoonUpgrades upgrades;
     //========== Upgrade Attributes ==========
 
@@ -89,7 +90,7 @@ public class TycoonBlock {
     private final Map<Material, Integer> ressourceMaterialsMap;
 
 
-    public TycoonBlock(TycoonType type,Location location, UUID ownerUuid, boolean isActive, OreTycoon plugin, TycoonUpgrades upgrades) {
+    public TycoonBlock(TycoonType type, Location location, UUID ownerUuid, boolean isActive, OreTycoon plugin, TycoonUpgrades upgrades) {
         this.location = location;
         this.block = location.getBlock();
         this.ownerUuid = ownerUuid;
@@ -113,12 +114,14 @@ public class TycoonBlock {
         this.miningRate = type.getMiningInterval();
         this.ressourceMaterialsMap = type.getResources();
         this.tycoonDisplayName = type.getName();
+        this.inventoryStorage = type.getDefaultMaxInventoryStorage();
 
         this.upgrades = upgrades;
         //========== Get Upgrade Attributes ==========
         this.spawnRateLevel = upgrades.getSpawnRateLevel();
         this.miningRateLevel = upgrades.getMiningRateLevel();
         this.sellMultiplierLevel = upgrades.getSellMultiplierLevel();
+        this.inventoryStorageLevel = upgrades.getInventoryStorageLevel();
         //========== Get Upgrade Attributes ==========
         //========== Calculate rates matching Level ==========
         updateAttributes();
@@ -138,7 +141,7 @@ public class TycoonBlock {
     }
 
 
-    public void incrementAndCheck(){
+    public void incrementAndCheck() {
         tickCounter++;
         if (tickCounter >= spawnRate) {
             tickCounter = 0;
@@ -174,12 +177,14 @@ public class TycoonBlock {
 //            miningTickCounter = 0;
 //        }
     }
+
     public void handleReward(Block block) {
         levelManager.handleXpGain(this, 50);
         //blockManager.playXpBlockHologram(this, block, 50);
         removeBlock(block);
 
     }
+
     public void sellInventory(Inventory inventory, Player player) {
         Economy econ = OreTycoon.getEconomy();
         double worth = PriceUtility.calculateWorth(inventory) * sellMultiplier;
@@ -191,11 +196,12 @@ public class TycoonBlock {
         cleanInventory(inventory);
         updateHologramPreset(location, "WORTH");
     }
+
     public void cleanInventory(Inventory inventory) {
         for (int i = 0; i < inventory.getSize(); i++) {
             ItemStack item = inventory.getItem(i);
 
-            if(item==null || item.getType() == Material.AIR)continue;
+            if (item == null || item.getType() == Material.AIR) continue;
 
             ItemMeta meta = item.getItemMeta();
             if (meta == null) {
@@ -208,8 +214,9 @@ public class TycoonBlock {
             }
         }
     }
+
     @Deprecated
-    public void withdrawBalance(Player player){
+    public void withdrawBalance(Player player) {
         Economy economy = OreTycoon.getEconomy();
 
         if (storedBalance > 0) {
@@ -219,8 +226,9 @@ public class TycoonBlock {
             storedBalance = 0;
         }
     }
+
     public void trySpawnResource() {
-        Console.debug("Trying spawning resource");
+
         Location center = getLocation();
         World world = center.getWorld();
         Random rand = new Random();
@@ -255,17 +263,24 @@ public class TycoonBlock {
             assert world != null;
             world.playSound(randomLocation, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.5f);
             world.spawnParticle(Particle.EXPLOSION, randomLocation, 1);
-            Console.log("Spawned succesfully block at: " + randomLocation);
         }
 
     }
-    public void updateAttributes(){
+
+    public void updateAttributes() {
         spawnRateLevel = upgrades.getSpawnRateLevel();
         miningRateLevel = upgrades.getMiningRateLevel();
         sellMultiplierLevel = upgrades.getSellMultiplierLevel();
         spawnRate = TycoonUpgrades.calculateNewSpawnRate(spawnRateLevel, type.getSpawnInterval());
         miningRate = TycoonUpgrades.calculateNewMiningRate(miningRateLevel, type.getMiningInterval());
         sellMultiplier = TycoonUpgrades.calculateNewSellMultiplier(sellMultiplierLevel, type.getSellMultiplier());
+
+        inventoryStorageLevel = upgrades.getInventoryStorageLevel();
+        inventoryStorage = TycoonUpgrades.getMaxInventoryStorage(inventoryStorageLevel, type.getDefaultMaxInventoryStorage());
+
+        updateHologramPreset(getLocation(), "ALL");
+        TycoonChangedAttributesEvent event = new TycoonChangedAttributesEvent(this);
+        Bukkit.getPluginManager().callEvent(event);
     }
     //========== Upgrade Methods ==========
 
@@ -284,9 +299,13 @@ public class TycoonBlock {
             Console.debug("Upgrade spawn rate level to: " + nextLevel + " New spawn rate: " + spawnRate + " At cost: " + economy.format(cost));
             player.sendMessage(ChatColor.GREEN + "You upgraded the Spawn rate to " + getSpawnRateFormatted() + "s for: " + PriceUtility.formatMoney(cost));
             Bukkit.getPluginManager().callEvent(new TycoonChangedAttributesEvent(this));
+        }else {
+            player.sendMessage(ChatColor.RED + "Not enough money!");
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
         }
 
     }
+
     public void upgradeMiningRate(Player player) {
         if (miningRate <= minMiningRate) {
             player.sendMessage(ChatColor.RED + "Max Level Reached!");
@@ -295,7 +314,7 @@ public class TycoonBlock {
         double cost = TycoonUpgrades.getMiningRateUpgradeCost(miningRateLevel + 1);
         Economy economy = OreTycoon.getEconomy();
         if (miningRate == spawnRate) {
-            player.sendMessage(ChatColor.RED + "Mining rate level " + miningRateLevel +" can't be higher than spawn rate level: " + spawnRateLevel);
+            player.sendMessage(ChatColor.RED + "Mining rate level " + miningRateLevel + " can't be higher than spawn rate level: " + spawnRateLevel);
             return;
         }
         if (economy.has(player, cost)) {
@@ -307,8 +326,17 @@ public class TycoonBlock {
             player.sendMessage(ChatColor.GREEN + "You upgraded the Mining rate to " + getMiningRateFormatted() + "s for: " + PriceUtility.formatMoney(cost));
 
             Bukkit.getPluginManager().callEvent(new TycoonChangedAttributesEvent(this));
+        }else {
+            player.sendMessage(ChatColor.RED + "Not enough money!");
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
         }
     }
+    public void upgradeMaxInventoryStorage(Player player) {
+        upgrades.setInventoryStorageLevel(inventoryStorageLevel + 1);
+        updateAttributes();
+        player.sendMessage(ChatColor.GREEN + "Upgraded Storage to " + getStorageStatisticFormatted());
+    }
+
     public void upgradeSellMultiplier(Player player) {
         if (sellMultiplier >= maxSellMultiplier) {
             player.sendMessage(ChatColor.RED + "Max Level Reached!");
@@ -322,6 +350,9 @@ public class TycoonBlock {
             upgrades.setSellMultiplierLevel(nextLevel);
             updateAttributes();
             player.sendMessage(ChatColor.GREEN + "You upgraded the Sell Multiplier to " + getSellMultiplier() + "x for: " + PriceUtility.formatMoney(cost));
+        }else {
+            player.sendMessage(ChatColor.RED + "Not enough money!");
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
         }
     }
     //========== Upgrade Methods ==========
@@ -334,13 +365,14 @@ public class TycoonBlock {
         if (itemMeta == null) return false;
         PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
         pdc.set(TycoonData.BLOCK_IS_AUTOMINED_KEY, PersistentDataType.STRING, "block_is_automined");
-        if (!tycoonBlock.canFitItem(tycoonBlock.getInventory(), item)){
+        if (!tycoonBlock.canFitItem(tycoonBlock.getInventory(), item)) {
             return false;
         }
-        Console.debug("Try autoMining Block at " +  blockLocation);
+
         new BukkitRunnable() {
 
             float progress = 0.0f;
+
             @Override
             public void run() {
                 // 1. Punkte zentrieren (damit sie aus der Mitte der Blöcke kommen)
@@ -378,7 +410,7 @@ public class TycoonBlock {
 
 
                     //tycoonBlock.getTycoonInventory().addItem(item);
-                    ItemStack item =  new ItemStack(blockLocation.getBlock().getType());
+                    ItemStack item = new ItemStack(blockLocation.getBlock().getType());
                     TycoonAutoMinedEvent event = new TycoonAutoMinedEvent(tycoonBlock, item);
                     Bukkit.getPluginManager().callEvent(event);
 
@@ -386,7 +418,6 @@ public class TycoonBlock {
 
                     blockLocation.getBlock().setType(Material.AIR);
                     pdc.remove(TycoonData.BLOCK_IS_AUTOMINED_KEY);
-                    Console.debug("Succesfully AutoMined Block at " +  blockLocation);
                     this.cancel();
                 }
 
@@ -412,6 +443,31 @@ public class TycoonBlock {
         return null;
     }
 
+    public double getAverageWorth() {
+        Map<Material, Integer> resources = type.getResources();
+
+        if (resources == null || resources.isEmpty()) return 0.0;
+
+        double totalWeight = 0;
+        for (int weight : resources.values()) {
+            totalWeight += weight;
+        }
+        double averageWorth = 0;
+        for (Map.Entry<Material, Integer> entry : resources.entrySet()) {
+            Material mat = entry.getKey();
+            int weight = entry.getValue();
+
+            // Hier holst du den Preis pro Stück aus deiner Preis-Liste
+            ItemStack item = new ItemStack(mat);
+            double price = PriceUtility.calculateWorth(item);
+
+            // Anteil am Gesamtwert berechnen
+            averageWorth += price * (weight / totalWeight);
+        }
+        return averageWorth;
+    }
+
+
     public boolean containsBlock(Block block) {
         return activeBlocks.contains(block);
     }
@@ -436,6 +492,7 @@ public class TycoonBlock {
     }
 
     // ---------     SpawnedBlockHologram      ---------
+    @Deprecated
     public void displayXpHologram(Block brokenBlock, int xp) {
         Location l = new Location(brokenBlock.getWorld(), brokenBlock.getX()+0.5, brokenBlock.getY()+1.5, brokenBlock.getZ()+0.5);
         World world = brokenBlock.getWorld();
@@ -498,8 +555,8 @@ public class TycoonBlock {
         hologramData.addLine("xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + (int) levelManager.getProgressPercentage(levelXp, level + 1) + "%");
         hologramData.addLine(ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
         double currentWorth = PriceUtility.calculateWorth(inventory);
-        hologramData.addLine(ChatColor.RESET + "Inventory Worth: "+ ChatColor.GREEN +"$" + PriceUtility.formatMoney(currentWorth));
-        hologramData.setBackground(Color.fromARGB(60, 0, 0, 0));
+        hologramData.addLine(ChatColor.RESET + "Inventory: "+ ChatColor.GREEN +"$" + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
+        hologramData.setBackground(Color.fromARGB(1, 1, 1, 1));
         hologramData.setPersistent(false);
         hologramData.setTextShadow(true);
         hologramData.setSeeThrough(false);
@@ -531,7 +588,7 @@ public class TycoonBlock {
         //TextHologramData textHologramData = (TextHologramData) data;
         List<String> hologramLines = ((TextHologramData) data).getText();
 
-
+        double currentWorth;
         switch (preset) {
             case "BLOCKNAME":
                 hologramLines.set(1, tycoonDisplayName + ChatColor.RESET);
@@ -548,8 +605,9 @@ public class TycoonBlock {
             case "PROGRESS":
                 hologramLines.set(5, ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
                 break;
-            case "WORTH", "BALANCE":
-                hologramLines.set(6, ChatColor.RESET + "Inventory Worth: "+ ChatColor.GREEN + "$" + ChatColor.GREEN + PriceUtility.formatMoney(PriceUtility.calculateWorth(inventory)));
+            case "WORTH", "BALANCE", "STORAGE":
+                currentWorth = PriceUtility.calculateWorth(inventory);
+                hologramLines.set(6, ChatColor.RESET + "Inventory: "+ ChatColor.GREEN +"$" + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
             case "ORDER":
                 List<TycoonBlock> tycoonBlockList = blockManager.getTycoonBlocksFromPlayer(ownerUuid);
 
@@ -567,7 +625,8 @@ public class TycoonBlock {
                 hologramLines.set(3, "Level: " + level);
                 hologramLines.set(4, "xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + (int) levelManager.getProgressPercentage(levelXp, level + 1) + "%");
                 hologramLines.set(5, ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
-                hologramLines.set(6, ChatColor.RESET + "Inventory Worth: "+ ChatColor.GREEN + "$" + ChatColor.GREEN + PriceUtility.formatMoney(PriceUtility.calculateWorth(inventory)));
+                currentWorth = PriceUtility.calculateWorth(inventory);
+                hologramLines.set(6, ChatColor.RESET + "Inventory: "+ ChatColor.GREEN +"$" + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
 
                 List<TycoonBlock> tycoonBlocksList = blockManager.getTycoonBlocksFromPlayer(ownerUuid);
 
@@ -624,22 +683,54 @@ public class TycoonBlock {
     public void addActiveBlocks(Block block) {
         activeBlocks.add(block);
     }
-    public void tryAddBlocksToInventory(Block block) {
-        ItemStack item = new ItemStack(block.getType());
-
-        if (canFitItem(inventory, item)) {
-            inventory.addItem(item);
+    public String getStorageStatisticFormatted(){
+        int storedItems = getStoredItemsCount();
+        double storagePercentage = (double)storedItems / (double)inventoryStorage;
+        storagePercentage = Math.round(storagePercentage * 100.0);
+        if (storagePercentage < 30.0) {
+            return ChatColor.GRAY + "["  + ChatColor.GREEN + storedItems + ChatColor.GRAY + "/" + ChatColor.RED + inventoryStorage + ChatColor.GRAY + "]";
+        } else if (storagePercentage < 50.0) {
+            return ChatColor.GRAY + "["  + ChatColor.DARK_GREEN + storedItems + ChatColor.GRAY + "/" + ChatColor.RED + inventoryStorage + ChatColor.GRAY + "]";
+        } else if (storagePercentage < 70) {
+            return ChatColor.GRAY + "["  + ChatColor.YELLOW + storedItems + ChatColor.GRAY + "/" + ChatColor.RED + inventoryStorage + ChatColor.GRAY + "]";
+        } else if (storagePercentage < 90.0) {
+            return ChatColor.GRAY + "["  + ChatColor.GOLD + storedItems + ChatColor.GRAY + "/" + ChatColor.RED + inventoryStorage + ChatColor.GRAY + "]";
+        } else if (storagePercentage <= 100.0) {
+            return ChatColor.GRAY + "["  + ChatColor.RED + storedItems + ChatColor.GRAY + "/" + ChatColor.RED + inventoryStorage + ChatColor.GRAY + "]";
         }
+        return storagePercentage + "%";
+    }
+    public int getStoredItemsCount(){
+        int storedItemsCount = 0;
+        for (ItemStack itemStack : inventory.getContents()) {
+            if (itemStack != null) {
+                ItemMeta itemMeta = itemStack.getItemMeta();
+                if (itemMeta != null) {
+                    if (itemMeta.getPersistentDataContainer().has(TycoonData.MENU_ITEM_KEY, PersistentDataType.STRING)) {
+                        continue;
+                    }
+                }
+                storedItemsCount += itemStack.getAmount();
+            }
+        }
+        return storedItemsCount;
     }
     public boolean canFitItem(Inventory inv, ItemStack item) {
+
+        if (getStoredItemsCount() + item.getAmount() > inventoryStorage) {
+            Console.debug("[Tycoon] Storage Full: " + getStoredItemsCount() + "/" + inventoryStorage);
+            return false;
+        }
         // 1. Gibt es überhaupt einen komplett leeren Slot?
         if (inv.firstEmpty() != -1) return true;
 
         // 2. Wenn kein leerer Slot da ist, prüfe, ob ein existierender Stack
         // des gleichen Typs noch Platz für weitere Items hat.
+
         for (ItemStack content : inv.getContents()) {
             if (content != null && content.isSimilar(item)) {
                 if (content.getAmount() < content.getMaxStackSize()) {
+
                     return true; // Es ist noch Platz in diesem Stack
                 }
             }
@@ -770,6 +861,9 @@ public class TycoonBlock {
     }
     public void setAutoMinerEnabled(boolean autoMinerEnabled) {
         this.autoMinerEnabled = autoMinerEnabled;
+    }
+    public int getInventoryStorage(){
+        return inventoryStorage;
     }
     // ---------     Setter      ---------
 }

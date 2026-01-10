@@ -1,14 +1,25 @@
 package me.mangokevin.oreTycoon.tycoonManagment;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TycoonUpgrades {
     private int spawnRateLevel = 1;
     private int miningRateLevel = 1;
     private int sellMultiplierLevel = 1;
+    private int inventoryStorageLevel = 1;
 
 
     public TycoonUpgrades(){};
 
+    private List<Integer> claimedLevels = new ArrayList<>();
 
+    public boolean hasClaimedLevel(int level){
+        return claimedLevels.contains(level);
+    }
+    public void claimLevel(int level){
+        claimedLevels.add(level);
+    }
     public static int calculateNewSpawnRate(int level, int defaultSpawnRate){
         return defaultSpawnRate - (level * 2);
     }
@@ -34,6 +45,9 @@ public class TycoonUpgrades {
         double multi = 1.2;
         return Math.round(getUpgradeCost(level, base, multi));
     }
+    public static int getMaxInventoryStorage(int level, int defaultMaxStorage){
+        return  defaultMaxStorage + (5 * level);
+    }
 
 
 
@@ -51,8 +65,20 @@ public class TycoonUpgrades {
     public void setSellMultiplierLevel(int sellMultiplierLevel){
         this.sellMultiplierLevel = sellMultiplierLevel;
     }
+    public void setInventoryStorageLevel(int inventoryStorageLevel){
+        this.inventoryStorageLevel = inventoryStorageLevel;
+    }
+    public void setClaimedLevels(List<Integer> claimedLevels){
+        this.claimedLevels = claimedLevels;
+    }
     //==========  Setter  ==========
     //==========  Getter  ==========
+    public List<Integer> getClaimedLevels(){
+        return claimedLevels;
+    }
+    public int getInventoryStorageLevel(){
+        return inventoryStorageLevel;
+    }
     public int getSpawnRateLevel() {
         return spawnRateLevel;
     }

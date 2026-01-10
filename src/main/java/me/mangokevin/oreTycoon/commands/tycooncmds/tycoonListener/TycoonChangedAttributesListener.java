@@ -12,5 +12,6 @@ public class TycoonChangedAttributesListener implements Listener {
         TycoonBlock tycoonBlock = event.getTycoonBlock();
 
         tycoonBlock.updateHologramPreset(tycoonBlock.getLocation(), "ALL");
+        tycoonBlock.updateHologramPreset(tycoonBlock.getLocation(), "WORTH");
     }
 }
