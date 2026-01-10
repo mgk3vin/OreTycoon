@@ -1,12 +1,11 @@
-package me.mangokevin.oreTycoon.commands.tycooncmds.tycoonListener;
+package me.mangokevin.oreTycoon.tycoonListener;
 
-import me.mangokevin.oreTycoon.OreTycoon;
-import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.MenuInterface;
-import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.OverviewMenu;
-import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.StatsMenu;
-import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.TycoonInventory;
-import me.mangokevin.oreTycoon.commands.tycooncmds.tycoonEvents.TycoonAutoMinedEvent;
-import me.mangokevin.oreTycoon.commands.tycooncmds.utility.Console;
+import me.mangokevin.oreTycoon.menuManager.MenuInterface;
+import me.mangokevin.oreTycoon.menuManager.OverviewMenu;
+import me.mangokevin.oreTycoon.menuManager.StatsMenu;
+import me.mangokevin.oreTycoon.menuManager.TycoonInventory;
+import me.mangokevin.oreTycoon.tycoonEvents.TycoonAutoMinedEvent;
+import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonHolder;
 import org.bukkit.Bukkit;

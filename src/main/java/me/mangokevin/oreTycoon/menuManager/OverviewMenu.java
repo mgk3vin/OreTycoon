@@ -1,8 +1,8 @@
-package me.mangokevin.oreTycoon.commands.tycooncmds.menuManager;
+package me.mangokevin.oreTycoon.menuManager;
 
 
 import me.mangokevin.oreTycoon.OreTycoon;
-import me.mangokevin.oreTycoon.commands.tycooncmds.utility.Console;
+import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.tycoonManagment.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

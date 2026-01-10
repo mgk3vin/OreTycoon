@@ -1,8 +1,8 @@
 package me.mangokevin.oreTycoon.tycoonManagment;
 
 import me.mangokevin.oreTycoon.OreTycoon;
-import me.mangokevin.oreTycoon.commands.tycooncmds.tycoonEvents.TycoonAutoMinedEvent;
-import me.mangokevin.oreTycoon.commands.tycooncmds.utility.Console;
+import me.mangokevin.oreTycoon.tycoonEvents.TycoonAutoMinedEvent;
+import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -586,7 +586,7 @@ public class TycoonBlockManager {
 
         ItemStack item = new ItemStack(tycoonBlock.getTycoonType().getMaterial(), 1);
 
-        TycoonData.writeToItem(item, tycoonBlock.getLevel(), tycoonBlock.getLevelXp(), tycoonBlock.getCreationTime(), tycoonBlock.getMaterial(), tycoonBlock.getSpawnRate(), tycoonBlock.getCreationTime(), tycoonBlock.getTycoonType().toString(), tycoonBlock.getInventory(), tycoonBlock.getTycoonUpgrades());
+        TycoonData.writeToItem(item, tycoonBlock.getLevel(), tycoonBlock.getLevelXp(), tycoonBlock.getCreationTime(), tycoonBlock.getLocation(),tycoonBlock.getMaterial(), tycoonBlock.getSpawnRate(), tycoonBlock.getCreationTime(), tycoonBlock.getTycoonType().toString(), tycoonBlock.getInventory(), tycoonBlock.getTycoonUpgrades());
         ItemMeta meta = item.getItemMeta();
 
         if (meta == null) return;

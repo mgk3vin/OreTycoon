@@ -1,6 +1,5 @@
-package me.mangokevin.oreTycoon.commands.tycooncmds.utility;
+package me.mangokevin.oreTycoon.utility;
 
-import me.mangokevin.oreTycoon.OreTycoon;
 import org.bukkit.Bukkit;
 
 public class Console {

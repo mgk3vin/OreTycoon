@@ -1,12 +1,8 @@
 package me.mangokevin.oreTycoon.tycoonManagment;
 
-import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.MenuInterface;
+import me.mangokevin.oreTycoon.menuManager.MenuInterface;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class TycoonHolder implements InventoryHolder {
     private final MenuInterface menu;
