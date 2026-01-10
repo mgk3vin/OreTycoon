@@ -28,6 +28,30 @@ public class PriceUtility {
         }
         return worth;
     }
+    public static String calculateWorthPerHour(double speed, double averageReward){
+        return "$" + formatMoney((3600/speed) * averageReward);
+    }
+    public static double calculateWorth(ItemStack item){
+        IEssentials ess = OreTycoon.getEssentials();
+        if(ess==null)return 0;
+
+        double worth = 0;
+        if(item==null || item.getType() == Material.AIR)return 0.0;
+
+        BigDecimal price = ess.getWorth().getPrice(ess, item);
+
+        if(price!=null){
+            worth += price.doubleValue() * item.getAmount();
+        }
+
+        return worth;
+    }
+    public static String calculateWorthFormatted(ItemStack item){
+        return "$" + formatMoney(calculateWorth(item));
+    }
+    public static String calculateWorthFormatted(Inventory inventory){
+        return "$" + formatMoney(calculateWorth(inventory));
+    }
     private static final NumberFormat fmt = NumberFormat.getCompactNumberInstance(
             Locale.US, NumberFormat.Style.SHORT);
 

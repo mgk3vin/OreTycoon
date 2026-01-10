@@ -9,6 +9,7 @@ Hologram cooldown❌
 Own menu system for easier use✅
 
 Hologram formatting
+Inventory size upgrade
 Higher Levels unlock more spawnblocks (clickable in menu which blocks to spawn must atleast be 5 diff or sum)‼️
 Teleport feature
 ‼️Need SpawnBlock list for autominer‼️☑️

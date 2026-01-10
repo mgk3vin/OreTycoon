@@ -2,13 +2,9 @@ package me.mangokevin.oreTycoon.commands.tycooncmds.menuManager;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonHolder;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
@@ -16,11 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.checkerframework.checker.units.qual.C;
 
-import javax.swing.text.StyledEditorKit;
-import java.security.Key;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -43,7 +35,7 @@ public class MenuManager {
                 ChatColor.GRAY + "Status: " + ChatColor.RESET + block.isActiveFormatted(),
                 ChatColor.GRAY + "Level: " + block.getLevel(),
                 block.getProgressBar(20) + " " + block.getProgressPercentage() + "%",
-                ChatColor.GRAY + "Spawn rate: " + block.getSpawnInterval(),
+                ChatColor.GRAY + "Spawn rate: " + block.getSpawnRateFormatted(),
                 "§8§m-----------------------");
 
         ItemStack stats = createItemstack(
@@ -60,6 +52,24 @@ public class MenuManager {
         stats.setItemMeta(statsmeta);
         return stats;
     }
+    public static ItemStack createItemstack(Material material, int amount, String name, List<String> lore, Boolean glint, Boolean hideAttributes, String action){
+        ItemStack itemstack = new ItemStack(material, amount);
+        ItemMeta meta = itemstack.getItemMeta();
+        if(meta != null){
+            meta.setDisplayName(name);
+            meta.setLore(lore);
+            meta.setEnchantmentGlintOverride(glint);
+            if (hideAttributes){
+                meta.addItemFlags(ItemFlag.values());
+            }
+            PersistentDataContainer pdc = meta.getPersistentDataContainer();
+            pdc.set(TycoonData.MENU_ITEM_KEY, PersistentDataType.STRING, "menu_item");
+            pdc.set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, action);
+
+            itemstack.setItemMeta(meta);
+        }
+        return itemstack;
+    }
     public static ItemStack createItemstack(Material material, int amount, String name, List<String> lore, Boolean glint, Boolean hideAttributes){
         ItemStack itemstack = new ItemStack(material, amount);
         ItemMeta meta = itemstack.getItemMeta();
@@ -70,10 +80,14 @@ public class MenuManager {
             if (hideAttributes){
                 meta.addItemFlags(ItemFlag.values());
             }
+            PersistentDataContainer pdc = meta.getPersistentDataContainer();
+            pdc.set(TycoonData.MENU_ITEM_KEY, PersistentDataType.STRING, "menu_item");
+
             itemstack.setItemMeta(meta);
         }
         return itemstack;
     }
+    @Deprecated
     public static ItemStack createItemstack(Material material, int amount, String name, List<String> lore, String KEY){
         ItemStack item = createItemstack(material, amount, name, lore, false, null);
         ItemMeta meta = item.getItemMeta();
@@ -92,6 +106,12 @@ public class MenuManager {
 
     public static void addFiller(Inventory inventory, Material material){
         ItemStack filler = createFiller(material);
+        ItemMeta meta = filler.getItemMeta();
+        if(meta != null){
+            PersistentDataContainer pdc = meta.getPersistentDataContainer();
+            pdc.set(TycoonData.MENU_ITEM_KEY, PersistentDataType.STRING, "menu_item");
+            filler.setItemMeta(meta);
+        }
         int size = inventory.getSize();
 
         for (int i = 0; i < 9; i++) {

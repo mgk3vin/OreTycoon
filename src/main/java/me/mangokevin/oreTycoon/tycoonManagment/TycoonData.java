@@ -9,14 +9,14 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
+import org.checkerframework.checker.units.qual.N;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.stream.Collectors;
 
 public class TycoonData {
     private static NamespacedKey TYCOON_BLOCK;
     private static NamespacedKey LEVEL;
-    private static NamespacedKey XP;
+    public static NamespacedKey XP;
     private static NamespacedKey CREATION;
     private static NamespacedKey MATERIAL;
     private static NamespacedKey SPAWN_INTERVAL;
@@ -29,6 +29,15 @@ public class TycoonData {
     public static NamespacedKey TYCOON_MENU_ITEM_INDEX_KEY;
     public static NamespacedKey TYCOON_MENU_ITEM_UID_KEY;
     public static NamespacedKey BLOCK_IS_AUTOMINED_KEY;
+
+    public static NamespacedKey MENU_ACTION_TYCOON_LEVEL_KEY;
+    //========== Upgrade Keys ==========
+    public static NamespacedKey TYCOON_SPAWN_RATE_LEVEL_KEY;
+    public static NamespacedKey TYCOON_MINING_RATE_LEVEL_KEY;
+    public static NamespacedKey TYCOON_SELL_MULTIPLIER_LEVEL_KEY;
+    public static NamespacedKey TYCOON_MAX_INVENTORY_STORAGE_KEY;
+    public static NamespacedKey TYCOON_CLAIMED_LEVELS_KEY;
+    //========== Upgrade Keys ==========
 
 
     // Wird einmal in der onEnable deiner Main aufgerufen: TycoonData.init(this);
@@ -48,9 +57,18 @@ public class TycoonData {
         TYCOON_MENU_ITEM_UID_KEY = new  NamespacedKey(plugin, "tycoon_menu_item_uid");
         BLOCK_IS_AUTOMINED_KEY = new NamespacedKey(plugin, "block_is_automined");
         MENU_ITEM_KEY = new NamespacedKey(plugin, "menu_item");
+        MENU_ACTION_TYCOON_LEVEL_KEY = new NamespacedKey(plugin, "menu_action_tycoon_level");
+
+        //========== Upgrade Keys ==========
+        TYCOON_SPAWN_RATE_LEVEL_KEY = new NamespacedKey(plugin, "tycoon_spawn_rate_level");
+        TYCOON_MINING_RATE_LEVEL_KEY = new NamespacedKey(plugin, "tycoon_mining_rate_level");
+        TYCOON_SELL_MULTIPLIER_LEVEL_KEY = new NamespacedKey(plugin, "tycoon_sell_multiplier_level");
+        TYCOON_MAX_INVENTORY_STORAGE_KEY = new NamespacedKey(plugin, "tycoon_max_inventory_storage");
+        TYCOON_CLAIMED_LEVELS_KEY = new NamespacedKey(plugin, "tycoon_claimed_levels");
+        //========== Upgrade Keys ==========
     }
     // Speichert die Daten eines Tycoons auf ein Item
-    public static void writeToItem(ItemStack item, int level, int xp, long creation, Material material, int spawnInterval, long creationTime, String type, Inventory inventory) {
+    public static void writeToItem(ItemStack item, int level, int xp, long creation, Material material, int spawnInterval, long creationTime, String type, Inventory inventory, TycoonUpgrades upgrades) {
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
 
@@ -68,6 +86,15 @@ public class TycoonData {
 
         pdc.set(INVENTORY_KEY, PersistentDataType.BYTE_ARRAY, byteArray);
 
+        //========== Upgrade Keys ==========
+        pdc.set(TYCOON_SPAWN_RATE_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getSpawnRateLevel());
+        pdc.set(TYCOON_MINING_RATE_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getMiningRateLevel());
+        pdc.set(TYCOON_SELL_MULTIPLIER_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getSellMultiplierLevel());
+        pdc.set(TYCOON_MAX_INVENTORY_STORAGE_KEY, PersistentDataType.INTEGER, upgrades.getInventoryStorageLevel());
+        //Save ClaimedLevels
+        String claimedLevels = upgrades.getClaimedLevels().stream().map(String::valueOf).collect(Collectors.joining(","));
+        pdc.set(TYCOON_CLAIMED_LEVELS_KEY, PersistentDataType.STRING, claimedLevels);
+        //========== Upgrade Keys ==========
         item.setItemMeta(meta); // DAS speichert es wirklich auf das Item!
     }
 

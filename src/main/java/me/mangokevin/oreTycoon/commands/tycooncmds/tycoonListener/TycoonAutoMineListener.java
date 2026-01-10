@@ -10,6 +10,7 @@ import me.mangokevin.oreTycoon.commands.tycooncmds.utility.Console;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonHolder;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -22,7 +23,6 @@ public class TycoonAutoMineListener implements Listener {
         TycoonBlock tycoon = event.getTycoonBlock();
         Inventory inventory = tycoon.getInventory();
         Player owner = tycoon.getOfflineOwner().getPlayer();
-        System.out.println("[TycoonAutoMineListener] Event triggered");
         //add Item when Block is auto mined
         boolean itemFits = tycoon.getTycoonInventory().addItem(event.getItemStack());
         if (itemFits) {
@@ -31,6 +31,11 @@ public class TycoonAutoMineListener implements Listener {
                     tycoon.getTycoonInventory().refresh(player, inventory);
                 }
             }
+        }else {
+            if (owner != null) {
+                owner.sendMessage(ChatColor.RED + "Inventory full! Max size: " + tycoon.getInventoryStorage() + "-items");
+            }
+            tycoon.setAutoMinerEnabled(false);
         }
         //Refresh Tycoon Hologram Worth
         tycoon.updateHologramPreset(tycoon.getLocation(), "WORTH");
@@ -52,11 +57,10 @@ public class TycoonAutoMineListener implements Listener {
                     }
                     case StatsMenu statsMenu -> {
                         if (statsMenu.getTycoonBlock().equals(tycoon)) {
-                            statsMenu.open(player);
+                            statsMenu.refresh(player,  openInventory);
                             Console.log("Refreshing stats menu");
                         }
-
-                        statsMenu.refresh(player, openInventory);
+                        //statsMenu.refresh(player, openInventory);
                     }
                     case OverviewMenu overviewMenu -> {
                         if (tycoon.getOfflineOwner().getUniqueId().equals(player.getUniqueId())) {

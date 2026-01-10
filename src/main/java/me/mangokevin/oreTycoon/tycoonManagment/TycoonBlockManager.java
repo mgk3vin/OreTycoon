@@ -7,7 +7,6 @@ import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -74,7 +73,7 @@ public class TycoonBlockManager {
                     tycoon.incrementAndCheck(); // Jeder Block zählt für sich selbst hoch
                 }
             }
-        }.runTaskTimer(plugin, 0, 20L); // Läuft jede Sekunde
+        }.runTaskTimer(plugin, 0, 1L); // Läuft jeden Tick (20 pro sekunde)
 
     }
     @Deprecated //Moved to Tycoonblock class
@@ -167,7 +166,6 @@ public class TycoonBlockManager {
                 return Long.compare(t1.getCreationTime(), t2.getCreationTime());    //letzte Tycoons zuerst
             }
         });
-        System.out.println("[BlockManager] returning " + tycoonBlocksList);
         return tycoonBlocksList;
     }
     public TycoonBlock getTycoonBlockFromIndex(Player player, int index) {
@@ -178,17 +176,17 @@ public class TycoonBlockManager {
         return tycoonBlocksList.get(index - 1);//1 basiert
     }
 
-    public void playXpBlockHologram(TycoonBlock tycoonBlock, Block block, int xp) {
-        tycoonBlock.displayXpHologram(block,xp);
-        System.out.println("[BlockManager] displayXpHologram");
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                tycoonBlock.removeXpHologram(block);
-                System.out.println("[BlockManager] removeXpHologram");
-            }
-        }.runTaskLater(plugin, 20L * 2);
-    }
+//    public void playXpBlockHologram(TycoonBlock tycoonBlock, Block block, int xp) {
+//        tycoonBlock.displayXpHologram(block,xp);
+//        System.out.println("[BlockManager] displayXpHologram");
+//        new BukkitRunnable() {
+//            @Override
+//            public void run() {
+//                tycoonBlock.removeXpHologram(block);
+//                System.out.println("[BlockManager] removeXpHologram");
+//            }
+//        }.runTaskLater(plugin, 20L * 1);
+//    }
     // ---------------- Filesave working ----------------
     public void saveTycoons(){
         if (!plugin.getDataFolder().exists()) {
@@ -215,6 +213,20 @@ public class TycoonBlockManager {
 
             data.set(path + "type", tycoon.getTycoonType().name());
 
+            //========== Save Upgrade Attributes ==========
+            data.set(path + "spawnRate", tycoon.getSpawnRate());
+            data.set(path + "spawnRateLevel", tycoon.getSpawnRateLevel());
+            data.set(path + "miningRate", tycoon.getMiningRate());
+            data.set(path + "miningRateLevel", tycoon.getMiningRateLevel());
+            data.set(path + "sellMultiplierLevel", tycoon.getSellMultiplierLevel());
+
+            data.set(path + "inventoryStorageLevel", tycoon.getTycoonUpgrades().getInventoryStorageLevel());
+
+            //Claimed Levels
+            List<Integer> claimedLevels = tycoon.getTycoonUpgrades().getClaimedLevels();
+            data.set(path + "claimedLevels", claimedLevels);
+            //========== Save Upgrade Attributes ==========
+
             data.set(path + "material", tycoon.getTycoonType().getMaterial().toString());
             data.set(path + "level", tycoon.getLevel());
             data.set(path + "xp", tycoon.getLevelXp());
@@ -228,6 +240,8 @@ public class TycoonBlockManager {
                 data.set(path + "lastSpawnedBlock", tycoon.getLastSpawnedMaterial().name());
             }
             //---------- Not used ----------
+
+
 
             //---------- Inventory save ----------
             List<String> inventoryItems = new ArrayList<>();
@@ -254,7 +268,7 @@ public class TycoonBlockManager {
             }
             data.set(path + "spawnedBlocks", blockLocs);
 
-            data.set(path + "spawnInterval", tycoon.getSpawnInterval());
+            data.set(path + "spawnInterval", tycoon.getSpawnRate());
             data.set(path + "hologramUID", tycoon.getHologramUID());
         }
         try {
@@ -303,17 +317,35 @@ public class TycoonBlockManager {
                 long  creationTime = section.getLong(path + "creationDate");
                 int index = section.getInt(path + "index");
 
+                //========== Load Upgrade Attributes ==========
+                int spawnRateLevel = section.getInt(path + "spawnRateLevel");
+                int miningRateLevel = section.getInt(path + "miningRateLevel");
+                int sellMultiplierLevel = section.getInt(path + "sellMultiplierLevel");
+                int inventoryStorageLevel = section.getInt(path + "inventoryStorageLevel");
+                List<Integer> claimedLevels = section.getIntegerList(path + "claimedLevels");
+
+                TycoonUpgrades tycoonUpgrades = new  TycoonUpgrades();
+                if(tycoonUpgrades != null){
+                    tycoonUpgrades.setSpawnRateLevel(spawnRateLevel);
+                    tycoonUpgrades.setMiningRateLevel(miningRateLevel);
+                    tycoonUpgrades.setSellMultiplierLevel(sellMultiplierLevel);
+                    tycoonUpgrades.setInventoryStorageLevel(inventoryStorageLevel);
+                    tycoonUpgrades.setClaimedLevels(claimedLevels);
+                }
+                //========== Load Upgrade Attributes ==========
+
+
                 String tycoonMaterialString = section.getString(path + "material");
                 assert tycoonMaterialString != null;
 
-                int spawnInterval = section.getInt(path + "spawnInterval");
+                //int spawnInterval = section.getInt(path + "spawnInterval");
                 String matName = section.getString(path + "lastSpawnedBlock");
                 Material type = (matName != null) ? Material.getMaterial(matName) : Material.STONE;
 
                 // 4. Objekt erstellen
                 // Wichtig: Nutze deinen Konstruktor.
                 // Falls er einen Spielernamen braucht, nimm Bukkit.getOfflinePlayer(ownerUUID).getName()
-                TycoonBlock block = new TycoonBlock(tycoonType ,loc, ownerUUID, active, plugin, this,levelManager);
+                TycoonBlock block = new TycoonBlock(tycoonType ,loc, ownerUUID, active, plugin, tycoonUpgrades);
                 block.setAutoMinerEnabled(autoMinerEnabled);
                 block.setLevel(level);
                 block.setLevelXp(xp);
@@ -455,7 +487,7 @@ public class TycoonBlockManager {
 
     public void addTycoonBlock(Block placedBlock, UUID playerUuid, TycoonType tycoonType) {
 
-        TycoonBlock tycoonBlock = new TycoonBlock(tycoonType ,placedBlock.getLocation(), playerUuid,false, plugin, this,levelManager);
+        TycoonBlock tycoonBlock = new TycoonBlock(tycoonType ,placedBlock.getLocation(), playerUuid,false, plugin, new TycoonUpgrades());
         tycoonBlocks.put(placedBlock.getLocation(), tycoonBlock);
         tycoonBlocksUID.put(tycoonBlock.getBlockUID(), tycoonBlock);
         System.out.println("[OreTycoon] Added Tycoon Block " + playerUuid + " index" + tycoonBlock.getIndex());
@@ -554,7 +586,7 @@ public class TycoonBlockManager {
 
         ItemStack item = new ItemStack(tycoonBlock.getTycoonType().getMaterial(), 1);
 
-        TycoonData.writeToItem(item, tycoonBlock.getLevel(), tycoonBlock.getLevelXp(), tycoonBlock.getCreationTime(), tycoonBlock.getMaterial(), tycoonBlock.getSpawnInterval(), tycoonBlock.getCreationTime(), tycoonBlock.getTycoonType().toString(), tycoonBlock.getInventory());
+        TycoonData.writeToItem(item, tycoonBlock.getLevel(), tycoonBlock.getLevelXp(), tycoonBlock.getCreationTime(), tycoonBlock.getMaterial(), tycoonBlock.getSpawnRate(), tycoonBlock.getCreationTime(), tycoonBlock.getTycoonType().toString(), tycoonBlock.getInventory(), tycoonBlock.getTycoonUpgrades());
         ItemMeta meta = item.getItemMeta();
 
         if (meta == null) return;
@@ -567,7 +599,7 @@ public class TycoonBlockManager {
         lore.add("§7Level: §e" + tycoonBlock.getLevel());
         lore.add("§7XP: §f" + tycoonBlock.getLevelXp());
         lore.add("§7Progress: §f" + tycoonBlock.getProgressBar(20));
-        lore.add("§7Spawnrate: §f" + tycoonBlock.getSpawnInterval() + "s");
+        lore.add("§7Spawnrate: §f" + tycoonBlock.getSpawnRate() + "s");
         lore.add("§8§m-------§r§8Inventory§m--------");
         lore.addAll(inventoryItemsToLore(tycoonBlock.getInventory()));
         lore.add("§8§m-----------------------");
