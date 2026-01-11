@@ -556,7 +556,7 @@ public class TycoonBlock {
         hologramData.addLine(ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
         double currentWorth = PriceUtility.calculateWorth(inventory);
         hologramData.addLine(ChatColor.RESET + "Inventory: "+ ChatColor.GREEN +"$" + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
-        hologramData.setBackground(Color.fromARGB(1, 1, 1, 1));
+        hologramData.setBackground(Color.fromARGB(60, 80, 80, 80));
         hologramData.setPersistent(false);
         hologramData.setTextShadow(true);
         hologramData.setSeeThrough(false);

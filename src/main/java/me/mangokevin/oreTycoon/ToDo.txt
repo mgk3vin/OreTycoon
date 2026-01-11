@@ -7,11 +7,13 @@ Enum for tycoon type variations✅
 saving tycoon stats on pickup✅
 Hologram cooldown❌
 Own menu system for easier use✅
-
-Hologram formatting
-Inventory size upgrade
-Higher Levels unlock more spawnblocks (clickable in menu which blocks to spawn must atleast be 5 diff or sum)‼️
-Teleport feature
+Inventory size upgrade✅
+Teleport feature✅
 ‼️Need SpawnBlock list for autominer‼️☑️
+
+Das "Eco-System" (Umgebungs-Buffs)
+"Instabile Kristalle" (Seltener temporärer Boost)
+Hologram formatting
+Higher Levels unlock more spawnblocks (clickable in menu which blocks to spawn must atleast be 5 diff or sum)‼️
 
 Clean up 🕛
