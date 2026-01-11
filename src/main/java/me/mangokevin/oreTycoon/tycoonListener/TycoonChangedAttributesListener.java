@@ -1,6 +1,6 @@
-package me.mangokevin.oreTycoon.commands.tycooncmds.tycoonListener;
+package me.mangokevin.oreTycoon.tycoonListener;
 
-import me.mangokevin.oreTycoon.commands.tycooncmds.tycoonEvents.TycoonChangedAttributesEvent;
+import me.mangokevin.oreTycoon.tycoonEvents.TycoonChangedAttributesEvent;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

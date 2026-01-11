@@ -1,4 +1,4 @@
-package me.mangokevin.oreTycoon.commands.tycooncmds.utility;
+package me.mangokevin.oreTycoon.utility;
 
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;

@@ -1,16 +1,18 @@
 package me.mangokevin.oreTycoon.tycoonManagment;
 
-import me.mangokevin.oreTycoon.commands.tycooncmds.utility.StorageUtils;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
+import me.mangokevin.oreTycoon.OreTycoon;
+import me.mangokevin.oreTycoon.utility.StorageUtils;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
-import org.checkerframework.checker.units.qual.N;
 
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TycoonData {
@@ -22,6 +24,7 @@ public class TycoonData {
     private static NamespacedKey SPAWN_INTERVAL;
     private static NamespacedKey CREATION_TIME;
     public static NamespacedKey TYPE_KEY;
+    public static NamespacedKey LOCATION_KEY;
     public static NamespacedKey INVENTORY_KEY;
     public static NamespacedKey MENU_ACTION_KEY;
     public static NamespacedKey TYCOON_MENU_ITEM_KEY;
@@ -50,6 +53,7 @@ public class TycoonData {
         SPAWN_INTERVAL = new NamespacedKey(plugin, "spawn_interval");
         CREATION_TIME = new NamespacedKey(plugin, "creation_time");
         TYPE_KEY = new NamespacedKey(plugin, "type");
+        LOCATION_KEY = new NamespacedKey(plugin, "location");
         INVENTORY_KEY = new NamespacedKey(plugin, "inventory");
         MENU_ACTION_KEY = new NamespacedKey(plugin, "menu_action");
         TYCOON_MENU_ITEM_KEY = new NamespacedKey(plugin, "tycoon_menu_item");
@@ -68,7 +72,7 @@ public class TycoonData {
         //========== Upgrade Keys ==========
     }
     // Speichert die Daten eines Tycoons auf ein Item
-    public static void writeToItem(ItemStack item, int level, int xp, long creation, Material material, int spawnInterval, long creationTime, String type, Inventory inventory, TycoonUpgrades upgrades) {
+    public static void writeToItem(ItemStack item, int level, int xp, long creation,Location loc, Material material, int spawnInterval, long creationTime, String type, Inventory inventory, TycoonUpgrades upgrades) {
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
 
@@ -78,6 +82,12 @@ public class TycoonData {
         pdc.set(LEVEL, PersistentDataType.INTEGER, level);
         pdc.set(XP, PersistentDataType.INTEGER, xp);
         pdc.set(CREATION, PersistentDataType.LONG, creation);
+
+        // Wir bauen einen String: "world;x;y;z;yaw;pitch"
+        String locString = String.format(Locale.US, "%s;%.2f;%.2f;%.2f;%.2f;%.2f",
+                loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
+        pdc.set(LOCATION_KEY, PersistentDataType.STRING, locString);
+
         pdc.set(MATERIAL, PersistentDataType.STRING, material.toString());
         pdc.set(SPAWN_INTERVAL, PersistentDataType.INTEGER, spawnInterval);
         pdc.set(CREATION_TIME, PersistentDataType.LONG, creationTime);
@@ -96,6 +106,65 @@ public class TycoonData {
         pdc.set(TYCOON_CLAIMED_LEVELS_KEY, PersistentDataType.STRING, claimedLevels);
         //========== Upgrade Keys ==========
         item.setItemMeta(meta); // DAS speichert es wirklich auf das Item!
+    }
+    public static TycoonBlock readFromItem(PersistentDataContainer pdc, Player player, Block placedBlock, OreTycoon plugin) {
+
+        int level = pdc.getOrDefault(TycoonData.LEVEL ,PersistentDataType.INTEGER, 1);
+        int xp = pdc.getOrDefault(TycoonData.XP, PersistentDataType.INTEGER, 0);
+        long creationTime = System.currentTimeMillis();
+
+        String tycoonName = pdc.getOrDefault(TycoonData.TYPE_KEY, PersistentDataType.STRING, "ERROR");
+        TycoonType tycoonType = TycoonType.valueOf(tycoonName);
+
+        //Location aus String laden
+//        String locationData = pdc.get(TycoonData.LOCATION_KEY, PersistentDataType.STRING);
+//        Location location;
+//        if (locationData != null) {
+//            String[] parts = locationData.split(";");
+//            World world = Bukkit.getWorld(parts[0]);
+//            location = new Location(world, Double.parseDouble(parts[1]), Double.parseDouble(parts[2]), Double.parseDouble(parts[3]), Float.parseFloat(parts[4]), Float.parseFloat(parts[5]));
+//        }else{
+//            return null;
+//        }
+        Location location = placedBlock.getLocation();
+        UUID uuid = player.getUniqueId();
+
+        //========== Load Upgrades ==========
+        TycoonUpgrades upgrades = new TycoonUpgrades();
+        upgrades.setSpawnRateLevel(pdc.getOrDefault(TycoonData.TYCOON_SPAWN_RATE_LEVEL_KEY, PersistentDataType.INTEGER, 1));
+        upgrades.setMiningRateLevel(pdc.getOrDefault(TycoonData.TYCOON_MINING_RATE_LEVEL_KEY, PersistentDataType.INTEGER, 1));
+        upgrades.setSellMultiplierLevel(pdc.getOrDefault(TycoonData.TYCOON_SELL_MULTIPLIER_LEVEL_KEY, PersistentDataType.INTEGER, 1));
+        upgrades.setInventoryStorageLevel(pdc.getOrDefault(TycoonData.TYCOON_MAX_INVENTORY_STORAGE_KEY, PersistentDataType.INTEGER, 1));
+
+        //Load claimed Levels from String
+        String claimedLevelsData = pdc.get(TycoonData.TYCOON_CLAIMED_LEVELS_KEY, PersistentDataType.STRING);
+        if (claimedLevelsData != null && !claimedLevelsData.trim().isEmpty()) {
+            String[] claimedLevels = pdc.get(TycoonData.TYCOON_CLAIMED_LEVELS_KEY, PersistentDataType.STRING).split(",");
+            List<Integer> claimedLevelsList = new ArrayList<>();
+            for (String claimedLevel : claimedLevels) {
+                claimedLevelsList.add(Integer.parseInt(claimedLevel));
+            }
+            upgrades.setClaimedLevels(claimedLevelsList);
+        }
+
+        //========== Load Upgrades ==========
+
+
+        TycoonBlock tycoonBlock = new TycoonBlock(tycoonType, location, uuid, false, plugin, upgrades);
+        tycoonBlock.setLevel(level);
+        tycoonBlock.setLevelXp(xp);
+        tycoonBlock.setCreationTime(creationTime);
+
+        plugin.getBlockManager().addTycoonBlock(tycoonBlock);
+
+        if (pdc.has(TycoonData.INVENTORY_KEY, PersistentDataType.BYTE_ARRAY)){
+            byte[] byteArray =  pdc.get(TycoonData.INVENTORY_KEY, PersistentDataType.BYTE_ARRAY);
+
+            StorageUtils.fromByteArray(byteArray, tycoonBlock.getInventory());
+        }
+
+        tycoonBlock.createHologram();
+        return tycoonBlock;
     }
 
     public NamespacedKey getTYCOON_BLOCK_KEY() {

@@ -1,7 +1,6 @@
 package me.mangokevin.oreTycoon.tycoonManagment;
 
 import me.mangokevin.oreTycoon.OreTycoon;
-import me.mangokevin.oreTycoon.commands.tycooncmds.utility.Console;
 import net.ess3.api.IEssentials;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;

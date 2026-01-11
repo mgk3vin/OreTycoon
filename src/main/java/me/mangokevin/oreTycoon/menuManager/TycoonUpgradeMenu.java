@@ -1,4 +1,4 @@
-package me.mangokevin.oreTycoon.commands.tycooncmds.menuManager;
+package me.mangokevin.oreTycoon.menuManager;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.*;
@@ -12,9 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.mvplugins.multiverse.external.vavr.collection.Array;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 

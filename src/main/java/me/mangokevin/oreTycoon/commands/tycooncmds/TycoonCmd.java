@@ -1,12 +1,12 @@
 package me.mangokevin.oreTycoon.commands.tycooncmds;
 
 import me.mangokevin.oreTycoon.OreTycoon;
-import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.MenuManager;
-import me.mangokevin.oreTycoon.commands.tycooncmds.menuManager.OverviewMenu;
+import me.mangokevin.oreTycoon.menuManager.MenuManager;
+import me.mangokevin.oreTycoon.menuManager.OverviewMenu;
+import me.mangokevin.oreTycoon.menuManager.StatsMenu;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonType;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -15,7 +15,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class TycoonCmd implements CommandExecutor {
@@ -75,16 +74,9 @@ public class TycoonCmd implements CommandExecutor {
                         p.sendMessage(ChatColor.RED + "Incorrect Usage. Use /tycoon toggle_all <on/off>");
                         return true;
                 }
-
-            case "block":
-
-                blockManager.giveTycoonBlock(p, Material.GOLD_BLOCK);
-                blockManager.giveTycoonBlock(p, Material.IRON_BLOCK);
-
-                break;
-            case "give":
+            case "give", "block":
                 if (args.length < 2) {
-                    p.sendMessage(ChatColor.RED + "Usage: /tycoon give <type>");
+                    p.sendMessage(ChatColor.RED + "Usage: /tycoon " + action + " <type>");
                     return true;
                 }
                 String type = args[1];
@@ -131,10 +123,7 @@ public class TycoonCmd implements CommandExecutor {
                     p.sendMessage(ChatColor.RED + "No tycoon block found!");
                     return true;
                 }
-                System.out.println("[TycoonCMD] opening index: " + index);
-                blockManager.openTycoonSpecificMenu(p, tycoonBlock);
-//            default:
-//                p.sendMessage(ChatColor.RED + "Unknown command!");
+                new StatsMenu(tycoonBlock, plugin).open(p);
         }
         return true;
     }

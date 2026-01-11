@@ -1,4 +1,4 @@
-package me.mangokevin.oreTycoon.commands.tycooncmds.menuManager;
+package me.mangokevin.oreTycoon.menuManager;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
