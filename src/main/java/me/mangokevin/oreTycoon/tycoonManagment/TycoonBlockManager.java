@@ -214,6 +214,7 @@ public class TycoonBlockManager {
             data.set(path + "type", tycoon.getTycoonType().name());
 
             //========== Save Upgrade Attributes ==========
+            data.set(path + "isAutoMinerUnlocked", tycoon.getTycoonUpgrades().isAutoMinerUnlocked());
             data.set(path + "spawnRate", tycoon.getSpawnRate());
             data.set(path + "spawnRateLevel", tycoon.getSpawnRateLevel());
             data.set(path + "miningRate", tycoon.getMiningRate());
@@ -221,6 +222,7 @@ public class TycoonBlockManager {
             data.set(path + "sellMultiplierLevel", tycoon.getSellMultiplierLevel());
 
             data.set(path + "inventoryStorageLevel", tycoon.getTycoonUpgrades().getInventoryStorageLevel());
+
 
             //Claimed Levels
             List<Integer> claimedLevels = tycoon.getTycoonUpgrades().getClaimedLevels();
@@ -318,6 +320,7 @@ public class TycoonBlockManager {
                 int index = section.getInt(path + "index");
 
                 //========== Load Upgrade Attributes ==========
+                boolean isAutoMinerUnlocked = section.getBoolean(path + "isAutoMinerUnlocked");
                 int spawnRateLevel = section.getInt(path + "spawnRateLevel");
                 int miningRateLevel = section.getInt(path + "miningRateLevel");
                 int sellMultiplierLevel = section.getInt(path + "sellMultiplierLevel");
@@ -326,6 +329,7 @@ public class TycoonBlockManager {
 
                 TycoonUpgrades tycoonUpgrades = new  TycoonUpgrades();
                 if(tycoonUpgrades != null){
+                    tycoonUpgrades.setAutoMinerUnlocked(isAutoMinerUnlocked);
                     tycoonUpgrades.setSpawnRateLevel(spawnRateLevel);
                     tycoonUpgrades.setMiningRateLevel(miningRateLevel);
                     tycoonUpgrades.setSellMultiplierLevel(sellMultiplierLevel);
@@ -518,6 +522,9 @@ public class TycoonBlockManager {
     public TycoonBlock getTycoonBlock(Block placedBlock) {
         return tycoonBlocks.get(placedBlock.getLocation());
     }
+    public TycoonBlock getTycoonBlock(Location location) {
+        return tycoonBlocks.get(location);
+    }
     @Deprecated
     public TycoonBlock getTycoonBlockByUID(String blockUID) {
         return tycoonBlocksUID.get(blockUID);
@@ -599,9 +606,10 @@ public class TycoonBlockManager {
         lore.add("§7Level: §e" + tycoonBlock.getLevel());
         lore.add("§7XP: §f" + tycoonBlock.getLevelXp());
         lore.add("§7Progress: §f" + tycoonBlock.getProgressBar(20));
-        lore.add("§7Spawnrate: §f" + tycoonBlock.getSpawnRate() + "s");
+        lore.add("§7Spawnrate: §f" + tycoonBlock.getSpawnRateFormatted() + "s");
         lore.add("§8§m-------§r§8Inventory§m--------");
-        lore.addAll(inventoryItemsToLore(tycoonBlock.getInventory()));
+        lore.add("§7Size: " + tycoonBlock.getStorageStatisticFormatted() + ChatColor.WHITE + " | " + ChatColor.GREEN + PriceUtility.calculateWorthFormatted(tycoonBlock.getInventory()));
+        //lore.addAll(inventoryItemsToLore(tycoonBlock.getInventory()));
         lore.add("§8§m-----------------------");
         meta.setLore(lore);
         meta.setDisplayName(tycoonBlock.getTycoonType().getName());

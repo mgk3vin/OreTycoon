@@ -6,11 +6,13 @@ import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
 
 
 public class BlockBreakListener implements Listener {
@@ -33,9 +35,8 @@ public class BlockBreakListener implements Listener {
 
         TycoonBlock blockData = blockManager.getTycoonBlock(block);
 
-
-
         Player p = event.getPlayer();
+
 
 
         if (blockData != null) {
@@ -64,9 +65,33 @@ public class BlockBreakListener implements Listener {
                 p.sendMessage(ChatColor.RED + "Cant mine blocks while auto miner is enabled!");
                 return;
             }
+            //Add item to inv when manually mined
+            ItemStack item = new ItemStack(block.getBlockData().getMaterial());
+            boolean itemFits = tycoonBlock.getTycoonInventory().addItem(item);
+            if (itemFits) {
+                event.setCancelled(true);
+                block.setType(Material.AIR);
+                blockLocation.getWorld().playSound(blockLocation, Sound.ENTITY_ITEM_PICKUP, 1, 1.5F);
+            }else {
+                p.sendMessage(ChatColor.RED + "Inventory full! Max size: " + tycoonBlock.getInventoryStorage() + "-items");
+            }
+            //Refresh Tycoon Hologram Worth
+            tycoonBlock.updateHologramPreset(tycoonBlock.getLocation(), "WORTH");
             tycoonBlock.handleReward(block);
         }
 
+        Location checkLocation = block.getLocation().clone();
+        checkLocation.add(0, 1, 0);
+        if (blockManager.isTycoonBlock(checkLocation)) {
+            TycoonBlock tycoon = blockManager.getTycoonBlock(checkLocation);
+            if (tycoon != null) {
+                if (tycoon.getTycoonType().getBuffMaterials().contains(block.getType())) {
+                    tycoon.deactivateSellMultiplierBuff();
+                    p.sendMessage(ChatColor.RED + "Sell Multiplier Buff Deactivated!");
+                    p.playSound(p.getLocation(), Sound.BLOCK_LARGE_AMETHYST_BUD_BREAK, 1.0f, 0.8f);
+                }
+            }
+        }
     }
 
 }

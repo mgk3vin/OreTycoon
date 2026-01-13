@@ -35,6 +35,7 @@ public class TycoonData {
 
     public static NamespacedKey MENU_ACTION_TYCOON_LEVEL_KEY;
     //========== Upgrade Keys ==========
+    public static NamespacedKey TYCOON_IS_AUTO_MINER_UNLOCKED_KEY;
     public static NamespacedKey TYCOON_SPAWN_RATE_LEVEL_KEY;
     public static NamespacedKey TYCOON_MINING_RATE_LEVEL_KEY;
     public static NamespacedKey TYCOON_SELL_MULTIPLIER_LEVEL_KEY;
@@ -63,7 +64,9 @@ public class TycoonData {
         MENU_ITEM_KEY = new NamespacedKey(plugin, "menu_item");
         MENU_ACTION_TYCOON_LEVEL_KEY = new NamespacedKey(plugin, "menu_action_tycoon_level");
 
+
         //========== Upgrade Keys ==========
+        TYCOON_IS_AUTO_MINER_UNLOCKED_KEY = new NamespacedKey(plugin, "tycoon_is_auto_miner_unlocked");
         TYCOON_SPAWN_RATE_LEVEL_KEY = new NamespacedKey(plugin, "tycoon_spawn_rate_level");
         TYCOON_MINING_RATE_LEVEL_KEY = new NamespacedKey(plugin, "tycoon_mining_rate_level");
         TYCOON_SELL_MULTIPLIER_LEVEL_KEY = new NamespacedKey(plugin, "tycoon_sell_multiplier_level");
@@ -97,6 +100,7 @@ public class TycoonData {
         pdc.set(INVENTORY_KEY, PersistentDataType.BYTE_ARRAY, byteArray);
 
         //========== Upgrade Keys ==========
+        pdc.set(TYCOON_IS_AUTO_MINER_UNLOCKED_KEY, PersistentDataType.BOOLEAN, upgrades.isAutoMinerUnlocked());
         pdc.set(TYCOON_SPAWN_RATE_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getSpawnRateLevel());
         pdc.set(TYCOON_MINING_RATE_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getMiningRateLevel());
         pdc.set(TYCOON_SELL_MULTIPLIER_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getSellMultiplierLevel());
@@ -131,6 +135,7 @@ public class TycoonData {
 
         //========== Load Upgrades ==========
         TycoonUpgrades upgrades = new TycoonUpgrades();
+        upgrades.setAutoMinerUnlocked(pdc.getOrDefault(TYCOON_IS_AUTO_MINER_UNLOCKED_KEY, PersistentDataType.BOOLEAN, false));
         upgrades.setSpawnRateLevel(pdc.getOrDefault(TycoonData.TYCOON_SPAWN_RATE_LEVEL_KEY, PersistentDataType.INTEGER, 1));
         upgrades.setMiningRateLevel(pdc.getOrDefault(TycoonData.TYCOON_MINING_RATE_LEVEL_KEY, PersistentDataType.INTEGER, 1));
         upgrades.setSellMultiplierLevel(pdc.getOrDefault(TycoonData.TYCOON_SELL_MULTIPLIER_LEVEL_KEY, PersistentDataType.INTEGER, 1));

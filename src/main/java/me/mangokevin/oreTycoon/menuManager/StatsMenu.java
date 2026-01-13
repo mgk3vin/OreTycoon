@@ -65,26 +65,41 @@ public class StatsMenu implements MenuInterface {
 
 
         //Autominer icon
-        List<String> minerLore = Arrays.asList("§8§m-----------------------",
-                ChatColor.GREEN + "~" + PriceUtility.calculateWorthPerHour(tycoonBlock.getMiningRateFormatted(), tycoonBlock.getAverageWorth()) + "/h",
-                "§8§m-----------------------");
-        if (tycoonBlock.isAutoMinerEnabled()) {
-            inventory.setItem(22, MenuManager.createItemstack(Material.IRON_PICKAXE,
+        if (tycoonBlock.getTycoonUpgrades().isAutoMinerUnlocked()) {
+            List<String> minerLore = Arrays.asList("§8§m-----------------------",
+                    ChatColor.GREEN + "~" + PriceUtility.calculateWorthPerHour(tycoonBlock.getMiningRateFormatted(), tycoonBlock.getAverageWorth()) + "/h",
+                    "§8§m-----------------------");
+            if (tycoonBlock.isAutoMinerEnabled()) {
+                inventory.setItem(22, MenuManager.createItemstack(Material.IRON_PICKAXE,
+                        1,
+                        ChatColor.GREEN + "Auto Miner Enabled",
+                        minerLore,
+                        true,
+                        true,
+                        "toggle_autominer_off"));
+            } else {
+                inventory.setItem(22, MenuManager.createItemstack(Material.IRON_PICKAXE,
+                        1,
+                        ChatColor.RED + "Auto Miner Disabled",
+                        minerLore,
+                        false,
+                        true,
+                        "toggle_autominer_on"));
+            }
+        }else {
+            List<String> minerLore = Arrays.asList("§8§m-----------------------",
+                    ChatColor.RED + "Locked",
+                    "§8§m-----------------------");
+            ItemStack autominerLocked = MenuManager.createItemstack(Material.IRON_BARS,
                     1,
-                    ChatColor.GREEN + "Auto Miner Enabled",
+                    ChatColor.RED + "Auto Miner",
                     minerLore,
                     true,
                     true,
-                    "toggle_autominer_off"));
-        } else {
-            inventory.setItem(22, MenuManager.createItemstack(Material.IRON_PICKAXE,
-                    1,
-                    ChatColor.RED + "Auto Miner Disabled",
-                    minerLore,
-                    false,
-                    true,
-                    "toggle_autominer_on"));
+                    "autominer_locked");
+            inventory.setItem(22, autominerLocked);
         }
+
 
         //Level Path icon
         ItemStack levelPath = MenuManager.createItemstack(Material.NETHER_STAR,
@@ -181,6 +196,9 @@ public class StatsMenu implements MenuInterface {
             case "toggle_autominer_on":
                 tycoonBlock.setAutoMinerEnabled(true);
                 refresh(player, inventory);
+                break;
+            case "autominer_locked":
+                player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_BREAK, 1f, 0.8f);
                 break;
         }
 

@@ -75,13 +75,23 @@ public class TycoonBlock {
 
     private double sellMultiplier = 1;
     private int sellMultiplierLevel;
-    private double maxSellMultiplier = 3.0;
+    private double sellMultiplierBuff = 1.0;
 
     private int inventoryStorage;
     private int inventoryStorageLevel;
 
+    private final List<Material> buffMaterials;
+
+    private boolean isAutoMinerUnlocked;
+
     private final TycoonUpgrades upgrades;
     //========== Upgrade Attributes ==========
+    //========== Buff Attributes ==========
+    private boolean isBuffed;
+    private double maxSellMultiplier = 3.0;
+
+    //========== Buff Attributes ==========
+
 
     private final OreTycoon plugin;
     private final TycoonBlockManager blockManager;
@@ -115,6 +125,7 @@ public class TycoonBlock {
         this.ressourceMaterialsMap = type.getResources();
         this.tycoonDisplayName = type.getName();
         this.inventoryStorage = type.getDefaultMaxInventoryStorage();
+        this.buffMaterials = type.getBuffMaterials();
 
         this.upgrades = upgrades;
         //========== Get Upgrade Attributes ==========
@@ -122,6 +133,8 @@ public class TycoonBlock {
         this.miningRateLevel = upgrades.getMiningRateLevel();
         this.sellMultiplierLevel = upgrades.getSellMultiplierLevel();
         this.inventoryStorageLevel = upgrades.getInventoryStorageLevel();
+        this.isBuffed = upgrades.isBuffed();
+        this.isAutoMinerUnlocked = upgrades.isAutoMinerUnlocked();
         //========== Get Upgrade Attributes ==========
         //========== Calculate rates matching Level ==========
         updateAttributes();
@@ -138,11 +151,13 @@ public class TycoonBlock {
 
         this.tycoonInventory = new TycoonInventory(this, plugin);
         this.inventory = Bukkit.createInventory(new TycoonHolder(this.tycoonInventory), 36, tycoonDisplayName);
+        checkIfBuffed();
     }
 
 
     public void incrementAndCheck() {
         tickCounter++;
+
         if (tickCounter >= spawnRate) {
             tickCounter = 0;
             if (isActive) {
@@ -271,12 +286,17 @@ public class TycoonBlock {
         spawnRateLevel = upgrades.getSpawnRateLevel();
         miningRateLevel = upgrades.getMiningRateLevel();
         sellMultiplierLevel = upgrades.getSellMultiplierLevel();
+        sellMultiplierBuff = upgrades.getSellMultiplierBuff();
         spawnRate = TycoonUpgrades.calculateNewSpawnRate(spawnRateLevel, type.getSpawnInterval());
         miningRate = TycoonUpgrades.calculateNewMiningRate(miningRateLevel, type.getMiningInterval());
+
         sellMultiplier = TycoonUpgrades.calculateNewSellMultiplier(sellMultiplierLevel, type.getSellMultiplier());
+        sellMultiplier *= sellMultiplierBuff;
 
         inventoryStorageLevel = upgrades.getInventoryStorageLevel();
         inventoryStorage = TycoonUpgrades.getMaxInventoryStorage(inventoryStorageLevel, type.getDefaultMaxInventoryStorage());
+
+        isAutoMinerUnlocked = upgrades.isAutoMinerUnlocked();
 
         updateHologramPreset(getLocation(), "ALL");
         TycoonChangedAttributesEvent event = new TycoonChangedAttributesEvent(this);
@@ -355,11 +375,48 @@ public class TycoonBlock {
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
         }
     }
+
+    public void unlockAutoMiner(){
+
+    }
     //========== Upgrade Methods ==========
+
+    //========= Buff methods =========
+    public boolean checkIfBuffed() {
+        Location checkLocation = location.clone();
+        checkLocation.add(0, -1, 0);
+        if (buffMaterials.contains(checkLocation.getBlock().getType())) {
+            isBuffed = true;
+            activateSellMultiplierBuff();
+            updateHologramPreset(location, "BUFF");
+            return true;
+        }else  {
+            isBuffed = false;
+            deactivateSellMultiplierBuff();
+            updateHologramPreset(location, "BUFF");
+            return false;
+        }
+    }
+    public void activateSellMultiplierBuff() {
+        upgrades.setSellMultiplierBuff(1.5);
+        isBuffed = true;
+        updateAttributes();
+    }
+    public void deactivateSellMultiplierBuff() {
+        upgrades.setSellMultiplierBuff(1.0);
+        isBuffed = false;
+        updateAttributes();
+    }
+    //========= Buff methods =========
+
 
 
     //---------- AutoMiner ----------
     public boolean tryAutoMining(TycoonBlock tycoonBlock, Location blockLocation) {
+        if (!isAutoMinerUnlocked){
+            Console.debug("[TycoonBlock] Auto Miner locked");
+            return false;
+        }
         ItemStack item = new ItemStack(blockLocation.getBlock().getType());
         ItemMeta itemMeta = item.getItemMeta();
         if (itemMeta == null) return false;
@@ -549,7 +606,7 @@ public class TycoonBlock {
 
         hologramData.addLine(tycoonDisplayName + ChatColor.RESET);
 
-        hologramData.addLine("Status: " + isActiveFormatted());
+        hologramData.addLine("Status: " + isActiveFormatted() + ChatColor.WHITE + " | " + isBuffedFormatted() + ChatColor.RESET);
 
         hologramData.addLine("Level: " + level);
         hologramData.addLine("xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + (int) levelManager.getProgressPercentage(levelXp, level + 1) + "%");
@@ -593,8 +650,8 @@ public class TycoonBlock {
             case "BLOCKNAME":
                 hologramLines.set(1, tycoonDisplayName + ChatColor.RESET);
                 break;
-            case "STATUS":
-                hologramLines.set(2, "Status: " + isActiveFormatted());
+            case "STATUS", "BUFF":
+                hologramLines.set(2, "Status: " + isActiveFormatted() + ChatColor.WHITE + " | " + isBuffedFormatted() + ChatColor.RESET);
                 break;
             case "LEVEL":
                 hologramLines.set(3, "Level: " + level);
@@ -621,7 +678,7 @@ public class TycoonBlock {
                 hologramLines.set(0, "[ " + getOwnerName() + "'s Tycoon #" + index + " ]");
             case "ALL":
                 hologramLines.set(1, tycoonDisplayName + ChatColor.RESET);
-                hologramLines.set(2, "Status: " + isActiveFormatted());
+                hologramLines.set(2, "Status: " + isActiveFormatted() + ChatColor.WHITE + " | " + isBuffedFormatted() + ChatColor.RESET);
                 hologramLines.set(3, "Level: " + level);
                 hologramLines.set(4, "xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + (int) levelManager.getProgressPercentage(levelXp, level + 1) + "%");
                 hologramLines.set(5, ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
@@ -643,6 +700,13 @@ public class TycoonBlock {
                 break;
         }
         updateHologram(location);
+    }
+    public String isBuffedFormatted(){
+        if(isBuffed){
+            return ChatColor.GREEN + "Buff active";
+        }else {
+            return ChatColor.RED + "Buff inactive";
+        }
     }
 
     public String getProgressBar(int bars){

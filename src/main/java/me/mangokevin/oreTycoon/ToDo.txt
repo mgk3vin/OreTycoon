@@ -9,11 +9,13 @@ Hologram cooldown❌
 Own menu system for easier use✅
 Inventory size upgrade✅
 Teleport feature✅
-‼️Need SpawnBlock list for autominer‼️☑️
+‼️Need SpawnBlock list for autominer✅
+
+‼️Auto miner unlock logic / stay locked
 
 Das "Eco-System" (Umgebungs-Buffs)
 "Instabile Kristalle" (Seltener temporärer Boost)
 Hologram formatting
 Higher Levels unlock more spawnblocks (clickable in menu which blocks to spawn must atleast be 5 diff or sum)‼️
-
+Spawn blocks that drop 1 of its kind per mine and have 5 mines
 Clean up 🕛

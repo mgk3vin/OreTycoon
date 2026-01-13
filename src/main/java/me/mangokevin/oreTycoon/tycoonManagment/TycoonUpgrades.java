@@ -9,7 +9,10 @@ public class TycoonUpgrades {
     private int sellMultiplierLevel = 1;
     private int inventoryStorageLevel = 1;
 
+    private boolean isBuffed = false;
+    private double sellMultiplierBuff = 1.0;
 
+    private boolean isAutoMinerUnlocked = false;
     public TycoonUpgrades(){};
 
     private List<Integer> claimedLevels = new ArrayList<>();
@@ -29,7 +32,13 @@ public class TycoonUpgrades {
     public static double calculateNewSellMultiplier(int level, double defaultSellMultiplier){
         return (Math.round((defaultSellMultiplier + (level * 0.01)) * 100.0)/100.0);
     }
-
+    public static boolean isAutoMinerUnlocked(int level){
+        if (level >= 5){
+            return true;
+        }else {
+            return false;
+        }
+    }
     public static double getSpawnRateUpgradeCost(int level){
         double base = 100.0;
         double multi = 1.4;
@@ -71,6 +80,15 @@ public class TycoonUpgrades {
     public void setClaimedLevels(List<Integer> claimedLevels){
         this.claimedLevels = claimedLevels;
     }
+    public void setSellMultiplierBuff(double sellMultiplierBuff){
+        this.sellMultiplierBuff = sellMultiplierBuff;
+    }
+    public void setBuffed(boolean isBuffed){
+        this.isBuffed = isBuffed;
+    }
+    public void setAutoMinerUnlocked(boolean autoMinerUnlocked){
+        this.isAutoMinerUnlocked = autoMinerUnlocked;
+    }
     //==========  Setter  ==========
     //==========  Getter  ==========
     public List<Integer> getClaimedLevels(){
@@ -87,6 +105,15 @@ public class TycoonUpgrades {
     }
     public int getSellMultiplierLevel() {
         return sellMultiplierLevel;
+    }
+    public double getSellMultiplierBuff() {
+        return sellMultiplierBuff;
+    }
+    public boolean isBuffed() {
+        return isBuffed;
+    }
+    public boolean isAutoMinerUnlocked() {
+        return isAutoMinerUnlocked;
     }
     //==========  Getter  ==========
 }
