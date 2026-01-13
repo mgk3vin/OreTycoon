@@ -28,7 +28,7 @@ public class PriceUtility {
         return worth;
     }
     public static String calculateWorthPerHour(double speed, double averageReward){
-        return "$" + formatMoney((3600/speed) * averageReward);
+        return formatMoney((3600/speed) * averageReward);
     }
     public static double calculateWorth(ItemStack item){
         IEssentials ess = OreTycoon.getEssentials();
@@ -46,17 +46,17 @@ public class PriceUtility {
         return worth;
     }
     public static String calculateWorthFormatted(ItemStack item){
-        return "$" + formatMoney(calculateWorth(item));
+        return formatMoney(calculateWorth(item));
     }
     public static String calculateWorthFormatted(Inventory inventory){
-        return "$" + formatMoney(calculateWorth(inventory));
+        return formatMoney(calculateWorth(inventory));
     }
     private static final NumberFormat fmt = NumberFormat.getCompactNumberInstance(
             Locale.US, NumberFormat.Style.SHORT);
 
     public static String formatMoney(double value) {
         fmt.setMaximumFractionDigits(2); // Max 2 Nachkommastellen (z.B. 1.25k)
-        return fmt.format(value);
+        return "$" + fmt.format(value);
     }
     @Deprecated
     public static String formatWorth(double value){

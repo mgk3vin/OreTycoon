@@ -5,6 +5,8 @@ import me.mangokevin.oreTycoon.tycoonManagment.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -39,7 +41,7 @@ public class TycoonUpgradeMenu implements MenuInterface{
         List<String> spawnLore = Arrays.asList("§8§m-----------------------",
                 ChatColor.GRAY + "[ Level: " + tycoonBlock.getSpawnRateLevel() + " ]",
                 ChatColor.GRAY + "[ Spawnrate: " + tycoonBlock.getSpawnRateFormatted() + "s ]",
-                ChatColor.GRAY + "[ Upgrade cost: " + ChatColor.GREEN + PriceUtility.formatMoney(TycoonUpgrades.getSpawnRateUpgradeCost(tycoonBlock.getSpawnRateLevel() + 1)) + ChatColor.GRAY +  " -> " + (tycoonBlock.getSpawnRateLevel() + 1) +" ]",
+                ChatColor.GRAY + "[ Upgrade cost: " + ChatColor.GREEN + PriceUtility.formatMoney(TycoonUpgrades.getSpawnRateUpgradeCost(tycoonBlock,tycoonBlock.getSpawnRateLevel() + 1)) + ChatColor.GRAY +  " -> " + (tycoonBlock.getSpawnRateLevel() + 1) +" ]",
                 "§8§m-----------------------");
         ItemStack spawnRate = MenuManager.createItemstack(Material.SPAWNER,
                 1,
@@ -50,25 +52,37 @@ public class TycoonUpgradeMenu implements MenuInterface{
                 "upgradeSpawnRate");
         inventory.setItem(20,spawnRate);
 
-        List<String> minerLore = Arrays.asList("§8§m-----------------------",
-                ChatColor.GRAY + "[ Level: " + tycoonBlock.getMiningRateLevel() + " ]",
-                ChatColor.GRAY + "[ Minerate: " + tycoonBlock.getMiningRateFormatted() + "s ]",
-                ChatColor.GRAY + "[ Upgrade Cost: " + ChatColor.GREEN + PriceUtility.formatMoney(TycoonUpgrades.getMiningRateUpgradeCost(tycoonBlock.getMiningRateLevel() + 1)) + ChatColor.GRAY +  " -> " + (tycoonBlock.getMiningRateLevel() + 1) +" ]",
-                "§8§m-----------------------");
-        ItemStack autoMinerSpeed = MenuManager.createItemstack(Material.IRON_PICKAXE,
-                1,
-                ChatColor.GOLD + "Upgrade Automining speed",
-                minerLore,
-                false,
-                true,
-                "upgradeAutoMinerSpeed");
-        inventory.setItem(22,autoMinerSpeed);
+        if (tycoonBlock.getTycoonUpgrades().isAutoMinerUnlocked()){
+            List<String> minerLore = Arrays.asList("§8§m-----------------------",
+                    ChatColor.GRAY + "[ Level: " + tycoonBlock.getMiningRateLevel() + " ]",
+                    ChatColor.GRAY + "[ Minerate: " + tycoonBlock.getMiningRateFormatted() + "s ]",
+                    ChatColor.GRAY + "[ Upgrade Cost: " + ChatColor.GREEN + PriceUtility.formatMoney(TycoonUpgrades.getMiningRateUpgradeCost(tycoonBlock, tycoonBlock.getMiningRateLevel() + 1)) + ChatColor.GRAY +  " -> " + (tycoonBlock.getMiningRateLevel() + 1) +" ]",
+                    "§8§m-----------------------");
+            ItemStack autoMinerSpeed = MenuManager.createItemstack(Material.IRON_PICKAXE,
+                    1,
+                    ChatColor.GOLD + "Upgrade Automining speed",
+                    minerLore,
+                    false,
+                    true,
+                    "upgradeAutoMinerSpeed");
+            inventory.setItem(22,autoMinerSpeed);
+        } else {
+            ItemStack autoMinerLocked = MenuManager.createItemstack(Material.IRON_BARS,
+                    1,
+                    ChatColor.RED + "Locked",
+                    null,
+                    true,
+                    true,
+                    "autoMinerLocked");
+            inventory.setItem(22,autoMinerLocked);
+        }
+
 
 
         List<String> multiplierLore = Arrays.asList("§8§m-----------------------",
                 ChatColor.GRAY + "[ Level: " + tycoonBlock.getSellMultiplierLevel() + " ]",
                 ChatColor.GRAY + "[ Sell Multiplier: " + tycoonBlock.getSellMultiplier() + "x ]",
-                ChatColor.GRAY + "[ Upgrade Cost: " + ChatColor.GREEN + PriceUtility.formatMoney(TycoonUpgrades.getSellMultiplierUpgradeCost(tycoonBlock.getSellMultiplierLevel() + 1)) + ChatColor.GRAY +  " -> " + (tycoonBlock.getSellMultiplierLevel() + 1) +" ]",
+                ChatColor.GRAY + "[ Upgrade Cost: " + ChatColor.GREEN + PriceUtility.formatMoney(TycoonUpgrades.getSellMultiplierUpgradeCost(tycoonBlock,tycoonBlock.getSellMultiplierLevel() + 1)) + ChatColor.GRAY +  " -> " + (tycoonBlock.getSellMultiplierLevel() + 1) +" ]",
                 "§8§m-----------------------");
         ItemStack worthMultiplier = MenuManager.createItemstack(Material.LIME_BUNDLE,
                 1,
@@ -108,6 +122,9 @@ public class TycoonUpgradeMenu implements MenuInterface{
                 case "upgradeAutoMinerSpeed":
                     tycoonBlock.upgradeMiningRate(player);
                     refresh(player,inventory);
+                    break;
+                case "autoMinerLocked":
+                    player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_HIT, 1f, 1f);
                     break;
                 case "upgradeWorthMultiplier":
                     tycoonBlock.upgradeSellMultiplier(player);

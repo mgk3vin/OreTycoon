@@ -64,6 +64,7 @@ public class TycoonBlock {
 
     HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
 
+    private final double basePrice;
     //========== Upgrade Attributes ==========
     private int spawnRate;
     private final int minSpawnRate = 10;
@@ -120,6 +121,7 @@ public class TycoonBlock {
 
         this.type = type;
         this.material = type.getMaterial();
+        this.basePrice = type.getBasePrice();
         this.spawnRate = type.getSpawnInterval();
         this.miningRate = type.getMiningInterval();
         this.ressourceMaterialsMap = type.getResources();
@@ -309,7 +311,7 @@ public class TycoonBlock {
             player.sendMessage(ChatColor.RED + "Max Level Reached!");
             return;
         }
-        double cost = TycoonUpgrades.getSpawnRateUpgradeCost(spawnRateLevel + 1);
+        double cost = TycoonUpgrades.getSpawnRateUpgradeCost(this,spawnRateLevel + 1);
         Economy economy = OreTycoon.getEconomy();
         if (economy.has(player, cost)) {
             economy.withdrawPlayer(player, cost);
@@ -331,7 +333,7 @@ public class TycoonBlock {
             player.sendMessage(ChatColor.RED + "Max Level Reached!");
             return;
         }
-        double cost = TycoonUpgrades.getMiningRateUpgradeCost(miningRateLevel + 1);
+        double cost = TycoonUpgrades.getMiningRateUpgradeCost(this,miningRateLevel + 1);
         Economy economy = OreTycoon.getEconomy();
         if (miningRate == spawnRate) {
             player.sendMessage(ChatColor.RED + "Mining rate level " + miningRateLevel + " can't be higher than spawn rate level: " + spawnRateLevel);
@@ -362,7 +364,7 @@ public class TycoonBlock {
             player.sendMessage(ChatColor.RED + "Max Level Reached!");
             return;
         }
-        double cost = TycoonUpgrades.getSellMultiplierUpgradeCost(sellMultiplierLevel + 1);
+        double cost = TycoonUpgrades.getSellMultiplierUpgradeCost(this,sellMultiplierLevel + 1);
         Economy economy = OreTycoon.getEconomy();
         if (economy.has(player, cost)) {
             economy.withdrawPlayer(player, cost);
@@ -612,7 +614,7 @@ public class TycoonBlock {
         hologramData.addLine("xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + (int) levelManager.getProgressPercentage(levelXp, level + 1) + "%");
         hologramData.addLine(ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
         double currentWorth = PriceUtility.calculateWorth(inventory);
-        hologramData.addLine(ChatColor.RESET + "Inventory: "+ ChatColor.GREEN +"$" + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
+        hologramData.addLine(ChatColor.RESET + "Inventory: "+ ChatColor.GREEN + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
         hologramData.setBackground(Color.fromARGB(60, 80, 80, 80));
         hologramData.setPersistent(false);
         hologramData.setTextShadow(true);
@@ -646,6 +648,7 @@ public class TycoonBlock {
         List<String> hologramLines = ((TextHologramData) data).getText();
 
         double currentWorth;
+        List<TycoonBlock> tycoonBlockList = blockManager.getTycoonBlocksFromPlayer(ownerUuid);
         switch (preset) {
             case "BLOCKNAME":
                 hologramLines.set(1, tycoonDisplayName + ChatColor.RESET);
@@ -664,9 +667,8 @@ public class TycoonBlock {
                 break;
             case "WORTH", "BALANCE", "STORAGE":
                 currentWorth = PriceUtility.calculateWorth(inventory);
-                hologramLines.set(6, ChatColor.RESET + "Inventory: "+ ChatColor.GREEN +"$" + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
+                hologramLines.set(6, ChatColor.RESET + "Inventory: "+ ChatColor.GREEN + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
             case "ORDER":
-                List<TycoonBlock> tycoonBlockList = blockManager.getTycoonBlocksFromPlayer(ownerUuid);
 
                 index = -1;
                 for (int i = 0; i < tycoonBlockList.size(); i++) {
@@ -683,19 +685,18 @@ public class TycoonBlock {
                 hologramLines.set(4, "xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + (int) levelManager.getProgressPercentage(levelXp, level + 1) + "%");
                 hologramLines.set(5, ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
                 currentWorth = PriceUtility.calculateWorth(inventory);
-                hologramLines.set(6, ChatColor.RESET + "Inventory: "+ ChatColor.GREEN +"$" + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
-
-                List<TycoonBlock> tycoonBlocksList = blockManager.getTycoonBlocksFromPlayer(ownerUuid);
+                hologramLines.set(6, ChatColor.RESET + "Inventory: "+ ChatColor.GREEN + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
 
                 index = -1;
-                for (int i = 0; i < tycoonBlocksList.size(); i++) {
-                    if (tycoonBlocksList.get(i).getBlockUID().equals(blockUID)) {
+                for (int i = 0; i < tycoonBlockList.size(); i++) {
+                    if (tycoonBlockList.get(i).getBlockUID().equals(blockUID)) {
                         index = i + 1;
                         break;
                     }
                 }
                 hologramLines.set(0, "[ " + getOwnerName() + "'s Tycoon #" + index + " ]");
-                break;
+
+                return;
             default:
                 break;
         }

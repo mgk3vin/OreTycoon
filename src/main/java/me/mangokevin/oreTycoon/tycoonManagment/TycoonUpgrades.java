@@ -32,25 +32,25 @@ public class TycoonUpgrades {
     public static double calculateNewSellMultiplier(int level, double defaultSellMultiplier){
         return (Math.round((defaultSellMultiplier + (level * 0.01)) * 100.0)/100.0);
     }
-    public static boolean isAutoMinerUnlocked(int level){
+    public boolean shouldAutoMinerUnlocked(int level){
         if (level >= 5){
             return true;
         }else {
             return false;
         }
     }
-    public static double getSpawnRateUpgradeCost(int level){
-        double base = 100.0;
+    public static double getSpawnRateUpgradeCost(TycoonBlock tycoonBlock, int level){
+        double base = tycoonBlock.getTycoonType().getBasePrice();
         double multi = 1.4;
         return Math.round(getUpgradeCost(level, base, multi));
     }
-    public static double getMiningRateUpgradeCost(int level){
-        double base = 200.0;
+    public static double getMiningRateUpgradeCost(TycoonBlock tycoonBlock, int level){
+        double base = tycoonBlock.getTycoonType().getBasePrice();
         double multi = 1.2;
         return Math.round(getUpgradeCost(level, base, multi));
     }
-    public static double getSellMultiplierUpgradeCost(int level){
-        double base = 1000.0;
+    public static double getSellMultiplierUpgradeCost(TycoonBlock tycoonBlock, int level){
+        double base = tycoonBlock.getTycoonType().getBasePrice() * 10.0;
         double multi = 1.2;
         return Math.round(getUpgradeCost(level, base, multi));
     }
