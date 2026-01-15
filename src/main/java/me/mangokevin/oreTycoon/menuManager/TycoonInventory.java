@@ -53,7 +53,7 @@ public class TycoonInventory implements MenuInterface {
         ItemStack item = MenuManager.createItemstack(
                 Material.GREEN_STAINED_GLASS_PANE,
                 1,
-                ChatColor.GREEN + "Sell all: " + "$" + PriceUtility.formatMoney(currentWorth) ,
+                ChatColor.GREEN + "Sell all: " + PriceUtility.formatMoney(currentWorth) ,
                 null,
                 false,
                 true

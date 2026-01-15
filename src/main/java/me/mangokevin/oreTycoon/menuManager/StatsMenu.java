@@ -169,7 +169,7 @@ public class StatsMenu implements MenuInterface {
                 int itemsPerPage = 14;
                 int page;
                 if (tycoonBlock.getIndex() >= 0){
-                    page = tycoonBlock.getIndex() / itemsPerPage;
+                    page = tycoonBlock.getIndex() / (itemsPerPage + 1);//+1 for item 15 on the next page
                 }else{
                     page = 0;
                 }

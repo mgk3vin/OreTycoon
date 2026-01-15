@@ -73,6 +73,7 @@ public class TycoonLevelPath implements MenuInterface{
                                 ChatColor.AQUA + "Level " + level,
                                 Arrays.asList("§8§m-----------------------",
                                         ChatColor.GREEN + "+5 MaxStorage",
+                                        ChatColor.GREEN + "+ 1 Sell Multiplier Level",
                                         "",
                                         ChatColor.GRAY + "[Click to claim Reward]",
                                         "§8§m-----------------------"),
@@ -86,6 +87,7 @@ public class TycoonLevelPath implements MenuInterface{
                                 ChatColor.AQUA + "Level " + level,
                                 Arrays.asList("§8§m-----------------------",
                                         ChatColor.GREEN + "+ Auto Miner",
+                                        ChatColor.GREEN + "+ 1 Sell Multiplier Level",
                                         "",
                                         ChatColor.GRAY + "[Click to claim Reward]",
                                         "§8§m-----------------------"),
@@ -99,6 +101,7 @@ public class TycoonLevelPath implements MenuInterface{
                                 ChatColor.AQUA + "Level " + level,
                                 Arrays.asList("§8§m-----------------------",
                                         ChatColor.GREEN + "+ test",
+                                        ChatColor.GREEN + "+ 1 Sell Multiplier Level",
                                         "",
                                         ChatColor.GRAY + "[Click to claim Reward]",
                                         "§8§m-----------------------"),
@@ -176,9 +179,13 @@ public class TycoonLevelPath implements MenuInterface{
                 case "level_item_claim":
                     //tycoonBlock.upgradeMaxInventoryStorage(player);
                     tycoonBlock.getTycoonUpgrades().claimLevel(level);
+                    int sellMultiplierLevel = tycoonBlock.getTycoonUpgrades().getSellMultiplierLevel();
+                    tycoonBlock.getTycoonUpgrades().setSellMultiplierLevel(level + 1);
+                    tycoonBlock.updateAttributes();
                     switch (level) {
                         case 1, 2, 3, 4:
                             tycoonBlock.upgradeMaxInventoryStorage(player);
+
                             break;
                         case 5:
                             tycoonBlock.getTycoonUpgrades().setAutoMinerUnlocked(true);

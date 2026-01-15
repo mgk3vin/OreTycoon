@@ -205,10 +205,10 @@ public class TycoonBlock {
     public void sellInventory(Inventory inventory, Player player) {
         Economy econ = OreTycoon.getEconomy();
         double worth = PriceUtility.calculateWorth(inventory) * sellMultiplier;
-        System.out.println("TycoonBlock Calculate Worth: " + "$" + PriceUtility.formatMoney(worth));
+        System.out.println("TycoonBlock Calculate Worth: " + PriceUtility.formatMoney(worth));
         if (worth <= 0) return;
         econ.depositPlayer(player, worth);
-        player.sendMessage(ChatColor.GREEN + "Sold items worth: " + "$" + PriceUtility.formatMoney(worth) + " with " + sellMultiplier + "x Sell Multiplier");
+        player.sendMessage(ChatColor.GREEN + "Sold items worth: " + PriceUtility.formatMoney(worth) + " with " + sellMultiplier + "x Sell Multiplier");
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.3f, 1);
         cleanInventory(inventory);
         updateHologramPreset(location, "WORTH");
@@ -416,7 +416,6 @@ public class TycoonBlock {
     //---------- AutoMiner ----------
     public boolean tryAutoMining(TycoonBlock tycoonBlock, Location blockLocation) {
         if (!isAutoMinerUnlocked){
-            Console.debug("[TycoonBlock] Auto Miner locked");
             return false;
         }
         ItemStack item = new ItemStack(blockLocation.getBlock().getType());
@@ -668,6 +667,7 @@ public class TycoonBlock {
             case "WORTH", "BALANCE", "STORAGE":
                 currentWorth = PriceUtility.calculateWorth(inventory);
                 hologramLines.set(6, ChatColor.RESET + "Inventory: "+ ChatColor.GREEN + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
+                break;
             case "ORDER":
 
                 index = -1;
@@ -678,6 +678,7 @@ public class TycoonBlock {
                     }
                 }
                 hologramLines.set(0, "[ " + getOwnerName() + "'s Tycoon #" + index + " ]");
+                break;
             case "ALL":
                 hologramLines.set(1, tycoonDisplayName + ChatColor.RESET);
                 hologramLines.set(2, "Status: " + isActiveFormatted() + ChatColor.WHITE + " | " + isBuffedFormatted() + ChatColor.RESET);

@@ -122,7 +122,7 @@ public class OverviewMenu implements MenuInterface{
             pdc.set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "autominer_disabled");
             toggleAutoMiner.setItemMeta(itemMeta);
         }
-        ItemStack collectAllBalance = MenuManager.createItemstack(Material.GREEN_STAINED_GLASS_PANE, 1, ChatColor.GREEN + "Sell all blocks for: " + "$" + PriceUtility.formatMoney(getAllWorth(player)), null, false, true);
+        ItemStack collectAllBalance = MenuManager.createItemstack(Material.GREEN_STAINED_GLASS_PANE, 1, ChatColor.GREEN + "Sell all blocks for: " + PriceUtility.formatMoney(getAllWorth(player)), null, false, true);
         ItemMeta itemMeta = collectAllBalance.getItemMeta();
         if (itemMeta == null) return;
         PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
