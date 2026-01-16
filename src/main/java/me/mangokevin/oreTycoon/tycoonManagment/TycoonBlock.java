@@ -926,7 +926,9 @@ public class TycoonBlock {
         this.creationTime = creationTime;
     }
     public void setAutoMinerEnabled(boolean autoMinerEnabled) {
-        this.autoMinerEnabled = autoMinerEnabled;
+        if (isAutoMinerUnlocked){
+            this.autoMinerEnabled = autoMinerEnabled;
+        }
     }
     public int getInventoryStorage(){
         return inventoryStorage;

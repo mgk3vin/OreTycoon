@@ -61,9 +61,14 @@ public class OverviewMenu implements MenuInterface{
             int idx = startIndex + i;
             if (idx < tycoonBlockList.size()) {
                 if (!tycoonBlockList.get(idx).isAutoMinerEnabled()) {
+                    if (!tycoonBlockList.get(idx).getTycoonUpgrades().isAutoMinerUnlocked()) {
+                        continue;
+                    }
                     toggleAllAutoMiner = false;
                     break;
                 }
+            } else {
+                toggleAllAutoMiner = false;
             }
         }
         List<Integer> usableSlots = getUsableSlots();
