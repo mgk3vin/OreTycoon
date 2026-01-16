@@ -66,17 +66,50 @@ public class TycoonLevelPath implements MenuInterface{
                         true,
                         "level_item_claimed");
             }else if(currentTycoonLevel >= level){
-                levelItem = MenuManager.createItemstack(Material.CHEST_MINECART,
-                        1,
-                        ChatColor.AQUA + "Level " + level,
-                        Arrays.asList("§8§m-----------------------",
-                                ChatColor.GREEN + "+5 MaxStorage",
-                                "",
-                                ChatColor.GRAY + "[Click to claim Reward]",
-                                "§8§m-----------------------"),
-                        true,
-                        true,
-                        "level_item_claim");
+                switch (level) {
+                    case 1, 2, 3, 4:
+                        levelItem = MenuManager.createItemstack(Material.CHEST_MINECART,
+                                1,
+                                ChatColor.AQUA + "Level " + level,
+                                Arrays.asList("§8§m-----------------------",
+                                        ChatColor.GREEN + "+5 MaxStorage",
+                                        ChatColor.GREEN + "+ 1 Sell Multiplier Level",
+                                        "",
+                                        ChatColor.GRAY + "[Click to claim Reward]",
+                                        "§8§m-----------------------"),
+                                true,
+                                true,
+                                "level_item_claim");
+                        break;
+                    case 5:
+                        levelItem = MenuManager.createItemstack(Material.CHEST_MINECART,
+                                1,
+                                ChatColor.AQUA + "Level " + level,
+                                Arrays.asList("§8§m-----------------------",
+                                        ChatColor.GREEN + "+ Auto Miner",
+                                        ChatColor.GREEN + "+ 1 Sell Multiplier Level",
+                                        "",
+                                        ChatColor.GRAY + "[Click to claim Reward]",
+                                        "§8§m-----------------------"),
+                                true,
+                                true,
+                                "level_item_claim");
+                        break;
+                    default:
+                        levelItem = MenuManager.createItemstack(Material.CHEST_MINECART,
+                                1,
+                                ChatColor.AQUA + "Level " + level,
+                                Arrays.asList("§8§m-----------------------",
+                                        ChatColor.GREEN + "+ test",
+                                        ChatColor.GREEN + "+ 1 Sell Multiplier Level",
+                                        "",
+                                        ChatColor.GRAY + "[Click to claim Reward]",
+                                        "§8§m-----------------------"),
+                                true,
+                                true,
+                                "level_item_claim");
+                        break;
+                }
             } else {
                 levelItem = MenuManager.createItemstack(Material.RED_STAINED_GLASS_PANE,
                         1,
@@ -102,7 +135,7 @@ public class TycoonLevelPath implements MenuInterface{
         if (page > 0) {
             ItemStack prev_page = MenuManager.createItemstack(Material.ARROW,
                     1,
-                    "Previous Page",
+                    "<- Previous Page",
                     null,
                     false,
                     true,
@@ -111,7 +144,7 @@ public class TycoonLevelPath implements MenuInterface{
         }
         ItemStack next_page = MenuManager.createItemstack(Material.ARROW,
                 1,
-                "Next Page",
+                "Next Page ->",
                 null,
                 false,
                 true,
@@ -144,8 +177,21 @@ public class TycoonLevelPath implements MenuInterface{
 
             switch (action) {
                 case "level_item_claim":
-                    tycoonBlock.upgradeMaxInventoryStorage(player);
+                    //tycoonBlock.upgradeMaxInventoryStorage(player);
                     tycoonBlock.getTycoonUpgrades().claimLevel(level);
+                    int sellMultiplierLevel = tycoonBlock.getTycoonUpgrades().getSellMultiplierLevel();
+                    tycoonBlock.getTycoonUpgrades().setSellMultiplierLevel(level + 1);
+                    tycoonBlock.updateAttributes();
+                    switch (level) {
+                        case 1, 2, 3, 4:
+                            tycoonBlock.upgradeMaxInventoryStorage(player);
+
+                            break;
+                        case 5:
+                            tycoonBlock.getTycoonUpgrades().setAutoMinerUnlocked(true);
+                            tycoonBlock.updateAttributes();
+                            break;
+                    }
                     player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.2f);
                     refresh(player, inventory);
                     break;

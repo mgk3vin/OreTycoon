@@ -1,7 +1,6 @@
 package me.mangokevin.oreTycoon.listener;
 
 import me.mangokevin.oreTycoon.OreTycoon;
-import me.mangokevin.oreTycoon.utility.StorageUtils;
 import me.mangokevin.oreTycoon.tycoonManagment.*;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -15,11 +14,6 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 public class BlockPlacedListener implements Listener {
 
@@ -54,66 +48,26 @@ public class BlockPlacedListener implements Listener {
                 event.setCancelled(true);
                 return;
             }
+
             //Tycoon Block place Logik
 
             assert meta != null;
             PersistentDataContainer pdc = meta.getPersistentDataContainer();
             TycoonBlock tycoonBlock = TycoonData.readFromItem(pdc, player, event.getBlock(), plugin);
             block.getWorld().playSound(block.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_SET_SPAWN, 1.0f, 1.5f);
-
-
-//            int level = pdc.getOrDefault(tycoonData.getLEVEL_KEY() ,PersistentDataType.INTEGER, 1);
-//            int xp = pdc.getOrDefault(TycoonData.XP, PersistentDataType.INTEGER, 0);
-//            int spawnInterval = pdc.getOrDefault(tycoonData.getSPAWN_INTERVAL_KEY(), PersistentDataType.INTEGER, 5);
-//            long creationTime = System.currentTimeMillis();
-//            String tycoonName = pdc.getOrDefault(TycoonData.TYPE_KEY, PersistentDataType.STRING, "ERROR");
-//            System.out.println("[BlockPlacedListener] Loading: " + level + "|" + xp + "|" + spawnInterval + "|" + creationTime);
-//
-//
-//
-//            TycoonType tycoonType = TycoonType.valueOf(tycoonName);
-//            Material type = event.getBlock().getType();
-//            Location location = block.getLocation();
-//            UUID uuid = player.getUniqueId();
-//
-//            //========== Load Upgrades ==========
-//            TycoonUpgrades upgrades = new TycoonUpgrades();
-//            upgrades.setSpawnRateLevel(pdc.getOrDefault(TycoonData.TYCOON_SPAWN_RATE_LEVEL_KEY, PersistentDataType.INTEGER, 1));
-//            upgrades.setMiningRateLevel(pdc.getOrDefault(TycoonData.TYCOON_MINING_RATE_LEVEL_KEY, PersistentDataType.INTEGER, 1));
-//            upgrades.setSellMultiplierLevel(pdc.getOrDefault(TycoonData.TYCOON_SELL_MULTIPLIER_LEVEL_KEY, PersistentDataType.INTEGER, 1));
-//            upgrades.setInventoryStorageLevel(pdc.getOrDefault(TycoonData.TYCOON_MAX_INVENTORY_STORAGE_KEY, PersistentDataType.INTEGER, 1));
-//
-//            //Load claimed Levels from String
-//            String claimedLevelsData = pdc.get(TycoonData.TYCOON_CLAIMED_LEVELS_KEY, PersistentDataType.STRING);
-//            if (claimedLevelsData != null && !claimedLevelsData.trim().isEmpty()) {
-//                String[] claimedLevels = pdc.get(TycoonData.TYCOON_CLAIMED_LEVELS_KEY, PersistentDataType.STRING).split(",");
-//                List<Integer> claimedLevelsList = new ArrayList<>();
-//                for (String claimedLevel : claimedLevels) {
-//                    claimedLevelsList.add(Integer.parseInt(claimedLevel));
-//                }
-//                upgrades.setClaimedLevels(claimedLevelsList);
-//            }
-//
-//            //========== Load Upgrades ==========
-//
-//            TycoonBlock tycoonBlock = new TycoonBlock(tycoonType,location, uuid, false, oreTycoon, upgrades);
-//
-//            tycoonBlock.setLevel(level);
-//            tycoonBlock.setLevelXp(xp);
-//            tycoonBlock.setCreationTime(creationTime);
-//
-//            blockManager.addTycoonBlock(tycoonBlock);
-//
-//
-//
-//            if (pdc.has(TycoonData.INVENTORY_KEY, PersistentDataType.BYTE_ARRAY)){
-//                byte[] byteArray =  pdc.get(TycoonData.INVENTORY_KEY, PersistentDataType.BYTE_ARRAY);
-//
-//                StorageUtils.fromByteArray(byteArray, tycoonBlock.getInventory());
-//            }
-//
-//            blockManager.getTycoonBlock(block).createHologram();
         }
 
+        Location checkLocation = block.getLocation().clone();
+        checkLocation.add(0, 1, 0);
+        if (blockManager.isTycoonBlock(checkLocation)) {
+            TycoonBlock tycoonBlock = blockManager.getTycoonBlock(checkLocation);
+            if (tycoonBlock != null) {
+                if (tycoonBlock.getTycoonType().getBuffMaterials().contains(block.getType())) {
+                    tycoonBlock.activateSellMultiplierBuff();
+                    player.sendMessage(ChatColor.GREEN + "Sell Multiplier Buff Activated!");
+                    player.playSound(player.getLocation(), Sound.BLOCK_LARGE_AMETHYST_BUD_PLACE, 1.0f, 1.5f);
+                }
+            }
+        }
     }
 }

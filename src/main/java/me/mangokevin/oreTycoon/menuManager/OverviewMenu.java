@@ -61,9 +61,14 @@ public class OverviewMenu implements MenuInterface{
             int idx = startIndex + i;
             if (idx < tycoonBlockList.size()) {
                 if (!tycoonBlockList.get(idx).isAutoMinerEnabled()) {
+                    if (!tycoonBlockList.get(idx).getTycoonUpgrades().isAutoMinerUnlocked()) {
+                        continue;
+                    }
                     toggleAllAutoMiner = false;
                     break;
                 }
+            } else {
+                toggleAllAutoMiner = false;
             }
         }
         List<Integer> usableSlots = getUsableSlots();
@@ -122,7 +127,7 @@ public class OverviewMenu implements MenuInterface{
             pdc.set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "autominer_disabled");
             toggleAutoMiner.setItemMeta(itemMeta);
         }
-        ItemStack collectAllBalance = MenuManager.createItemstack(Material.GREEN_STAINED_GLASS_PANE, 1, ChatColor.GREEN + "Sell all blocks for: " + "$" + PriceUtility.formatMoney(getAllWorth(player)), null, false, true);
+        ItemStack collectAllBalance = MenuManager.createItemstack(Material.GREEN_STAINED_GLASS_PANE, 1, ChatColor.GREEN + "Sell all blocks for: " + PriceUtility.formatMoney(getAllWorth(player)), null, false, true);
         ItemMeta itemMeta = collectAllBalance.getItemMeta();
         if (itemMeta == null) return;
         PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
