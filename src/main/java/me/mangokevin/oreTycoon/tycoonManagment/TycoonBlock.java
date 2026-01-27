@@ -77,6 +77,7 @@ public class TycoonBlock {
     private double sellMultiplier = 1;
     private int sellMultiplierLevel;
     private double sellMultiplierBuff = 1.0;
+    private double maxSellMultiplier = 5.0;
 
     private int inventoryStorage;
     private int inventoryStorageLevel;
@@ -87,11 +88,17 @@ public class TycoonBlock {
 
     private final TycoonUpgrades upgrades;
     //========== Upgrade Attributes ==========
-    //========== Buff Attributes ==========
-    private boolean isBuffed;
-    private double maxSellMultiplier = 3.0;
 
     //========== Buff Attributes ==========
+    private boolean isBuffed;
+
+    //========== Buff Attributes ==========
+
+    //========== Booster Attributes ==========
+    private TycoonBooster tycoonBooster;
+    private boolean isAutoMinerBoosterActive;
+    private boolean isSellMultiplierBoosterActive;
+    //========== Booster Attributes ==========
 
 
     private final OreTycoon plugin;
@@ -99,6 +106,9 @@ public class TycoonBlock {
     private final LevelManager levelManager;
 
     private final Map<Material, Integer> ressourceMaterialsMap;
+    private Map<Material, Boolean> activeRessourceMaterialsMap = new HashMap<>();
+
+    private final Random random = new Random();
 
 
     public TycoonBlock(TycoonType type, Location location, UUID ownerUuid, boolean isActive, OreTycoon plugin, TycoonUpgrades upgrades) {
@@ -129,8 +139,18 @@ public class TycoonBlock {
         this.inventoryStorage = type.getDefaultMaxInventoryStorage();
         this.buffMaterials = type.getBuffMaterials();
 
-        this.upgrades = upgrades;
+        //Set all ressources to inactive
+        for (Map.Entry<Material, Integer> entry : ressourceMaterialsMap.entrySet()) {
+            this.activeRessourceMaterialsMap.put(entry.getKey(), true);
+        }
+
+        //========== Get Booster  ==========
+        this.tycoonBooster = new TycoonBooster();
+        //========== Get Booster  ==========
+
         //========== Get Upgrade Attributes ==========
+        this.upgrades = upgrades;
+
         this.spawnRateLevel = upgrades.getSpawnRateLevel();
         this.miningRateLevel = upgrades.getMiningRateLevel();
         this.sellMultiplierLevel = upgrades.getSellMultiplierLevel();
@@ -141,6 +161,8 @@ public class TycoonBlock {
         //========== Calculate rates matching Level ==========
         updateAttributes();
         //========== Calculate rates matching Level ==========
+
+
 
         this.spawnedBlockLocations = new ArrayList<>();
 
@@ -174,13 +196,12 @@ public class TycoonBlock {
             if (miningTickCounter >= miningRate) {
                 miningTickCounter = 0;
                 // Wichtig: Nur versuchen abzubauen, wenn dort auch wirklich ein Block steht!
-                Random random = new Random();
 
                 if (activeBlocks.isEmpty()) return;
 
                 // Einen zufälligen Block aus dem Set picken
                 Block target = activeBlocks.stream()
-                        .skip(new Random().nextInt(activeBlocks.size()))
+                        .skip(random.nextInt(activeBlocks.size()))
                         .findFirst().orElse(null);
 
                 if (target != null && target.getType() != Material.AIR) {
@@ -248,7 +269,7 @@ public class TycoonBlock {
 
         Location center = getLocation();
         World world = center.getWorld();
-        Random rand = new Random();
+
 
         // 1. Definiere das 5x5 Areal (vom Zentrum aus -2 bis +2)
         int minX = center.getBlockX() - 2;
@@ -257,8 +278,8 @@ public class TycoonBlock {
         int maxZ = center.getBlockZ() + 2;
         int fixedY = center.getBlockY(); // Wir spawnen nur auf der Y-Ebene des Tycoon-Block
 
-        int randomX = rand.nextInt(maxX - minX + 1) + minX;
-        int randomZ = rand.nextInt(maxZ - minZ + 1) + minZ;
+        int randomX = random.nextInt(maxX - minX + 1) + minX;
+        int randomZ = random.nextInt(maxZ - minZ + 1) + minZ;
 
         Location randomLocation = new Location(center.getWorld(), randomX, fixedY, randomZ);
         Block spawnBlock = randomLocation.getBlock();
@@ -285,14 +306,17 @@ public class TycoonBlock {
     }
 
     public void updateAttributes() {
-        spawnRateLevel = upgrades.getSpawnRateLevel();
-        miningRateLevel = upgrades.getMiningRateLevel();
         sellMultiplierLevel = upgrades.getSellMultiplierLevel();
         sellMultiplierBuff = upgrades.getSellMultiplierBuff();
+
+        spawnRateLevel = upgrades.getSpawnRateLevel();
         spawnRate = TycoonUpgrades.calculateNewSpawnRate(spawnRateLevel, type.getSpawnInterval());
+
+        miningRateLevel = upgrades.getMiningRateLevel();
         miningRate = TycoonUpgrades.calculateNewMiningRate(miningRateLevel, type.getMiningInterval());
 
         sellMultiplier = TycoonUpgrades.calculateNewSellMultiplier(sellMultiplierLevel, type.getSellMultiplier());
+        sellMultiplier += tycoonBooster.getSellMultiplierBoost();
         sellMultiplier *= sellMultiplierBuff;
 
         inventoryStorageLevel = upgrades.getInventoryStorageLevel();
@@ -486,16 +510,30 @@ public class TycoonBlock {
     //---------- AutoMiner ----------
 
     private Material getRandomMaterial(Map<Material, Integer> map) {
-        int totalWeight = 0;
-        for (int weight : map.values()) {
-            totalWeight += weight;
-        }
-        int randomValue = new Random().nextInt(totalWeight);
-        int currentSum = 0;
+        //Only from active Materials
+        int totalActiveWeight = 0;
         for (Map.Entry<Material, Integer> entry : map.entrySet()) {
-            currentSum += entry.getValue();
-            if (randomValue < currentSum) {
-                return entry.getKey();
+            //Only when the Material is active it gets added to the total Weight
+            if (activeRessourceMaterialsMap.get(entry.getKey())) {
+                totalActiveWeight += entry.getValue();
+            }
+        }
+
+        //Safety Check if every Item is disabled
+        if (totalActiveWeight <= 0) {
+            return null;
+        }
+
+        int randomValue = random.nextInt(totalActiveWeight);
+        int currentSum = 0;
+
+        for (Map.Entry<Material, Integer> entry : map.entrySet()) {
+            //Only check for active Ressources
+            if (activeRessourceMaterialsMap.get(entry.getKey())) {
+                currentSum += entry.getValue();
+                if (randomValue < currentSum) {
+                    return entry.getKey();
+                }
             }
         }
         return null;
@@ -525,6 +563,17 @@ public class TycoonBlock {
         return averageWorth;
     }
 
+    public int getTotalActiveWeight(){
+        Map<Material, Integer> OriginalResources = type.getResources();
+
+        int totalWeight = 0;
+        for (Map.Entry<Material, Integer> entry : OriginalResources.entrySet()) {
+            if (activeRessourceMaterialsMap.get(entry.getKey())) {
+                totalWeight += entry.getValue();
+            }
+        }
+        return totalWeight;
+    }
 
     public boolean containsBlock(Block block) {
         return activeBlocks.contains(block);
@@ -900,6 +949,15 @@ public class TycoonBlock {
     public double getMiningRateFormatted(){
         return (double) miningRate /20;
     }
+    public Map<Material, Boolean> getActiveRessourceMaterialsMap(){
+        return activeRessourceMaterialsMap;
+    }
+    public int getInventoryStorage(){
+        return inventoryStorage;
+    }
+    public TycoonBooster getTycoonBooster() {
+        return tycoonBooster;
+    }
     // ---------     Getter      ---------
 
     // ---------     Setter      ---------
@@ -930,8 +988,8 @@ public class TycoonBlock {
             this.autoMinerEnabled = autoMinerEnabled;
         }
     }
-    public int getInventoryStorage(){
-        return inventoryStorage;
+    public void setActiveRessourceMaterialsMap(Map<Material, Boolean> activeRessourceMaterialsMap) {
+        this.activeRessourceMaterialsMap = activeRessourceMaterialsMap;
     }
     // ---------     Setter      ---------
 }

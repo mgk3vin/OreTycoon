@@ -25,6 +25,28 @@ public enum TycoonType {
                 Material.SPRUCE_LOG, 10
     ), Arrays.asList(Material.OAK_LEAVES,
                     Material.JUNGLE_LEAVES)),
+    STONE(Material.STONE,
+            ChatColor.GRAY + "Stone Tycoon",
+            20.0,
+            5*20,
+            6*20,
+            1.0,
+            40,
+            Map.of(
+                    Material.STONE, 10,
+                    Material.COBBLESTONE, 10,
+                    Material.ANDESITE, 10,
+                    Material.DIORITE, 10,
+                    Material.GRANITE, 10,
+                    Material.COBBLED_DEEPSLATE, 10,
+                    Material.TUFF, 10,
+                    Material.DIRT, 10,
+                    Material.CALCITE, 10,
+                    Material.SMOOTH_BASALT, 10
+                    ),
+            Arrays.asList(
+                    Material.FURNACE
+            )),
     COAL(Material.COAL_BLOCK,
             "§8Coal Tycoon",
             30.0,

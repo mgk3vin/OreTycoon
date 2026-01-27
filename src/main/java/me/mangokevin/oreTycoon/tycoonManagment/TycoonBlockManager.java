@@ -243,32 +243,41 @@ public class TycoonBlockManager {
             }
             //---------- Not used ----------
 
-
+            //---------- Active Blocks save ----------
+            Map<Material, Boolean> activeBlocksMap = tycoon.getActiveRessourceMaterialsMap();
+            List<String> disabledBlocksList = new ArrayList<>();
+            for (Map.Entry<Material, Boolean> entry : activeBlocksMap.entrySet()) {
+                if (!entry.getValue()) {
+                    disabledBlocksList.add(entry.getKey().name());
+                }
+            }
+            data.set(path + "disabledBlocks", disabledBlocksList);
+            //---------- Active Blocks save ----------
 
             //---------- Inventory save ----------
             List<String> inventoryItems = new ArrayList<>();
             for (ItemStack item : tycoon.getInventory()) {
-                if (item == null) continue;
+                if (item == null || item.getType() == Material.AIR) continue;
 
                 ItemMeta meta = item.getItemMeta();
                 if (meta == null) continue;
 
                 PersistentDataContainer pdc = meta.getPersistentDataContainer();
                 if (pdc.has(TycoonData.MENU_ITEM_KEY) || pdc.has(TycoonData.MENU_ACTION_KEY)) continue;
-                for (int i = 0; i < item.getAmount(); i++) {
-                    inventoryItems.add(item.getType().name());
-                }
+
+                inventoryItems.add(item.getType().name() + ":" + item.getAmount());
+
 
                 Console.log("[BlockManager] saving inventory item: " + item.getAmount() + "x " + item.getType().name());
             }
             data.set(path + "inventoryItems", inventoryItems);
             //---------- Inventory save ----------
 
-            List<String> blockLocs = new ArrayList<>();
+            List<String> spawnedBlockLocations = new ArrayList<>();
             for (Block block : tycoon.getActiveBlocks()){
-                blockLocs.add(block.getX() + "," + block.getY() + "," + block.getZ());
+                spawnedBlockLocations.add(block.getX() + "," + block.getY() + "," + block.getZ());
             }
-            data.set(path + "spawnedBlocks", blockLocs);
+            data.set(path + "spawnedBlocks", spawnedBlockLocations);
 
             data.set(path + "spawnInterval", tycoon.getSpawnRate());
             data.set(path + "hologramUID", tycoon.getHologramUID());
@@ -349,26 +358,47 @@ public class TycoonBlockManager {
                 // 4. Objekt erstellen
                 // Wichtig: Nutze deinen Konstruktor.
                 // Falls er einen Spielernamen braucht, nimm Bukkit.getOfflinePlayer(ownerUUID).getName()
-                TycoonBlock block = new TycoonBlock(tycoonType ,loc, ownerUUID, active, plugin, tycoonUpgrades);
-                block.setAutoMinerEnabled(autoMinerEnabled);
-                block.setLevel(level);
-                block.setLevelXp(xp);
-                block.setCreationTime(creationTime);
-                block.setIndex(index);
-                System.out.println("[BlockManager] Loading Tycoon " + block.getLevel() + "|" + block.getLevelXp() + "|" + block.getIndex() + "|" + block.getMaterial().toString());
+                TycoonBlock tycoonBlock = new TycoonBlock(tycoonType ,loc, ownerUUID, active, plugin, tycoonUpgrades);
+                tycoonBlock.setAutoMinerEnabled(autoMinerEnabled);
+                tycoonBlock.setLevel(level);
+                tycoonBlock.setLevelXp(xp);
+                tycoonBlock.setCreationTime(creationTime);
+                tycoonBlock.setIndex(index);
+                System.out.println("[BlockManager] Loading Tycoon " + tycoonBlock.getLevel() + "|" + tycoonBlock.getLevelXp() + "|" + tycoonBlock.getIndex() + "|" + tycoonBlock.getMaterial().toString());
 
                 if (type != null) {
-                    block.setLastSpawnedMaterial(type);
+                    tycoonBlock.setLastSpawnedMaterial(type);
                 }
-                tycoonBlocks.put(loc, block);
+                tycoonBlocks.put(loc, tycoonBlock);
+
+                //---------- Disabled Blocks Load ----------
+                List<String> disabledBlocksList = section.getStringList(path + "disabledBlocks");
+                Map<Material, Boolean> activeMaterials = new HashMap<>();
+
+                for (Map.Entry<Material, Integer> entry : tycoonBlock.getTycoonType().getResources().entrySet()) {
+                    activeMaterials.put(entry.getKey(), true);
+                }
+                for (String disabledBlock : disabledBlocksList) {
+                    try {
+                        Material mat = Material.valueOf(disabledBlock);
+                        activeMaterials.put(mat, false);
+                    }catch (IllegalArgumentException e){
+                        Console.error("[BlockManager] Invalid Material " + disabledBlock);
+                    }
+                }
+                tycoonBlock.setActiveRessourceMaterialsMap(activeMaterials);
+
+                //---------- Disabled Blocks Load ----------
 
                 //---------- Inventory Load ----------
                 List<String> inventoryItems = section.getStringList(path + "inventoryItems");
                 for (String inventoryItem : inventoryItems) {
-                    Material item = Material.getMaterial(inventoryItem);
+                    String[] split = inventoryItem.split(":");
+                    int amount = Integer.parseInt(split[1]);
+                    Material item = Material.getMaterial(split[0]);
                     if (item != null) {
-                        ItemStack itemStack = new ItemStack(item);
-                        block.getTycoonInventory().addItem(itemStack);
+                        ItemStack itemStack = new ItemStack(item, amount);
+                        tycoonBlock.getTycoonInventory().addItem(itemStack);
                         Console.log("added " + inventoryItem + " to inventory");
                     }
                 }
@@ -384,7 +414,7 @@ public class TycoonBlockManager {
 
                     if (b.getType() != Material.AIR) {
                         System.out.println("[BlockManager] Reloading Block: " + b.getType() + "|" + bx + "," + by + "," + bz);
-                        block.addActiveBlocks(b); // Methode in TycoonBlock, die den Block in die interne Liste packt
+                        tycoonBlock.addActiveBlocks(b); // Methode in TycoonBlock, die den Block in die interne Liste packt
                     }
                 }
 
@@ -395,7 +425,7 @@ public class TycoonBlockManager {
         }
         for (TycoonBlock block : tycoonBlocks.values()) {
             block.createHologram();
-            Console.log("[BlockManager] Creating Hologram: " + PriceUtility.calculateWorth(block.getInventory()));
+
         }
     }
     // ---------------- Filesave working ----------------

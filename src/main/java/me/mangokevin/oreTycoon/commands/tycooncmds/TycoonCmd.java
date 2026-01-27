@@ -4,10 +4,8 @@ import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.menuManager.MenuManager;
 import me.mangokevin.oreTycoon.menuManager.OverviewMenu;
 import me.mangokevin.oreTycoon.menuManager.StatsMenu;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonType;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonUpgrades;
+import me.mangokevin.oreTycoon.menuManager.TycoonBoosterMenu;
+import me.mangokevin.oreTycoon.tycoonManagment.*;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -45,6 +43,10 @@ public class TycoonCmd implements CommandExecutor {
         String action = args[0].toLowerCase();
 
         switch (action) {
+            case "booster":
+                p.getInventory().addItem(new TycoonBooster().createAutoMinerBooster(1));
+                p.getInventory().addItem(new TycoonBooster().createSellMultiplierBooster(1));
+                break;
             case "runtest":
                 if (args.length == 4) {
                     try {
@@ -107,6 +109,9 @@ public class TycoonCmd implements CommandExecutor {
                 switch (type) {
                     case "wood":
                         blockManager.giveTycoonBlock(p, TycoonType.WOOD);
+                        return true;
+                    case "stone":
+                        blockManager.giveTycoonBlock(p, TycoonType.STONE);
                         return true;
                     case "coal":
                         blockManager.giveTycoonBlock(p, TycoonType.COAL);
