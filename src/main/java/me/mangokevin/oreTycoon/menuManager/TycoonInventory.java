@@ -126,10 +126,8 @@ public class TycoonInventory implements MenuInterface {
                 new StatsMenu(tycoonBlock, plugin).open(player);
             case "filler_item":
                 break;
-            case null:
+            case null, default:
                 break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + action);
         }
     }
     public TycoonBlock getTycoonBlock() {

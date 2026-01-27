@@ -12,8 +12,9 @@ public class InventoryClickListener implements Listener {
         // 1. Ist es ein Inventar mit unserem Holder?
         if (!(event.getInventory().getHolder() instanceof TycoonHolder holder)) return;
 
-        event.setCancelled(true);
+
         if (event.getCurrentItem() == null) return;
+        event.setCancelled(true);
 
         MenuInterface menu = holder.getMenu();
         if (menu != null) {
