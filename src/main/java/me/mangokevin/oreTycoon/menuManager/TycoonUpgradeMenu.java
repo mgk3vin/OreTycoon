@@ -49,6 +49,7 @@ public class TycoonUpgradeMenu implements MenuInterface{
                 spawnLore,
                 false,
                 true,
+                true,
                 "upgradeSpawnRate");
         inventory.setItem(20,spawnRate);
 
@@ -64,6 +65,7 @@ public class TycoonUpgradeMenu implements MenuInterface{
                     minerLore,
                     false,
                     true,
+                    true,
                     "upgradeAutoMinerSpeed");
             inventory.setItem(22,autoMinerSpeed);
         } else {
@@ -71,6 +73,7 @@ public class TycoonUpgradeMenu implements MenuInterface{
                     1,
                     ChatColor.RED + "Locked",
                     null,
+                    true,
                     true,
                     true,
                     "autoMinerLocked");
@@ -81,7 +84,7 @@ public class TycoonUpgradeMenu implements MenuInterface{
 
         List<String> multiplierLore = Arrays.asList("§8§m-----------------------",
                 ChatColor.GRAY + "[ Level: " + tycoonBlock.getSellMultiplierLevel() + " ]",
-                ChatColor.GRAY + "[ Sell Multiplier: " + tycoonBlock.getSellMultiplier() + "x ]",
+                ChatColor.GRAY + "[ Sell Multiplier: " + tycoonBlock.getSellMultiplierFormatted() + "x ]",
                 ChatColor.GRAY + "[ Upgrade Cost: " + ChatColor.GREEN + PriceUtility.formatMoney(TycoonUpgrades.getSellMultiplierUpgradeCost(tycoonBlock,tycoonBlock.getSellMultiplierLevel() + 1)) + ChatColor.GRAY +  " -> " + (tycoonBlock.getSellMultiplierLevel() + 1) +" ]",
                 "§8§m-----------------------");
         ItemStack worthMultiplier = MenuManager.createItemstack(Material.LIME_BUNDLE,
@@ -89,6 +92,7 @@ public class TycoonUpgradeMenu implements MenuInterface{
                 ChatColor.GREEN + "Upgrade Money Multiplier",
                 multiplierLore,
                 false,
+                true,
                 true,
                 "upgradeWorthMultiplier");
         inventory.setItem(24,worthMultiplier);
@@ -99,6 +103,7 @@ public class TycoonUpgradeMenu implements MenuInterface{
                 ChatColor.RED + "<- Back to Stats Menu",
                 null,
                 false,
+                true,
                 true,
                 "return");
         inventory.setItem(44, returnItem);

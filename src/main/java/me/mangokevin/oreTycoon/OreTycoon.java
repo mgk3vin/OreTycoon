@@ -8,6 +8,8 @@ import me.mangokevin.oreTycoon.tycoonListener.TycoonAutoMineListener;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import me.mangokevin.oreTycoon.listener.*;
 import me.mangokevin.oreTycoon.papiExpansion.PlaceholderExpansion;
+import me.mangokevin.oreTycoon.tycoonListener.TycoonBoosterTickedListener;
+import me.mangokevin.oreTycoon.tycoonListener.TycoonChangedAttributesListener;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
 import net.ess3.api.IEssentials;
@@ -82,6 +84,8 @@ public final class OreTycoon extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
         getServer().getPluginManager().registerEvents(new InventoryClickListener(),this);
         getServer().getPluginManager().registerEvents(new TycoonAutoMineListener(), this);
+        //getServer().getPluginManager().registerEvents(new TycoonChangedAttributesListener(), this);
+        getServer().getPluginManager().registerEvents(new TycoonBoosterTickedListener(), this);
         Objects.requireNonNull(getCommand("tycoon")).setExecutor(new TycoonCmd(this, blockManager));
         Objects.requireNonNull(getCommand("tycoon")).setTabCompleter(new TycoonTabCompleter());
         //-----------------------   Listeners & Commands    -----------------------

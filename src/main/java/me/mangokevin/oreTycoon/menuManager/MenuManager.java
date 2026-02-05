@@ -3,6 +3,8 @@ package me.mangokevin.oreTycoon.menuManager;
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
+import me.mangokevin.oreTycoon.tycoonManagment.TycoonHolder;
+import me.mangokevin.oreTycoon.utility.Console;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -23,6 +25,47 @@ public class MenuManager {
         this.plugin = plugin;
     }
 
+
+    public static void refreshOpenInventory(Player player, TycoonBlock tycoonBlock) {
+        Inventory openInventory = player.getOpenInventory().getTopInventory();
+        if (openInventory.getHolder() instanceof TycoonHolder tycoonHolder) {
+            MenuInterface menu = tycoonHolder.getMenu();
+            if (menu == null) {
+                return;
+            };
+
+            switch (menu){
+                case TycoonInventory tycoonInventory -> {
+                    if (tycoonInventory.getTycoonBlock().equals(tycoonBlock)) {
+                        tycoonInventory.refresh(player, openInventory);
+                        Console.log("Refreshing tycoon inventory");
+                    }
+                }
+                case StatsMenu statsMenu -> {
+                    if (statsMenu.getTycoonBlock().equals(tycoonBlock)) {
+                        statsMenu.refresh(player,  openInventory);
+                        Console.log("Refreshing stats menu");
+                    }
+                    //statsMenu.refresh(player, openInventory);
+                }
+                case OverviewMenu overviewMenu -> {
+                    if (tycoonBlock.getOfflineOwner().getUniqueId().equals(player.getUniqueId())) {
+                        overviewMenu.refresh(player, openInventory);
+                        Console.log("Refreshing overview menu");
+                    }
+                }
+                case TycoonBoosterMenu tycoonBoosterMenu -> {
+                    if (tycoonBoosterMenu.getTycoonBlock().equals(tycoonBlock)) {
+                        tycoonBoosterMenu.refresh(player, openInventory);
+                        Console.log("Refreshing TycoonBoosterMenu");
+                    }
+                }
+
+                default -> {}
+            }
+        }
+    }
+
     public void openTycoonStats(TycoonBlock block, Player player) {
         new StatsMenu(block, plugin).open(player);
     }
@@ -36,6 +79,8 @@ public class MenuManager {
                 ChatColor.GRAY + "Level: " + block.getLevel(),
                 block.getProgressBar(20) + " " + block.getProgressPercentage() + "%",
                 ChatColor.GRAY + "Spawn rate: " + block.getSpawnRateFormatted(),
+                ChatColor.GRAY + "Mining rate: " + block.getMiningRateFormatted() + (block.getTycoonBoosterManager().isAutoMinerBoosterActive() ? ChatColor.GREEN + " [Boost -" + (block.getAutoMinerSpeedBooster().getBoostValue()/20) + "s]" : ""),
+                ChatColor.GRAY + "Sell Multiplier: " + block.getSellMultiplierFormatted() + (block.getTycoonBoosterManager().isSellMultiplierBoosterActive() ? ChatColor.GREEN + " [Boost +" + block.getSellMultiplierBooster().getBoostValue() + "x]" : ""),
                 "§8§m-----------------------");
 
         ItemStack stats = createItemstack(
@@ -53,7 +98,7 @@ public class MenuManager {
         stats.setItemMeta(statsmeta);
         return stats;
     }
-    public static ItemStack createItemstack(Material material, int amount, String name, List<String> lore, Boolean glint, Boolean hideAttributes, String action){
+    public static ItemStack createItemstack(Material material, int amount, String name, List<String> lore, Boolean glint, Boolean hideAttributes, Boolean isMenuItem, String action){
         ItemStack itemstack = new ItemStack(material, amount);
         ItemMeta meta = itemstack.getItemMeta();
         if(meta != null){
@@ -64,7 +109,9 @@ public class MenuManager {
                 meta.addItemFlags(ItemFlag.values());
             }
             PersistentDataContainer pdc = meta.getPersistentDataContainer();
-            pdc.set(TycoonData.MENU_ITEM_KEY, PersistentDataType.STRING, "menu_item");
+            if (isMenuItem){
+                pdc.set(TycoonData.MENU_ITEM_KEY, PersistentDataType.STRING, "menu_item");
+            }
             pdc.set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, action);
 
             itemstack.setItemMeta(meta);

@@ -4,10 +4,10 @@ import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.menuManager.MenuManager;
 import me.mangokevin.oreTycoon.menuManager.OverviewMenu;
 import me.mangokevin.oreTycoon.menuManager.StatsMenu;
-import me.mangokevin.oreTycoon.menuManager.TycoonBoosterMenu;
 import me.mangokevin.oreTycoon.tycoonManagment.*;
+import me.mangokevin.oreTycoon.tycoonManagment.booster.AutoMinerSpeedBooster;
+import me.mangokevin.oreTycoon.tycoonManagment.booster.SellMultiplyBooster;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -44,8 +44,29 @@ public class TycoonCmd implements CommandExecutor {
 
         switch (action) {
             case "booster":
-                p.getInventory().addItem(new TycoonBooster().createAutoMinerBooster(1));
-                p.getInventory().addItem(new TycoonBooster().createSellMultiplierBooster(1));
+                if (args.length < 2) {
+                    p.sendMessage(ChatColor.RED + "Usage: /tycoon " + action + " <booster_type>");
+                    return true;
+                }
+                String boosterType = args[1];
+                if (boosterType == null) {
+                    return true;
+                }
+                switch (boosterType) {
+                    case "sellmultiplier":
+                        p.getInventory().addItem(new SellMultiplyBooster(0.3, 20L * 60 * 2).getItem());
+                        break;
+                    case "autominer":
+                        p.getInventory().addItem(new AutoMinerSpeedBooster(20D, 20L * 60 * 2).getItem());
+                        break;
+                    case "all":
+                        p.getInventory().addItem(new SellMultiplyBooster(0.3, 20L * 60 * 2).getItem());
+                        p.getInventory().addItem(new AutoMinerSpeedBooster(20D, 20L * 60 * 2).getItem());
+                    default:
+                        return true;
+                }
+
+
                 break;
             case "runtest":
                 if (args.length == 4) {

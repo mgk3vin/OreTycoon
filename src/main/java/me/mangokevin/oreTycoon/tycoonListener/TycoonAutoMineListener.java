@@ -1,9 +1,6 @@
 package me.mangokevin.oreTycoon.tycoonListener;
 
-import me.mangokevin.oreTycoon.menuManager.MenuInterface;
-import me.mangokevin.oreTycoon.menuManager.OverviewMenu;
-import me.mangokevin.oreTycoon.menuManager.StatsMenu;
-import me.mangokevin.oreTycoon.menuManager.TycoonInventory;
+import me.mangokevin.oreTycoon.menuManager.*;
 import me.mangokevin.oreTycoon.tycoonEvents.TycoonAutoMinedEvent;
 import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
@@ -41,35 +38,9 @@ public class TycoonAutoMineListener implements Listener {
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             Inventory openInventory = player.getOpenInventory().getTopInventory();
-            if (openInventory.getHolder() instanceof TycoonHolder tycoonHolder) {
-                MenuInterface menu = tycoonHolder.getMenu();
-                if (menu == null) {
-                    continue;
-                };
 
-                switch (menu){
-                    case TycoonInventory tycoonInventory -> {
-                        if (tycoonInventory.getTycoonBlock().equals(tycoon)) {
-                            tycoonInventory.refresh(player, openInventory);
-                            Console.log("Refreshing tycoon inventory");
-                        }
-                    }
-                    case StatsMenu statsMenu -> {
-                        if (statsMenu.getTycoonBlock().equals(tycoon)) {
-                            statsMenu.refresh(player,  openInventory);
-                            Console.log("Refreshing stats menu");
-                        }
-                        //statsMenu.refresh(player, openInventory);
-                    }
-                    case OverviewMenu overviewMenu -> {
-                        if (tycoon.getOfflineOwner().getUniqueId().equals(player.getUniqueId())) {
-                            overviewMenu.refresh(player, openInventory);
-                            Console.log("Refreshing overview menu");
-                        }
-                    }
-                    default -> {}
-                }
-            }
+            MenuManager.refreshOpenInventory(player, tycoon);
+
         }
 
 

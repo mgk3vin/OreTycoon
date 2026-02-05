@@ -1,13 +1,11 @@
 package me.mangokevin.oreTycoon.menuManager;
 
 import me.mangokevin.oreTycoon.OreTycoon;
-import me.mangokevin.oreTycoon.booster.TycoonBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -70,6 +68,7 @@ public class StatsMenu implements MenuInterface {
                 inventoryLore,
                 false,
                 true,
+                true,
                 "inventory"));
         //Return to Overviewmenu icon
         inventory.setItem(26, MenuManager.createItemstack(Material.OAK_DOOR,
@@ -78,6 +77,7 @@ public class StatsMenu implements MenuInterface {
                 null,
                 false,
                 true,
+                true,
                 "return"));
 
         //Level Path icon slot 20
@@ -85,6 +85,7 @@ public class StatsMenu implements MenuInterface {
                 1,
                 ChatColor.AQUA + "Level path",
                 null,
+                true,
                 true,
                 true,
                 "level_path");
@@ -105,6 +106,7 @@ public class StatsMenu implements MenuInterface {
                 spawnBlocksLore,
                 true,
                 true,
+                true,
                 "spawn_blocks");
         inventory.setItem(21, spawnBlocksChoice);
 
@@ -120,6 +122,7 @@ public class StatsMenu implements MenuInterface {
                         minerLore,
                         true,
                         true,
+                        true,
                         "toggle_autominer_off"));
             } else {
                 inventory.setItem(22, MenuManager.createItemstack(Material.IRON_PICKAXE,
@@ -127,6 +130,7 @@ public class StatsMenu implements MenuInterface {
                         ChatColor.RED + "Auto Miner Disabled",
                         minerLore,
                         false,
+                        true,
                         true,
                         "toggle_autominer_on"));
             }
@@ -140,6 +144,7 @@ public class StatsMenu implements MenuInterface {
                     minerLore,
                     true,
                     true,
+                    true,
                     "autominer_locked");
             inventory.setItem(22, autominerLocked);
         }
@@ -150,17 +155,19 @@ public class StatsMenu implements MenuInterface {
                 null,
                 true,
                 true,
+                true,
                 "tycoon_booster");
         inventory.setItem(23, boosters);
         //Upgrades Icon slot 24
         ItemStack upgrades = MenuManager.createItemstack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE,
                 1,
                 ChatColor.AQUA + "Upgrades",
-                null, true,
+                null,
+                true,
+                true,
                 true,
                 "upgrades");
         inventory.setItem(24, upgrades);
-
 
     }
 
