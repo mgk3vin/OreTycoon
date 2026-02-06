@@ -73,7 +73,7 @@ public class TycoonBoosterManager {
         expirationTimes.put(tycoonBooster.getUID(), expiryTime);
 
         switch (tycoonBooster.getUID().toLowerCase()) {
-            case "sell_multiplier_booster":
+            case "sell_multiplier_booster" -> {
                 isSellMultiplierBoosterActive = true;
                 tycoonBlock.setSellMultiplierBooster((SellMultiplyBooster) tycoonBooster);
                 runBoostTask(tycoonBooster, tycoonBooster.getDuration(), () -> {
@@ -82,8 +82,9 @@ public class TycoonBoosterManager {
                     tycoonBlock.updateAttributes();
                 });
                 Console.log("[TycoonBoosterManager] SellMultiplierBoost activated");
-                break;
-            case "auto_miner_booster":
+            }
+
+            case "auto_miner_booster" -> {
                 isAutoMinerBoosterActive = true;
                 tycoonBlock.setAutoMinerSpeedBooster((AutoMinerSpeedBooster) tycoonBooster);
                 runBoostTask(tycoonBooster, tycoonBooster.getDuration(), () -> {
@@ -93,7 +94,10 @@ public class TycoonBoosterManager {
                     Bukkit.getPluginManager().callEvent(new TycoonBoosterTickedEvent(tycoonBlock, tycoonBooster));
                 });
                 Console.log("[TycoonBoosterManager] AutoMinerSpeedBoost activated");
-            case "spawn_speed_booster":
+            }
+
+            case "spawn_speed_booster" -> {
+
                 isSpawnSpeedBoosterActive = true;
                 tycoonBlock.setSpawnSpeedBooster((SpawnSpeedBooster) tycoonBooster);
                 runBoostTask(tycoonBooster, tycoonBooster.getDuration(), () -> {
@@ -103,9 +107,7 @@ public class TycoonBoosterManager {
                     Bukkit.getPluginManager().callEvent(new TycoonBoosterTickedEvent(tycoonBlock, tycoonBooster));
                 });
                 Console.log("[TycoonBoosterManager] AutoMinerSpeedBoost activated");
-                break;
-            default:
-                break;
+            }
         }
         tycoonBlock.updateAttributes();
 

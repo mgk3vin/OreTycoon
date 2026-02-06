@@ -78,8 +78,8 @@ public class MenuManager {
                 ChatColor.GRAY + "Status: " + ChatColor.RESET + block.isActiveFormatted(),
                 ChatColor.GRAY + "Level: " + block.getLevel(),
                 block.getProgressBar(20) + " " + block.getProgressPercentage() + "%",
-                ChatColor.GRAY + "Spawn rate: " + block.getSpawnRateFormatted(),
-                ChatColor.GRAY + "Mining rate: " + block.getMiningRateFormatted() + (block.getTycoonBoosterManager().isAutoMinerBoosterActive() ? ChatColor.GREEN + " [Boost -" + (block.getAutoMinerSpeedBooster().getBoostValue()/20) + "s]" : ""),
+                ChatColor.GRAY + "Spawn rate: " + block.getSpawnRateFormatted() + (block.getTycoonBoosterManager().isSpawnSpeedBoosterActive() ? ChatColor.GREEN + " [Boost -" + (block.getSpawnSpeedBooster().getBoostValue()/20) + "s]" : ""),
+                ChatColor.GRAY + "Mining rate: " + (block.getTycoonUpgrades().isAutoMinerUnlocked() ? getMiningRateDisplay(block ): ChatColor.RED + "[LOCKED]"),
                 ChatColor.GRAY + "Sell Multiplier: " + block.getSellMultiplierFormatted() + (block.getTycoonBoosterManager().isSellMultiplierBoosterActive() ? ChatColor.GREEN + " [Boost +" + block.getSellMultiplierBooster().getBoostValue() + "x]" : ""),
                 "§8§m-----------------------");
 
@@ -97,6 +97,9 @@ public class MenuManager {
         statsmeta.getPersistentDataContainer().set(TycoonData.TYCOON_MENU_ITEM_UID_KEY, PersistentDataType.STRING, block.getBlockUID());
         stats.setItemMeta(statsmeta);
         return stats;
+    }
+    private String getMiningRateDisplay(TycoonBlock block) {
+        return ChatColor.GRAY + "Mining rate: " + block.getMiningRateFormatted() + (block.getTycoonBoosterManager().isAutoMinerBoosterActive() ? ChatColor.GREEN + " [Boost -" + (block.getAutoMinerSpeedBooster().getBoostValue()/20) + "s]" : "");
     }
     public static ItemStack createItemstack(Material material, int amount, String name, List<String> lore, Boolean glint, Boolean hideAttributes, Boolean isMenuItem, String action){
         ItemStack itemstack = new ItemStack(material, amount);

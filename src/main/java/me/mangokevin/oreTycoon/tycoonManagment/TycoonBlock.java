@@ -12,6 +12,7 @@ import me.mangokevin.oreTycoon.tycoonEvents.TycoonChangedAttributesEvent;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.AutoMinerSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SellMultiplyBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SpawnSpeedBooster;
+import me.mangokevin.oreTycoon.tycoonManagment.booster.TycoonBoosterAbstract;
 import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import net.milkbowl.vault.economy.Economy;
@@ -813,6 +814,16 @@ public class TycoonBlock {
     }
     // ---------     TycoonHologram      ---------
 
+    public TycoonBoosterAbstract isAnyBoosterActive(){
+        if(sellMultiplyBooster != null ){
+            return sellMultiplyBooster;
+        } else if (autoMinerSpeedBooster != null) {
+            return autoMinerSpeedBooster;
+        } else if (spawnSpeedBooster != null) {
+            return spawnSpeedBooster;
+        }
+        return null;
+    }
 
     // ---------     Adder      ---------
     public void addActiveBlocks(Block block) {
