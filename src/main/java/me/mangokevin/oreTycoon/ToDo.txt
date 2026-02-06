@@ -13,6 +13,14 @@ Need SpawnBlock list for autominer✅
 ️Auto miner unlock logic / stay locked✅
 Das "Eco-System" (Umgebungs-Buffs)✅
 
+🛠️ Booster Enum
+🛠️ Booster Save
+🛠️ Booster Timer
+
+➕MultiSpawn Upgrade
+➕Fortune Upgrade
+➕Spawn block Rarity / Spawn Rarity Upgrade
+➕Auto Sell Artifact
 "Seasonal Global Boosters" (Der Community-Grind)
 Das "Artifact-Hunting" (Archäologie)
 "Instabile Kristalle" (Seltener temporärer Boost)

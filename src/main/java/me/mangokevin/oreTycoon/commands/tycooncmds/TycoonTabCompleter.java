@@ -37,6 +37,12 @@ public class TycoonTabCompleter implements TabCompleter {
             return subcommands.stream().filter(string -> string.toLowerCase().startsWith(strings[1].toLowerCase()))
                     .collect(Collectors.toList());
         }
+        if (strings.length == 2 && strings[0].equalsIgnoreCase("booster")) {
+            List<String> subcommands = Arrays.asList("sellmultiplier", "autominer", "all", "");
+
+            return subcommands.stream().filter(string -> string.toLowerCase().startsWith(strings[1].toLowerCase()))
+                    .collect(Collectors.toList());
+        }
 
         return List.of();
     }

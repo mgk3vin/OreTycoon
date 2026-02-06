@@ -9,6 +9,10 @@ import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.menuManager.TycoonInventory;
 import me.mangokevin.oreTycoon.tycoonEvents.TycoonAutoMinedEvent;
 import me.mangokevin.oreTycoon.tycoonEvents.TycoonChangedAttributesEvent;
+import me.mangokevin.oreTycoon.tycoonManagment.booster.AutoMinerSpeedBooster;
+import me.mangokevin.oreTycoon.tycoonManagment.booster.SellMultiplyBooster;
+import me.mangokevin.oreTycoon.tycoonManagment.booster.SpawnSpeedBooster;
+import me.mangokevin.oreTycoon.tycoonManagment.booster.TycoonBoosterAbstract;
 import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import net.milkbowl.vault.economy.Economy;
@@ -95,9 +99,10 @@ public class TycoonBlock {
     //========== Buff Attributes ==========
 
     //========== Booster Attributes ==========
-    private TycoonBooster tycoonBooster;
-    private boolean isAutoMinerBoosterActive;
-    private boolean isSellMultiplierBoosterActive;
+    private TycoonBoosterManager tycoonBooster;
+    private SellMultiplyBooster sellMultiplyBooster;
+    private AutoMinerSpeedBooster autoMinerSpeedBooster;
+    private SpawnSpeedBooster spawnSpeedBooster;
     //========== Booster Attributes ==========
 
 
@@ -145,7 +150,7 @@ public class TycoonBlock {
         }
 
         //========== Get Booster  ==========
-        this.tycoonBooster = new TycoonBooster();
+        this.tycoonBooster = new TycoonBoosterManager(plugin, this);
         //========== Get Booster  ==========
 
         //========== Get Upgrade Attributes ==========
@@ -311,12 +316,28 @@ public class TycoonBlock {
 
         spawnRateLevel = upgrades.getSpawnRateLevel();
         spawnRate = TycoonUpgrades.calculateNewSpawnRate(spawnRateLevel, type.getSpawnInterval());
+        if (spawnSpeedBooster != null){
+            if (spawnRate >= minSpawnRate + spawnSpeedBooster.getBoostValue()){
+                spawnRate -= (int) spawnSpeedBooster.getBoostValue();
+            } else {
+                spawnRate = minSpawnRate;
+            }
+
+        }
 
         miningRateLevel = upgrades.getMiningRateLevel();
         miningRate = TycoonUpgrades.calculateNewMiningRate(miningRateLevel, type.getMiningInterval());
+        if (autoMinerSpeedBooster != null) {
+            Console.log(getClass(), "Miningrate before boost: " + miningRate);
+            miningRate -= (int) autoMinerSpeedBooster.getBoostValue();
+            Console.log(getClass(), "Auto Miner Speed with booster enabled: " + miningRate + " Booster Value: " + autoMinerSpeedBooster.getBoostValue());
+        }
+
 
         sellMultiplier = TycoonUpgrades.calculateNewSellMultiplier(sellMultiplierLevel, type.getSellMultiplier());
-        sellMultiplier += tycoonBooster.getSellMultiplierBoost();
+        if (sellMultiplyBooster != null) {
+            sellMultiplier += sellMultiplyBooster.getBoostValue();
+        }
         sellMultiplier *= sellMultiplierBuff;
 
         inventoryStorageLevel = upgrades.getInventoryStorageLevel();
@@ -793,6 +814,16 @@ public class TycoonBlock {
     }
     // ---------     TycoonHologram      ---------
 
+    public TycoonBoosterAbstract isAnyBoosterActive(){
+        if(sellMultiplyBooster != null ){
+            return sellMultiplyBooster;
+        } else if (autoMinerSpeedBooster != null) {
+            return autoMinerSpeedBooster;
+        } else if (spawnSpeedBooster != null) {
+            return spawnSpeedBooster;
+        }
+        return null;
+    }
 
     // ---------     Adder      ---------
     public void addActiveBlocks(Block block) {
@@ -937,6 +968,9 @@ public class TycoonBlock {
     public double getSellMultiplier() {
         return sellMultiplier;
     }
+    public String getSellMultiplierFormatted() {
+        return String.format("%.2f", sellMultiplier);
+    }
     public int getSellMultiplierLevel() {
         return sellMultiplierLevel;
     }
@@ -955,9 +989,14 @@ public class TycoonBlock {
     public int getInventoryStorage(){
         return inventoryStorage;
     }
-    public TycoonBooster getTycoonBooster() {
+    public TycoonBoosterManager getTycoonBoosterManager() {
         return tycoonBooster;
     }
+    public SellMultiplyBooster getSellMultiplierBooster() {
+        return sellMultiplyBooster;
+    }
+    public AutoMinerSpeedBooster getAutoMinerSpeedBooster() {return autoMinerSpeedBooster;}
+    public SpawnSpeedBooster getSpawnSpeedBooster() {return spawnSpeedBooster;}
     // ---------     Getter      ---------
 
     // ---------     Setter      ---------
@@ -990,6 +1029,15 @@ public class TycoonBlock {
     }
     public void setActiveRessourceMaterialsMap(Map<Material, Boolean> activeRessourceMaterialsMap) {
         this.activeRessourceMaterialsMap = activeRessourceMaterialsMap;
+    }
+    public void setSellMultiplierBooster(SellMultiplyBooster sellMultiplierBooster) {
+        this.sellMultiplyBooster = sellMultiplierBooster;
+    }
+    public void setAutoMinerSpeedBooster(AutoMinerSpeedBooster autoMinerSpeedBooster) {
+        this.autoMinerSpeedBooster = autoMinerSpeedBooster;
+    }
+    public void setSpawnSpeedBooster(SpawnSpeedBooster spawnSpeedBooster) {
+        this.spawnSpeedBooster = spawnSpeedBooster;
     }
     // ---------     Setter      ---------
 }

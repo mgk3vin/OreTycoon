@@ -72,6 +72,7 @@ public class TycoonSpawnBlocksMenu implements MenuInterface{
                             "§8§m-----------------------"),
                     isActive,
                     true,
+                    true,
                     "spawn_block");
 
             if (itemPerRow >= 8){
@@ -91,6 +92,7 @@ public class TycoonSpawnBlocksMenu implements MenuInterface{
                 ChatColor.RED + "<- Back to Menu",
                 null,
                 false,
+                true,
                 true,
                 "return");
         inventory.setItem(53, returnItem);

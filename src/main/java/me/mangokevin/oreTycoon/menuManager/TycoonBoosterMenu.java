@@ -2,17 +2,18 @@ package me.mangokevin.oreTycoon.menuManager;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonBooster;
+import me.mangokevin.oreTycoon.tycoonManagment.TycoonBoosterManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonHolder;
+import me.mangokevin.oreTycoon.tycoonManagment.booster.AutoMinerSpeedBooster;
+import me.mangokevin.oreTycoon.tycoonManagment.booster.BoosterRegistry;
+import me.mangokevin.oreTycoon.tycoonManagment.booster.TycoonBoosterAbstract;
 import me.mangokevin.oreTycoon.utility.Console;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -41,22 +42,39 @@ public class TycoonBoosterMenu implements MenuInterface{
     public void refresh(Player player, Inventory inventory) {
         MenuManager.addFiller(inventory, Material.GRAY_STAINED_GLASS_PANE);
 
-        if (tycoonBlock.getTycoonBooster().isAutoMinerBoosterActive()) {
-            ItemStack autoMinerBooster = new TycoonBooster().createAutoMinerBooster(1);
+        if (tycoonBlock.getTycoonBoosterManager().isAutoMinerBoosterActive()) {
+            ItemStack autoMinerBooster = tycoonBlock.getAutoMinerSpeedBooster().getItem();
             inventory.setItem(22, autoMinerBooster);
-        } else if (tycoonBlock.getTycoonBooster().isSellMultiplierBoosterActive()) {
-            ItemStack sellMultiplierBooster = new TycoonBooster().createSellMultiplierBooster(1);
+        } else if (tycoonBlock.getTycoonBoosterManager().isSellMultiplierBoosterActive()) {
+            ItemStack sellMultiplierBooster = tycoonBlock.getSellMultiplierBooster().getItem();
             inventory.setItem(22, sellMultiplierBooster);
-        } else {
+        }else if (tycoonBlock.getTycoonBoosterManager().isSpawnSpeedBoosterActive()){
+            ItemStack spawnSpeedBooster = tycoonBlock.getSpawnSpeedBooster().getItem();
+            inventory.setItem(22, spawnSpeedBooster);
+        }
+        else {
             ItemStack autoMinerBooster = MenuManager.createItemstack(Material.SCULK_VEIN,
                     1,
                     ChatColor.DARK_PURPLE + "No active Booster...",
                     null,
                     false,
                     true,
+                    true,
                     "empty_booster_slot");
             inventory.setItem(22, autoMinerBooster);
         }
+
+        ItemStack returnButton = MenuManager.createItemstack(
+                Material.BARRIER,
+                1,
+                ChatColor.RED + "Back to Stats Menu",
+                null,
+                false,
+                true,
+                true,
+                "return"
+        );
+        inventory.setItem(40, returnButton);
 
     }
 
@@ -75,55 +93,74 @@ public class TycoonBoosterMenu implements MenuInterface{
 
 
         switch (action) {
+            //Clicked a tycoon Booster item
             case "tycoon_booster_item":
-                if (tycoonBlock.getTycoonBooster().isAutoMinerBoosterActive() || tycoonBlock.getTycoonBooster().isSellMultiplierBoosterActive()) {
+                if (tycoonBlock.getTycoonBoosterManager().isAutoMinerBoosterActive() || tycoonBlock.getTycoonBoosterManager().isSellMultiplierBoosterActive()) {
                     player.sendMessage(ChatColor.DARK_PURPLE + "Booster is already active.");
                     return;
                 }
+                String uid = pdc.get(TycoonData.BOOSTER_ID_KEY, PersistentDataType.STRING);
+                double value = pdc.getOrDefault(TycoonData.BOOSTER_VALUE_KEY, PersistentDataType.DOUBLE, 0.0);
+                long duration = pdc.getOrDefault(TycoonData.BOOSTER_DURATION_KEY, PersistentDataType.LONG, 0L);
+
+                TycoonBoosterAbstract tycoonBooster = BoosterRegistry.createBooster(uid, value, duration);
+                Console.debug(getClass(), "Booster created: " + uid + " | " + value + " | " + duration);
+
+                if (tycoonBooster != null) {
+                    if (tycoonBooster.getUID().equals("auto_miner_booster") && !tycoonBlock.getTycoonUpgrades().isAutoMinerUnlocked()) {
+                        //Auto Miner Locked
+                        player.sendMessage(ChatColor.RED + "Can't activate " + tycoonBooster.getDisplayName() + ChatColor.RED + " when Auto Miner is still locked!");
+                        return;
+                    }
+                    tycoonBooster.onApply(tycoonBlock);
+                    Console.debug(getClass(), "Starting apply logic from tycoon Booster");
+                } else {
+                    Console.debug(getClass(), "Booster not created");
+                }
+//                ItemMeta boosterSlotMeta = menuBoosterItem.getItemMeta();
+//                if (boosterSlotMeta != null) {
+//                    boosterSlotMeta.setLore(Arrays.asList(
+//                            ChatColor.GRAY + "Booster: " + ChatColor.GREEN + "ACTIVE",
+//                            ChatColor.GRAY + "Boost: ???",
+//                            ChatColor.GRAY + "Duration: ???"
+//                    ));
+//                }
+                //menuBoosterItem.setItemMeta(boosterSlotMeta);
                 ItemStack menuBoosterItem = item.clone();
                 item.setAmount(item.getAmount() - 1);
 
-                //Activate Booster on Tycoon
-                tycoonBlock.getTycoonBooster().setSellMultiplierBoosterActive(true);
-                tycoonBlock.updateAttributes();
-                Console.debug("Booster item has been updated" + "Booster: " + tycoonBlock.getTycoonBooster().getSellMultiplierBoost() + " Tycoon Boost: " + tycoonBlock.getSellMultiplier());
-
-                ItemMeta boosterSlotMeta = menuBoosterItem.getItemMeta();
-                if (boosterSlotMeta != null) {
-                    boosterSlotMeta.setLore(Arrays.asList(
-                            ChatColor.GRAY + "Booster: " + ChatColor.GREEN + "ACTIVE",
-                            ChatColor.GRAY + "Boost: ???",
-                            ChatColor.GRAY + "Duration: ???"
-                    ));
-                }
-                menuBoosterItem.setItemMeta(boosterSlotMeta);
                 menuBoosterItem.setAmount(1);
                 inventory.setItem(22, menuBoosterItem);
                 player.updateInventory();
                 break;
-            case "empty_booster_slot":
-                ItemMeta holdingItemMeta = holdingItem.getItemMeta();
-                if (holdingItemMeta != null) {
-                    PersistentDataContainer boosterPdc = holdingItemMeta.getPersistentDataContainer();
-                    String boosterAction = boosterPdc.get(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING);
-                    switch (boosterAction) {
-                        case "tycoon_booster_item":
-                            if (holdingItem.getAmount() > 1) {
-                                Console.debug("[TycoonBoosterMenu] Setting booster amount from " + holdingItem.getAmount() + " to " + (holdingItem.getAmount() - 1));
-                                holdingItem.setAmount(holdingItem.getAmount() - 1);
-                            } else {
-                                event.getWhoClicked().setItemOnCursor(null); // Cursor leeren
-                                Console.debug("[TycoonBoosterMenu] Setting booster amount to 0");
-                            }
-                            break;
-                        case null, default:
-                            break;
-                    }
-                }
+//            case "empty_booster_slot":
+//                ItemMeta holdingItemMeta = holdingItem.getItemMeta();
+//                if (holdingItemMeta != null) {
+//                    PersistentDataContainer boosterPdc = holdingItemMeta.getPersistentDataContainer();
+//                    String boosterAction = boosterPdc.get(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING);
+//                    switch (boosterAction) {
+//                        case "tycoon_booster_item":
+//                            if (holdingItem.getAmount() > 1) {
+//                                Console.debug("[TycoonBoosterMenu] Setting booster amount from " + holdingItem.getAmount() + " to " + (holdingItem.getAmount() - 1));
+//                                holdingItem.setAmount(holdingItem.getAmount() - 1);
+//                            } else {
+//                                event.getWhoClicked().setItemOnCursor(null); // Cursor leeren
+//                                Console.debug("[TycoonBoosterMenu] Setting booster amount to 0");
+//                            }
+//                            break;
+//                        case null, default:
+//                            break;
+//                    }
+            case "return":
+                new StatsMenu(tycoonBlock, plugin).open(player);
                 break;
             case null, default:
                 break;
+
         }
+    }
+    public TycoonBlock getTycoonBlock() {
+        return tycoonBlock;
     }
     private boolean isBooster(ItemStack item) {
         ItemMeta meta = item.getItemMeta();

@@ -64,6 +64,7 @@ public class TycoonLevelPath implements MenuInterface{
                                  "§8§m-----------------------"),
                         false,
                         true,
+                         true,
                         "level_item_claimed");
             }else if(currentTycoonLevel >= level){
                 switch (level) {
@@ -77,6 +78,7 @@ public class TycoonLevelPath implements MenuInterface{
                                         "",
                                         ChatColor.GRAY + "[Click to claim Reward]",
                                         "§8§m-----------------------"),
+                                true,
                                 true,
                                 true,
                                 "level_item_claim");
@@ -93,6 +95,7 @@ public class TycoonLevelPath implements MenuInterface{
                                         "§8§m-----------------------"),
                                 true,
                                 true,
+                                true,
                                 "level_item_claim");
                         break;
                     default:
@@ -107,6 +110,7 @@ public class TycoonLevelPath implements MenuInterface{
                                         "§8§m-----------------------"),
                                 true,
                                 true,
+                                true,
                                 "level_item_claim");
                         break;
                 }
@@ -117,6 +121,7 @@ public class TycoonLevelPath implements MenuInterface{
                         Arrays.asList("§8§m-----------------------",
                                 ChatColor.GRAY + "Reward locked",
                                 "§8§m-----------------------"),
+                        true,
                         true,
                         true,
                         "level_item_locked");
@@ -139,6 +144,7 @@ public class TycoonLevelPath implements MenuInterface{
                     null,
                     false,
                     true,
+                    true,
                     "prev_page");
             inventory.setItem(45, prev_page);
         }
@@ -147,6 +153,7 @@ public class TycoonLevelPath implements MenuInterface{
                 "Next Page ->",
                 null,
                 false,
+                true,
                 true,
                 "next_page");
         inventory.setItem(53, next_page);
@@ -157,6 +164,7 @@ public class TycoonLevelPath implements MenuInterface{
                 ChatColor.RED + "<- Back to Stats Menu",
                 null,
                 false,
+                true,
                 true,
                 "return");
         inventory.setItem(49, returnItem);

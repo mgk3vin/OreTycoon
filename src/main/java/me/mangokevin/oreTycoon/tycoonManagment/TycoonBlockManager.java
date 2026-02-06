@@ -2,6 +2,8 @@ package me.mangokevin.oreTycoon.tycoonManagment;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonEvents.TycoonAutoMinedEvent;
+import me.mangokevin.oreTycoon.tycoonManagment.booster.BoosterRegistry;
+import me.mangokevin.oreTycoon.tycoonManagment.booster.TycoonBoosterAbstract;
 import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import org.bukkit.*;
@@ -254,6 +256,24 @@ public class TycoonBlockManager {
             data.set(path + "disabledBlocks", disabledBlocksList);
             //---------- Active Blocks save ----------
 
+            //⬇️---------- Active Booster Load ----------⬇️
+            if (tycoon.isAnyBoosterActive() != null) {
+                TycoonBoosterAbstract tycoonBooster = tycoon.isAnyBoosterActive();
+                data.set(path + "activeBooster" + "isActive", true);
+                data.set(path + "activeBooster" + "type", tycoonBooster.getUID());
+                data.set(path + "activeBooster" + "boostValue", tycoonBooster.getBoostValue());
+                data.set(path + "activeBooster" + "duration", tycoonBooster.getDuration());
+                Console.log(getClass(), "Saved Booster: " + tycoonBooster.getUID() + " | BoostValue: " + tycoonBooster.getBoostValue() + " | Duration: " + tycoonBooster.getDuration() + "ticks");
+            } else {
+                Console.log(getClass(), "No active Booster saved!");
+                data.set(path + "activeBooster" + "isActive", false);
+                data.set(path + "activeBooster" + "type", null);
+                data.set(path + "activeBooster" + "boostValue", null);
+                data.set(path + "activeBooster" + "duration", null);
+            }
+
+            //⬆️---------- Active Booster Load ----------⬆️
+
             //---------- Inventory save ----------
             List<String> inventoryItems = new ArrayList<>();
             for (ItemStack item : tycoon.getInventory()) {
@@ -328,7 +348,7 @@ public class TycoonBlockManager {
                 long  creationTime = section.getLong(path + "creationDate");
                 int index = section.getInt(path + "index");
 
-                //========== Load Upgrade Attributes ==========
+                //⬇️========== Load Upgrade Attributes ==========
                 boolean isAutoMinerUnlocked = section.getBoolean(path + "isAutoMinerUnlocked");
                 int spawnRateLevel = section.getInt(path + "spawnRateLevel");
                 int miningRateLevel = section.getInt(path + "miningRateLevel");
@@ -337,15 +357,13 @@ public class TycoonBlockManager {
                 List<Integer> claimedLevels = section.getIntegerList(path + "claimedLevels");
 
                 TycoonUpgrades tycoonUpgrades = new  TycoonUpgrades();
-                if(tycoonUpgrades != null){
-                    tycoonUpgrades.setAutoMinerUnlocked(isAutoMinerUnlocked);
-                    tycoonUpgrades.setSpawnRateLevel(spawnRateLevel);
-                    tycoonUpgrades.setMiningRateLevel(miningRateLevel);
-                    tycoonUpgrades.setSellMultiplierLevel(sellMultiplierLevel);
-                    tycoonUpgrades.setInventoryStorageLevel(inventoryStorageLevel);
-                    tycoonUpgrades.setClaimedLevels(claimedLevels);
-                }
-                //========== Load Upgrade Attributes ==========
+                tycoonUpgrades.setAutoMinerUnlocked(isAutoMinerUnlocked);
+                tycoonUpgrades.setSpawnRateLevel(spawnRateLevel);
+                tycoonUpgrades.setMiningRateLevel(miningRateLevel);
+                tycoonUpgrades.setSellMultiplierLevel(sellMultiplierLevel);
+                tycoonUpgrades.setInventoryStorageLevel(inventoryStorageLevel);
+                tycoonUpgrades.setClaimedLevels(claimedLevels);
+                //⬆️========== Load Upgrade Attributes ==========⬆️
 
 
                 String tycoonMaterialString = section.getString(path + "material");
@@ -371,7 +389,7 @@ public class TycoonBlockManager {
                 }
                 tycoonBlocks.put(loc, tycoonBlock);
 
-                //---------- Disabled Blocks Load ----------
+                //⬇️---------- Disabled Blocks Load ----------⬇️
                 List<String> disabledBlocksList = section.getStringList(path + "disabledBlocks");
                 Map<Material, Boolean> activeMaterials = new HashMap<>();
 
@@ -388,9 +406,25 @@ public class TycoonBlockManager {
                 }
                 tycoonBlock.setActiveRessourceMaterialsMap(activeMaterials);
 
-                //---------- Disabled Blocks Load ----------
+                //⬆️---------- Disabled Blocks Load ----------⬆️
 
-                //---------- Inventory Load ----------
+                //⬇️---------- Active Booster Load ----------⬇️
+                boolean isBoosterActive = section.getBoolean(path + "activeBooster" + "isActive");
+                String boosterUID = section.getString(path + "activeBooster" + "type");
+                double boosterValue = section.getDouble(path + "activeBooster" + "boostValue");
+                long duration = section.getLong(path + "activeBooster" + "duration");
+                if (isBoosterActive) {
+                    Console.log(getClass(), "Loading booster: " +  boosterUID + " | BoostValue: " + boosterValue + " | duration: " + duration + "ticks");
+                    TycoonBoosterAbstract tycoonBooster = BoosterRegistry.createBooster(boosterUID, boosterValue, duration);
+                    if (tycoonBooster != null){
+                        Console.log(getClass(), "Starting booster task!");
+                        tycoonBooster.onApply(tycoonBlock);
+                    }
+                }
+                //⬆️---------- Active Booster Load ----------⬆️
+
+
+                //⬇️---------- Inventory Load ----------⬇️
                 List<String> inventoryItems = section.getStringList(path + "inventoryItems");
                 for (String inventoryItem : inventoryItems) {
                     String[] split = inventoryItem.split(":");
@@ -402,7 +436,7 @@ public class TycoonBlockManager {
                         Console.log("added " + inventoryItem + " to inventory");
                     }
                 }
-                //---------- Inventory Load ----------
+                //⬆️---------- Inventory Load ----------⬆️
 
                 List<String> blockLocs = section.getStringList(path + "spawnedBlocks");
                 for (String s : blockLocs) {
@@ -425,7 +459,6 @@ public class TycoonBlockManager {
         }
         for (TycoonBlock block : tycoonBlocks.values()) {
             block.createHologram();
-
         }
     }
     // ---------------- Filesave working ----------------

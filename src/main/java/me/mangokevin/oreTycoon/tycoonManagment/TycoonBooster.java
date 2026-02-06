@@ -6,50 +6,67 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
+import java.util.List;
 
-public class TycoonBooster {
-
-    private boolean isAutoMinerBoosterActive = false;
-    private boolean isSellMultiplierBoosterActive = false;
-    private double sellMultiplierBoost = 0.5;
+@Deprecated
+public enum TycoonBooster {
 
 
-    public ItemStack createAutoMinerBooster(int amount) {
-        return MenuManager.createItemstack(Material.AMETHYST_SHARD,
-                amount,
-                ChatColor.DARK_PURPLE + "" + ChatColor.ITALIC + "Auto Miner Booster",
-                null,
+    SELL_BOOSTER(
+            Material.AMETHYST_SHARD,
+            ChatColor.GREEN + "" + ChatColor.ITALIC +"Sell Booster",
+            Arrays.asList(
+                    "§8§m-----------------------",
+                    ChatColor.GOLD+ "Boosts the sell multiplier of your tycoon!",
+                    ChatColor.GOLD + "Duration: " + ChatColor.ITALIC + " 7min",
+                    "§8§m-----------------------"
+            ),
+            0.5,
+            20L * 60 * 7
+    ),
+    AUTO_MINER_BOOSTER(
+            Material.AMETHYST_SHARD,
+            ChatColor.GOLD + "" + ChatColor.ITALIC + "Auto Miner Booster",
+            Arrays.asList(
+                    "§8§m-----------------------",
+                    ChatColor.GOLD+ "Boosts the speed of your tycoon's autominer!",
+                    ChatColor.GOLD + "Duration: " + ChatColor.ITALIC + " 5min",
+                    "§8§m-----------------------"
+            ),
+            0.3,
+            20L * 60 * 5
+    );
+
+    private final ItemStack item;
+    private final List<String> lore;
+    private final double boost;
+    private final long duration;
+    TycoonBooster(Material material, String name, List<String> lore, double boost, long duration){
+        this.lore = lore;
+        this.boost = boost;
+        this.duration = duration;
+        long formattedDuration = (duration / 60)/20;
+
+
+        this.item = MenuManager.createItemstack(
+                material,
+                1,
+                name,
+                lore,
                 true,
                 true,
-                "tycoon_booster_item");
-    }
-    public ItemStack createSellMultiplierBooster(int amount) {
-        return MenuManager.createItemstack(Material.AMETHYST_SHARD,
-                amount,
-                ChatColor.GREEN + "" + ChatColor.ITALIC + "Sell Multiplier Booster",
-                Arrays.asList(ChatColor.GREEN + "Adds 0.5x Sell Multiplier"),
                 true,
-                true,
-                "tycoon_booster_item");
+                "tycoon_booster_item"
+        );
     }
 
-    public void setSellMultiplierBoosterActive(boolean isSellMultiplierBoosterActive) {
-        this.isSellMultiplierBoosterActive = isSellMultiplierBoosterActive;
+    public ItemStack getItem() {
+        return item.clone();
     }
-    public void setAutoMinerBoosterActive(boolean isAutoMinerBoosterActive) {
-        this.isAutoMinerBoosterActive = isAutoMinerBoosterActive;
+    public double getBoost() {
+        return boost;
     }
-    public boolean isAutoMinerBoosterActive() {
-        return isAutoMinerBoosterActive;
-    }
-    public boolean isSellMultiplierBoosterActive() {
-        return isSellMultiplierBoosterActive;
-    }
-    public double getSellMultiplierBoost() {
-        if (isSellMultiplierBoosterActive) {
-            return sellMultiplierBoost;
-        }else {
-            return 0.0;
-        }
+    public long getDuration() {
+        return duration;
     }
 }

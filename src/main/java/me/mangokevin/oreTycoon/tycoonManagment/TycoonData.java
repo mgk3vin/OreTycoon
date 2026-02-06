@@ -43,6 +43,12 @@ public class TycoonData {
     public static NamespacedKey TYCOON_CLAIMED_LEVELS_KEY;
     //========== Upgrade Keys ==========
 
+    //========== Booster Keys ==========
+    public static NamespacedKey BOOSTER_ID_KEY;
+    public static NamespacedKey BOOSTER_VALUE_KEY;
+    public static NamespacedKey BOOSTER_DURATION_KEY;
+    //========== Booster Keys ==========
+
 
     // Wird einmal in der onEnable deiner Main aufgerufen: TycoonData.init(this);
     public static void init(Plugin plugin) {
@@ -73,6 +79,13 @@ public class TycoonData {
         TYCOON_MAX_INVENTORY_STORAGE_KEY = new NamespacedKey(plugin, "tycoon_max_inventory_storage");
         TYCOON_CLAIMED_LEVELS_KEY = new NamespacedKey(plugin, "tycoon_claimed_levels");
         //========== Upgrade Keys ==========
+
+
+        //========== Booster Keys ==========
+        BOOSTER_ID_KEY = new  NamespacedKey(plugin, "booster_id");
+        BOOSTER_VALUE_KEY = new   NamespacedKey(plugin, "booster_value");
+        BOOSTER_DURATION_KEY = new   NamespacedKey(plugin, "booster_duration");
+        //========== Booster Keys ==========
     }
     // Speichert die Daten eines Tycoons auf ein Item
     public static void writeToItem(ItemStack item, int level, int xp, long creation,Location loc, Material material, int spawnInterval, long creationTime, String type, Inventory inventory, TycoonUpgrades upgrades) {
