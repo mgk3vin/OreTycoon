@@ -11,6 +11,7 @@ public class BoosterRegistry {
         return switch (uid.toLowerCase()){
             case "sell_multiplier_booster" -> new SellMultiplyBooster(value, duration);
             case "auto_miner_booster" -> new AutoMinerSpeedBooster(value, duration);
+            case "spawn_speed_booster" -> new SpawnSpeedBooster(value, duration);
             default -> null;
         };
     }

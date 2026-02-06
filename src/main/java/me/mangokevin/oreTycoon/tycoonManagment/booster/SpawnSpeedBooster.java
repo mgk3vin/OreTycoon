@@ -1,43 +1,41 @@
 package me.mangokevin.oreTycoon.tycoonManagment.booster;
 
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
+import me.mangokevin.oreTycoon.tycoonManagment.TycoonBoosterManager;
+import me.mangokevin.oreTycoon.utility.Console;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 
-import java.util.Arrays;
 import java.util.List;
 
-public class AutoMinerSpeedBooster extends TycoonBoosterAbstract {
-    private long duration;
-    public AutoMinerSpeedBooster(double boostValue, long duration) {
+public class SpawnSpeedBooster extends TycoonBoosterAbstract {
+    long duration;
+    public SpawnSpeedBooster(double boostValue, long duration) {
         super(boostValue, duration);
         this.duration = duration;
-
     }
 
     @Override
     public Material getMaterial() {
-        return Material.ECHO_SHARD;
+        return Material.PRISMARINE_SHARD;
     }
 
     @Override
     public String getDisplayName() {
-        return ChatColor.GOLD + "" + ChatColor.ITALIC + "Auto Miner Booster";
+        return ChatColor.AQUA +  "" + ChatColor.ITALIC +  "Spawn Speed Booster";
     }
 
     @Override
     public List<String> getLore() {
-        return Arrays.asList(
-                "§8§m-----------------------",
-                ChatColor.GREEN + "- " + getBoostValue()/20 + "s AutoMiner speed",
+        return List.of("§8§m-----------------------",
+                ChatColor.GREEN + "-" + getBoostValue()/20 + "s spawn speed",
                 ChatColor.GREEN + "Duration: " + getRemainingTimeFormatted(getDuration()),
-                "§8§m-----------------------"
-        );
+                "§8§m-----------------------");
     }
 
     @Override
     public String getUID() {
-        return "auto_miner_booster";
+        return "spawn_speed_booster";
     }
 
     @Override
@@ -58,5 +56,6 @@ public class AutoMinerSpeedBooster extends TycoonBoosterAbstract {
     @Override
     public void onApply(TycoonBlock tycoonBlock) {
         tycoonBlock.getTycoonBoosterManager().activate(this);
+        Console.log(getClass(), " Activated Tycoon Booster");
     }
 }

@@ -5,6 +5,7 @@ import me.mangokevin.oreTycoon.menuManager.MenuManager;
 import me.mangokevin.oreTycoon.tycoonEvents.TycoonBoosterTickedEvent;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.AutoMinerSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SellMultiplyBooster;
+import me.mangokevin.oreTycoon.tycoonManagment.booster.SpawnSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.TycoonBoosterAbstract;
 import me.mangokevin.oreTycoon.utility.Console;
 import org.bukkit.Bukkit;
@@ -22,6 +23,8 @@ public class TycoonBoosterManager {
 
     private boolean isAutoMinerBoosterActive = false;
     private long autoMinerBoostTime = 0L;
+
+    private boolean isSpawnSpeedBoosterActive = false;
 
     private boolean isSellMultiplierBoosterActive = false;
     private double sellMultiplierBoost = 0.5;
@@ -90,7 +93,16 @@ public class TycoonBoosterManager {
                     Bukkit.getPluginManager().callEvent(new TycoonBoosterTickedEvent(tycoonBlock, tycoonBooster));
                 });
                 Console.log("[TycoonBoosterManager] AutoMinerSpeedBoost activated");
-
+            case "spawn_speed_booster":
+                isSpawnSpeedBoosterActive = true;
+                tycoonBlock.setSpawnSpeedBooster((SpawnSpeedBooster) tycoonBooster);
+                runBoostTask(tycoonBooster, tycoonBooster.getDuration(), () -> {
+                    this.isSpawnSpeedBoosterActive = false;
+                    tycoonBlock.setSpawnSpeedBooster(null);
+                    tycoonBlock.updateAttributes();
+                    Bukkit.getPluginManager().callEvent(new TycoonBoosterTickedEvent(tycoonBlock, tycoonBooster));
+                });
+                Console.log("[TycoonBoosterManager] AutoMinerSpeedBoost activated");
                 break;
             default:
                 break;
@@ -166,6 +178,9 @@ public class TycoonBoosterManager {
     }
     public boolean isSellMultiplierBoosterActive() {
         return isSellMultiplierBoosterActive;
+    }
+    public boolean isSpawnSpeedBoosterActive(){
+        return isSpawnSpeedBoosterActive;
     }
     public double getSellMultiplierBoost() {
         if (isSellMultiplierBoosterActive) {

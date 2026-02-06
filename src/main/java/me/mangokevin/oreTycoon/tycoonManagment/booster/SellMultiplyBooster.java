@@ -31,7 +31,7 @@ public class SellMultiplyBooster extends TycoonBoosterAbstract {
     public List<String> getLore() {
         return Arrays.asList("§8§m-----------------------",
                 ChatColor.GREEN + "+ " + getBoostValue() + "x sell multiplier",
-                ChatColor.GREEN + "Duration: " + getRemainingTimeFormatted(getDuration()) + " minutes",
+                ChatColor.GREEN + "Duration: " + getRemainingTimeFormatted(getDuration()),
                 "§8§m-----------------------");
     }
 

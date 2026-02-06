@@ -7,6 +7,7 @@ import me.mangokevin.oreTycoon.menuManager.StatsMenu;
 import me.mangokevin.oreTycoon.tycoonManagment.*;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.AutoMinerSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SellMultiplyBooster;
+import me.mangokevin.oreTycoon.tycoonManagment.booster.SpawnSpeedBooster;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
@@ -59,9 +60,13 @@ public class TycoonCmd implements CommandExecutor {
                     case "autominer":
                         p.getInventory().addItem(new AutoMinerSpeedBooster(20D, 20L * 60 * 2).getItem());
                         break;
+                    case "spawnspeed":
+                        p.getInventory().addItem(new SpawnSpeedBooster(20D, 20L * 60 * 2).getItem());
+                        break;
                     case "all":
                         p.getInventory().addItem(new SellMultiplyBooster(0.3, 20L * 60 * 2).getItem());
                         p.getInventory().addItem(new AutoMinerSpeedBooster(20D, 20L * 60 * 2).getItem());
+                        p.getInventory().addItem(new SpawnSpeedBooster(20D, 20L * 60 * 2).getItem());
                     default:
                         return true;
                 }

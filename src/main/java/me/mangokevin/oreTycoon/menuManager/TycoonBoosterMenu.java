@@ -47,7 +47,11 @@ public class TycoonBoosterMenu implements MenuInterface{
         } else if (tycoonBlock.getTycoonBoosterManager().isSellMultiplierBoosterActive()) {
             ItemStack sellMultiplierBooster = tycoonBlock.getSellMultiplierBooster().getItem();
             inventory.setItem(22, sellMultiplierBooster);
-        } else {
+        }else if (tycoonBlock.getTycoonBoosterManager().isSpawnSpeedBoosterActive()){
+            ItemStack spawnSpeedBooster = tycoonBlock.getSpawnSpeedBooster().getItem();
+            inventory.setItem(22, spawnSpeedBooster);
+        }
+        else {
             ItemStack autoMinerBooster = MenuManager.createItemstack(Material.SCULK_VEIN,
                     1,
                     ChatColor.DARK_PURPLE + "No active Booster...",

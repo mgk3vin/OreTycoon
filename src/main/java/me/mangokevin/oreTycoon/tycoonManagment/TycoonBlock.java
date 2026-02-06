@@ -11,6 +11,7 @@ import me.mangokevin.oreTycoon.tycoonEvents.TycoonAutoMinedEvent;
 import me.mangokevin.oreTycoon.tycoonEvents.TycoonChangedAttributesEvent;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.AutoMinerSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SellMultiplyBooster;
+import me.mangokevin.oreTycoon.tycoonManagment.booster.SpawnSpeedBooster;
 import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import net.milkbowl.vault.economy.Economy;
@@ -100,6 +101,7 @@ public class TycoonBlock {
     private TycoonBoosterManager tycoonBooster;
     private SellMultiplyBooster sellMultiplyBooster;
     private AutoMinerSpeedBooster autoMinerSpeedBooster;
+    private SpawnSpeedBooster spawnSpeedBooster;
     //========== Booster Attributes ==========
 
 
@@ -313,6 +315,14 @@ public class TycoonBlock {
 
         spawnRateLevel = upgrades.getSpawnRateLevel();
         spawnRate = TycoonUpgrades.calculateNewSpawnRate(spawnRateLevel, type.getSpawnInterval());
+        if (spawnSpeedBooster != null){
+            if (spawnRate >= minSpawnRate + spawnSpeedBooster.getBoostValue()){
+                spawnRate -= (int) spawnSpeedBooster.getBoostValue();
+            } else {
+                spawnRate = minSpawnRate;
+            }
+
+        }
 
         miningRateLevel = upgrades.getMiningRateLevel();
         miningRate = TycoonUpgrades.calculateNewMiningRate(miningRateLevel, type.getMiningInterval());
@@ -975,6 +985,7 @@ public class TycoonBlock {
         return sellMultiplyBooster;
     }
     public AutoMinerSpeedBooster getAutoMinerSpeedBooster() {return autoMinerSpeedBooster;}
+    public SpawnSpeedBooster getSpawnSpeedBooster() {return spawnSpeedBooster;}
     // ---------     Getter      ---------
 
     // ---------     Setter      ---------
@@ -1013,6 +1024,9 @@ public class TycoonBlock {
     }
     public void setAutoMinerSpeedBooster(AutoMinerSpeedBooster autoMinerSpeedBooster) {
         this.autoMinerSpeedBooster = autoMinerSpeedBooster;
+    }
+    public void setSpawnSpeedBooster(SpawnSpeedBooster spawnSpeedBooster) {
+        this.spawnSpeedBooster = spawnSpeedBooster;
     }
     // ---------     Setter      ---------
 }

@@ -17,14 +17,19 @@ public class TycoonBoosterTickedListener implements Listener {
     public void onTycoonTick(TycoonBoosterTickedEvent event) {
         TycoonBlock tycoonBlock = event.getTycoonBlock();
         TycoonBoosterAbstract tycoonBooster = event.getTycoonBooster();
-        switch (tycoonBooster.getUID().toLowerCase()) {
-            case "sell_multiplier_booster", "auto_miner_booster":
-                refreshInventory(tycoonBlock);
-                break;
-            default:
-                Console.log(getClass() ,"No booster found");
-                break;
+        if (tycoonBooster != null){
+            refreshInventory(tycoonBlock);
+        }else{
+            Console.log(getClass() ,"No booster found");
         }
+//        switch (tycoonBooster) {
+//            case :
+//                refreshInventory(tycoonBlock);
+//                break;
+//            default:
+//                Console.log(getClass() ,"No booster found");
+//                break;
+//        }
     }
     private void refreshInventory(TycoonBlock tycoonBlock) {
         for (Player player : Bukkit.getOnlinePlayers()) {
