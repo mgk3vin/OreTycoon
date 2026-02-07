@@ -41,6 +41,7 @@ public class TycoonData {
     public static NamespacedKey TYCOON_SELL_MULTIPLIER_LEVEL_KEY;
     public static NamespacedKey TYCOON_MAX_INVENTORY_STORAGE_KEY;
     public static NamespacedKey TYCOON_CLAIMED_LEVELS_KEY;
+    public static NamespacedKey TYCOON_DOUBLE_DROPS_LEVEL_KEY;
     //========== Upgrade Keys ==========
 
     //========== Booster Keys ==========
@@ -78,6 +79,7 @@ public class TycoonData {
         TYCOON_SELL_MULTIPLIER_LEVEL_KEY = new NamespacedKey(plugin, "tycoon_sell_multiplier_level");
         TYCOON_MAX_INVENTORY_STORAGE_KEY = new NamespacedKey(plugin, "tycoon_max_inventory_storage");
         TYCOON_CLAIMED_LEVELS_KEY = new NamespacedKey(plugin, "tycoon_claimed_levels");
+        TYCOON_DOUBLE_DROPS_LEVEL_KEY = new NamespacedKey(plugin, "tycoon_double_drops_level");
         //========== Upgrade Keys ==========
 
 
@@ -117,6 +119,7 @@ public class TycoonData {
         pdc.set(TYCOON_SPAWN_RATE_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getSpawnRateLevel());
         pdc.set(TYCOON_MINING_RATE_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getMiningRateLevel());
         pdc.set(TYCOON_SELL_MULTIPLIER_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getSellMultiplierLevel());
+        pdc.set(TYCOON_DOUBLE_DROPS_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getDoubleDropsLevel());
         pdc.set(TYCOON_MAX_INVENTORY_STORAGE_KEY, PersistentDataType.INTEGER, upgrades.getInventoryStorageLevel());
         //Save ClaimedLevels
         String claimedLevels = upgrades.getClaimedLevels().stream().map(String::valueOf).collect(Collectors.joining(","));
@@ -152,6 +155,7 @@ public class TycoonData {
         upgrades.setSpawnRateLevel(pdc.getOrDefault(TycoonData.TYCOON_SPAWN_RATE_LEVEL_KEY, PersistentDataType.INTEGER, 0));
         upgrades.setMiningRateLevel(pdc.getOrDefault(TycoonData.TYCOON_MINING_RATE_LEVEL_KEY, PersistentDataType.INTEGER, 0));
         upgrades.setSellMultiplierLevel(pdc.getOrDefault(TycoonData.TYCOON_SELL_MULTIPLIER_LEVEL_KEY, PersistentDataType.INTEGER, 0));
+        upgrades.setDoubleDropsLevel(pdc.getOrDefault(TYCOON_DOUBLE_DROPS_LEVEL_KEY, PersistentDataType.INTEGER, 0));
         upgrades.setInventoryStorageLevel(pdc.getOrDefault(TycoonData.TYCOON_MAX_INVENTORY_STORAGE_KEY, PersistentDataType.INTEGER, 0));
 
         //Load claimed Levels from String

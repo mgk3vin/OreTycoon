@@ -12,10 +12,8 @@ Teleport feature✅
 Need SpawnBlock list for autominer✅
 ️Auto miner unlock logic / stay locked✅
 Das "Eco-System" (Umgebungs-Buffs)✅
-
-🛠️ Booster Enum
-🛠️ Booster Save
-🛠️ Booster Timer
+🛠️ Booster Save ✅
+🛠️ Booster Timer ✅
 
 ➕MultiSpawn Upgrade
 ➕Fortune Upgrade
@@ -30,3 +28,7 @@ Hologram formatting
 Higher Levels unlock more spawnblocks (clickable in menu which blocks to spawn must atleast be 5 diff or sum)‼️
 Spawn blocks that drop 1 of its kind per mine and have 5 mines
 Clean up 🕛
+
+//<editor-fold desc="Beschreibung">
+
+//</editor-fold>

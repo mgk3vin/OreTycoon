@@ -38,6 +38,7 @@ public class TycoonUpgradeMenu implements MenuInterface{
     public void refresh(Player player, Inventory inventory) {
         MenuManager.addFiller(inventory, Material.GRAY_STAINED_GLASS_PANE);
         //  20 | 22 | 24
+        //<editor-fold desc="⚒️ Spawn rate Upgrade">
         List<String> spawnLore = Arrays.asList("§8§m-----------------------",
                 ChatColor.GRAY + "[ Level: " + tycoonBlock.getSpawnRateLevel() + " ]",
                 ChatColor.GRAY + "[ Spawnrate: " + tycoonBlock.getSpawnRateFormatted() + "s ]",
@@ -52,6 +53,26 @@ public class TycoonUpgradeMenu implements MenuInterface{
                 true,
                 "upgradeSpawnRate");
         inventory.setItem(20,spawnRate);
+        //</editor-fold>
+
+        //<editor-fold desc="🎲Double Drops Upgrade">
+        List<String> doubleDropsLore = Arrays.asList("§8§m-----------------------",
+                ChatColor.GRAY + "[ Level: " + tycoonBlock.getTycoonUpgrades().getDoubleDropsLevel() + " ]",
+                ChatColor.GRAY + "[ Chance: " + tycoonBlock.getDoubleDropsChanceFormatted() + " ]",
+                ChatColor.GRAY + "[ Upgrade cost: " + ChatColor.GREEN + PriceUtility.formatMoney(TycoonUpgrades.getDoubleDropChanceUpgradeCost(tycoonBlock,tycoonBlock.getTycoonUpgrades().getDoubleDropsLevel() + 1)) + ChatColor.GRAY +  " -> " + (tycoonBlock.getSpawnRateLevel() + 1) +" ]",
+                "§8§m-----------------------");
+        ItemStack doubleDrops = MenuManager.createItemstack(
+                Material.PRISMARINE_CRYSTALS,
+                1,
+                ChatColor.AQUA + "Upgrad Double Drops",
+                doubleDropsLore,
+                false,
+                true,
+                true,
+                "upgradeDoubleDrops"
+        );
+        inventory.setItem(21,doubleDrops);
+//</editor-fold>
 
         if (tycoonBlock.getTycoonUpgrades().isAutoMinerUnlocked()){
             List<String> minerLore = Arrays.asList("§8§m-----------------------",
@@ -133,6 +154,10 @@ public class TycoonUpgradeMenu implements MenuInterface{
                     break;
                 case "upgradeWorthMultiplier":
                     tycoonBlock.upgradeSellMultiplier(player);
+                    refresh(player,inventory);
+                    break;
+                case "upgradeDoubleDrops":
+                    tycoonBlock.upgradeDoubleDropsChance(player);
                     refresh(player,inventory);
                     break;
                 case "return":
