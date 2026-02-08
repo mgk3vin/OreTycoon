@@ -36,8 +36,10 @@ public class TycoonUpgradeMenu implements MenuInterface{
 
     @Override
     public void refresh(Player player, Inventory inventory) {
-        MenuManager.addFiller(inventory, Material.GRAY_STAINED_GLASS_PANE);
+        TycoonUpgrades tycoonUpgrades = tycoonBlock.getTycoonUpgrades();
+        MenuManager.addFiller(inventory, Material.ORANGE_STAINED_GLASS_PANE);
         //  20 | 22 | 24
+        //<editor-fold desc="⚒️ Spawn rate Upgrade">
         List<String> spawnLore = Arrays.asList("§8§m-----------------------",
                 ChatColor.GRAY + "[ Level: " + tycoonBlock.getSpawnRateLevel() + " ]",
                 ChatColor.GRAY + "[ Spawnrate: " + tycoonBlock.getSpawnRateFormatted() + "s ]",
@@ -51,8 +53,29 @@ public class TycoonUpgradeMenu implements MenuInterface{
                 true,
                 true,
                 "upgradeSpawnRate");
-        inventory.setItem(20,spawnRate);
+        inventory.setItem(11,spawnRate);
+        //</editor-fold>
 
+        //<editor-fold desc="🎲Double Drops Upgrade">
+        List<String> doubleDropsLore = Arrays.asList("§8§m-----------------------",
+                ChatColor.GRAY + "[ Level: " + tycoonBlock.getTycoonUpgrades().getDoubleDropsLevel() + " ]",
+                ChatColor.GRAY + "[ Chance: " + tycoonBlock.getDoubleDropsChanceFormatted() + " ]",
+                ChatColor.GRAY + "[ Upgrade cost: " + ChatColor.GREEN + PriceUtility.formatMoney(TycoonUpgrades.getDoubleDropChanceUpgradeCost(tycoonBlock,tycoonBlock.getTycoonUpgrades().getDoubleDropsLevel() + 1)) + ChatColor.GRAY +  " -> " + (tycoonBlock.getTycoonUpgrades().getDoubleDropsLevel() + 1) +" ]",
+                "§8§m-----------------------");
+        ItemStack doubleDrops = MenuManager.createItemstack(
+                Material.PRISMARINE_CRYSTALS,
+                1,
+                ChatColor.AQUA + "Upgrade Double Drops",
+                doubleDropsLore,
+                false,
+                true,
+                true,
+                "upgradeDoubleDrops"
+        );
+        inventory.setItem(13,doubleDrops);
+//</editor-fold>
+
+        //<editor-fold desc="⛏️ Auto Miner Upgrade">
         if (tycoonBlock.getTycoonUpgrades().isAutoMinerUnlocked()){
             List<String> minerLore = Arrays.asList("§8§m-----------------------",
                     ChatColor.GRAY + "[ Level: " + tycoonBlock.getMiningRateLevel() + " ]",
@@ -67,7 +90,7 @@ public class TycoonUpgradeMenu implements MenuInterface{
                     true,
                     true,
                     "upgradeAutoMinerSpeed");
-            inventory.setItem(22,autoMinerSpeed);
+            inventory.setItem(15,autoMinerSpeed);
         } else {
             ItemStack autoMinerLocked = MenuManager.createItemstack(Material.IRON_BARS,
                     1,
@@ -77,11 +100,30 @@ public class TycoonUpgradeMenu implements MenuInterface{
                     true,
                     true,
                     "autoMinerLocked");
-            inventory.setItem(22,autoMinerLocked);
+            inventory.setItem(15,autoMinerLocked);
         }
+        //</editor-fold>
 
+        //<editor-fold desc="🍀 Fortune Upgrade">
+        List<String> fortuneLore = Arrays.asList("§8§m-----------------------",
+                ChatColor.GRAY + "[ Level: " + tycoonBlock.getTycoonUpgrades().getFortuneLevel() + " ]",
+                ChatColor.GRAY + "[ Chance: " + tycoonBlock.getFortuneChanceFormatted() + " ]",
+                ChatColor.GRAY + "[ Upgrade cost: " + ChatColor.GREEN + PriceUtility.formatMoney(TycoonUpgrades.getFortuneUpgradeCost(tycoonBlock,tycoonBlock.getTycoonUpgrades().getFortuneLevel() + 1)) + ChatColor.GRAY +  " -> " + (tycoonBlock.getTycoonUpgrades().getFortuneLevel() + 1) +" ]",
+                "§8§m-----------------------");
+        ItemStack fortune = MenuManager.createItemstack(
+                Material.BOOK,
+                1,
+                ChatColor.LIGHT_PURPLE + "Upgrade Fortune",
+                fortuneLore,
+                false,
+                true,
+                true,
+                "upgradeFortune"
+        );
+        inventory.setItem(29,fortune);
+//</editor-fold>
 
-
+        //<editor-fold desc="💵 Multiplier Upgrade">
         List<String> multiplierLore = Arrays.asList("§8§m-----------------------",
                 ChatColor.GRAY + "[ Level: " + tycoonBlock.getSellMultiplierLevel() + " ]",
                 ChatColor.GRAY + "[ Sell Multiplier: " + tycoonBlock.getSellMultiplierFormatted() + "x ]",
@@ -89,15 +131,33 @@ public class TycoonUpgradeMenu implements MenuInterface{
                 "§8§m-----------------------");
         ItemStack worthMultiplier = MenuManager.createItemstack(Material.LIME_BUNDLE,
                 1,
-                ChatColor.GREEN + "Upgrade Money Multiplier",
+                ChatColor.GREEN + "Upgrade Sell Multiplier",
                 multiplierLore,
                 false,
                 true,
                 true,
                 "upgradeWorthMultiplier");
-        inventory.setItem(24,worthMultiplier);
+        inventory.setItem(31,worthMultiplier);
+//</editor-fold>
 
-        //Return button
+        //<editor-fold desc="📦 Inventory Storage Upgrade">
+        List<String> inventoryLore = Arrays.asList("§8§m-----------------------",
+                ChatColor.GRAY + "[ Level: " + tycoonUpgrades.getInventoryStorageLevel()+ " ]",
+                ChatColor.GRAY + "[ Storage: " + tycoonBlock.getInventoryStorage() + " blocks ]",
+                ChatColor.GRAY + "[ Upgrade Cost: " + ChatColor.GREEN + PriceUtility.formatMoney(TycoonUpgrades.getInventoryStorageUpgradeCost(tycoonBlock,tycoonUpgrades.getInventoryStorageLevel() + 1)) + ChatColor.GRAY +  " -> " + (tycoonUpgrades.getInventoryStorageLevel() + 1) +" ]",
+                "§8§m-----------------------");
+        ItemStack inventoryUpgrade = MenuManager.createItemstack(Material.CHEST_MINECART,
+                1,
+                ChatColor.GOLD + "Upgrade Inventory Storage",
+                inventoryLore,
+                false,
+                true,
+                true,
+                "upgradeInventoryStorage");
+        inventory.setItem(33, inventoryUpgrade);
+//</editor-fold>
+
+        //<editor-fold desc="❌ Return button">
         ItemStack returnItem = MenuManager.createItemstack(Material.BARRIER,
                 1,
                 ChatColor.RED + "<- Back to Stats Menu",
@@ -107,6 +167,7 @@ public class TycoonUpgradeMenu implements MenuInterface{
                 true,
                 "return");
         inventory.setItem(44, returnItem);
+        //</editor-fold>
     }
 
     @Override
@@ -133,6 +194,19 @@ public class TycoonUpgradeMenu implements MenuInterface{
                     break;
                 case "upgradeWorthMultiplier":
                     tycoonBlock.upgradeSellMultiplier(player);
+                    refresh(player,inventory);
+                    break;
+                case "upgradeDoubleDrops":
+                    tycoonBlock.upgradeDoubleDropsChance(player);
+                    refresh(player,inventory);
+                    break;
+                case "upgradeFortune":
+                    tycoonBlock.upgradeFortuneChance(player);
+                    refresh(player,inventory);
+                    break;
+                case "upgradeInventoryStorage":
+                    tycoonBlock.upgradeMaxInventoryStorage(player);
+                    tycoonBlock.updateHologramPreset(tycoonBlock.getLocation(), "STORAGE");
                     refresh(player,inventory);
                     break;
                 case "return":

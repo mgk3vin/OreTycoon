@@ -4,6 +4,7 @@ import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
+import me.mangokevin.oreTycoon.utility.Console;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -13,6 +14,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.Random;
 
 
 public class BlockBreakListener implements Listener {
@@ -67,6 +70,13 @@ public class BlockBreakListener implements Listener {
             }
             //Add item to inv when manually mined
             ItemStack item = new ItemStack(block.getBlockData().getMaterial());
+            //Fortune Multiplier
+            Random random = new Random();
+            if (random.nextDouble() * 100.0 < tycoonBlock.getFortuneChance()) {
+                item.setAmount(2);
+                Console.log(getClass(), "Fortune has doubled the drop!");
+            }
+            //Fortune Multiplier
             boolean itemFits = tycoonBlock.getTycoonInventory().addItem(item);
             if (itemFits) {
                 event.setCancelled(true);

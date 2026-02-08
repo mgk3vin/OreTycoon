@@ -190,10 +190,8 @@ public class TycoonBlockManager {
 //        }.runTaskLater(plugin, 20L * 1);
 //    }
     // ---------------- Filesave working ----------------
+    //<editor-fold desc="🗂️Save Tycoons">
     public void saveTycoons(){
-        if (!plugin.getDataFolder().exists()) {
-            plugin.getDataFolder().mkdirs(); // Erstellt den Ordner, falls er fehlt
-        }
 
         File file = new File(plugin.getDataFolder(), "tycoons.yml");
         // Vorherige Daten löschen, um Duplikate zu vermeiden
@@ -222,6 +220,8 @@ public class TycoonBlockManager {
             data.set(path + "miningRate", tycoon.getMiningRate());
             data.set(path + "miningRateLevel", tycoon.getMiningRateLevel());
             data.set(path + "sellMultiplierLevel", tycoon.getSellMultiplierLevel());
+            data.set(path + "doubleDropsLevel", tycoon.getTycoonUpgrades().getDoubleDropsLevel());
+            data.set(path + "fortuneLevel", tycoon.getTycoonUpgrades().getFortuneLevel());
 
             data.set(path + "inventoryStorageLevel", tycoon.getTycoonUpgrades().getInventoryStorageLevel());
 
@@ -259,17 +259,17 @@ public class TycoonBlockManager {
             //⬇️---------- Active Booster Load ----------⬇️
             if (tycoon.isAnyBoosterActive() != null) {
                 TycoonBoosterAbstract tycoonBooster = tycoon.isAnyBoosterActive();
-                data.set(path + "activeBooster" + "isActive", true);
-                data.set(path + "activeBooster" + "type", tycoonBooster.getUID());
-                data.set(path + "activeBooster" + "boostValue", tycoonBooster.getBoostValue());
-                data.set(path + "activeBooster" + "duration", tycoonBooster.getDuration());
+                data.set(path + "activeBooster." + "isActive", true);
+                data.set(path + "activeBooster." + "type", tycoonBooster.getUID());
+                data.set(path + "activeBooster." + "boostValue", tycoonBooster.getBoostValue());
+                data.set(path + "activeBooster." + "duration", tycoonBooster.getDuration());
                 Console.log(getClass(), "Saved Booster: " + tycoonBooster.getUID() + " | BoostValue: " + tycoonBooster.getBoostValue() + " | Duration: " + tycoonBooster.getDuration() + "ticks");
             } else {
                 Console.log(getClass(), "No active Booster saved!");
-                data.set(path + "activeBooster" + "isActive", false);
-                data.set(path + "activeBooster" + "type", null);
-                data.set(path + "activeBooster" + "boostValue", null);
-                data.set(path + "activeBooster" + "duration", null);
+                data.set(path + "activeBooster." + "isActive", false);
+                data.set(path + "activeBooster." + "type", null);
+                data.set(path + "activeBooster." + "boostValue", null);
+                data.set(path + "activeBooster." + "duration", null);
             }
 
             //⬆️---------- Active Booster Load ----------⬆️
@@ -309,6 +309,8 @@ public class TycoonBlockManager {
             plugin.getLogger().severe("Fehler beim Speichern der Tycoons: " + e.getMessage());
         }
     }
+    //</editor-fold>
+    //<editor-fold desc="🪫Load Tycoons">
     public void loadTycoons(){
         File file = new File(plugin.getDataFolder(), "tycoons.yml");
         if (!file.exists()) return;
@@ -354,6 +356,8 @@ public class TycoonBlockManager {
                 int miningRateLevel = section.getInt(path + "miningRateLevel");
                 int sellMultiplierLevel = section.getInt(path + "sellMultiplierLevel");
                 int inventoryStorageLevel = section.getInt(path + "inventoryStorageLevel");
+                int doubleDropsLevel = section.getInt(path + "doubleDropsLevel");
+                int fortuneLevel = section.getInt(path + "fortuneLevel");
                 List<Integer> claimedLevels = section.getIntegerList(path + "claimedLevels");
 
                 TycoonUpgrades tycoonUpgrades = new  TycoonUpgrades();
@@ -361,6 +365,9 @@ public class TycoonBlockManager {
                 tycoonUpgrades.setSpawnRateLevel(spawnRateLevel);
                 tycoonUpgrades.setMiningRateLevel(miningRateLevel);
                 tycoonUpgrades.setSellMultiplierLevel(sellMultiplierLevel);
+                tycoonUpgrades.setDoubleDropsLevel(doubleDropsLevel);
+                tycoonUpgrades.setFortuneLevel(fortuneLevel);
+
                 tycoonUpgrades.setInventoryStorageLevel(inventoryStorageLevel);
                 tycoonUpgrades.setClaimedLevels(claimedLevels);
                 //⬆️========== Load Upgrade Attributes ==========⬆️
@@ -409,10 +416,10 @@ public class TycoonBlockManager {
                 //⬆️---------- Disabled Blocks Load ----------⬆️
 
                 //⬇️---------- Active Booster Load ----------⬇️
-                boolean isBoosterActive = section.getBoolean(path + "activeBooster" + "isActive");
-                String boosterUID = section.getString(path + "activeBooster" + "type");
-                double boosterValue = section.getDouble(path + "activeBooster" + "boostValue");
-                long duration = section.getLong(path + "activeBooster" + "duration");
+                boolean isBoosterActive = section.getBoolean(path + "activeBooster." + "isActive");
+                String boosterUID = section.getString(path + "activeBooster." + "type");
+                double boosterValue = section.getDouble(path + "activeBooster." + "boostValue");
+                long duration = section.getLong(path + "activeBooster." + "duration");
                 if (isBoosterActive) {
                     Console.log(getClass(), "Loading booster: " +  boosterUID + " | BoostValue: " + boosterValue + " | duration: " + duration + "ticks");
                     TycoonBoosterAbstract tycoonBooster = BoosterRegistry.createBooster(boosterUID, boosterValue, duration);
@@ -461,6 +468,7 @@ public class TycoonBlockManager {
             block.createHologram();
         }
     }
+    //</editor-fold>
     // ---------------- Filesave working ----------------
 
     public boolean isTycoonBlock(@NotNull ItemStack placedItem) {

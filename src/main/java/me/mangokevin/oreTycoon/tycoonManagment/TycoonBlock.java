@@ -1,5 +1,4 @@
 package me.mangokevin.oreTycoon.tycoonManagment;
-
 import de.oliver.fancyholograms.api.FancyHologramsPlugin;
 import de.oliver.fancyholograms.api.HologramManager;
 import de.oliver.fancyholograms.api.data.HologramData;
@@ -28,8 +27,9 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import java.util.*;
-
 public class TycoonBlock {
+
+    //<editor-fold desc="🪪Tycoon Variables">
 
     private final Location location;
     private final OfflinePlayer owner;
@@ -39,7 +39,7 @@ public class TycoonBlock {
     private int index;
     private final String tycoonDisplayName;
     private final String blockUID;
-
+    //</editor-fold>
     private int level;
     private int levelXp;
 
@@ -52,7 +52,6 @@ public class TycoonBlock {
     private int tickCounter = 0;
     private int miningTickCounter = 0;
 
-
     private final Inventory inventory;
     private final TycoonInventory tycoonInventory;
     private boolean autoMinerEnabled;
@@ -64,24 +63,32 @@ public class TycoonBlock {
     public static final Map<Location, String> hologramMap = new HashMap<>();
 
     private final Set<Block> activeBlocks = new HashSet<>();
-    private List<Location> spawnedBlockLocations = new ArrayList<>();
 
     HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
 
     private final double basePrice;
-    //========== Upgrade Attributes ==========
+    //<editor-fold desc="⚙️ Upgrade Variables">
+    //⬇️========== Upgrade Attributes ==========⬇️
     private int spawnRate;
     private final int minSpawnRate = 10;
     private int spawnRateLevel;
 
     private int miningRate;
-    private final int minMiningRate = 10;
+    private static final int MIN_MINING_RATE = 10;
     private int miningRateLevel;
 
     private double sellMultiplier = 1;
     private int sellMultiplierLevel;
-    private double sellMultiplierBuff = 1.0;
+    private double sellMultiplierBuff;
     private double maxSellMultiplier = 5.0;
+
+    private double doubleDropsChance = 0.0;
+    private int doubleDropsChanceLevel;
+    private double maxDoubleDropsChance = 100.0;
+
+    private double fortuneChance = 1.0;
+    private int fortuneChanceLevel;
+    private double maxFortuneChance = 100.0;
 
     private int inventoryStorage;
     private int inventoryStorageLevel;
@@ -91,8 +98,8 @@ public class TycoonBlock {
     private boolean isAutoMinerUnlocked;
 
     private final TycoonUpgrades upgrades;
-    //========== Upgrade Attributes ==========
-
+    //⬆️========== Upgrade Attributes ==========⬆️
+    //</editor-fold>
     //========== Buff Attributes ==========
     private boolean isBuffed;
 
@@ -159,6 +166,8 @@ public class TycoonBlock {
         this.spawnRateLevel = upgrades.getSpawnRateLevel();
         this.miningRateLevel = upgrades.getMiningRateLevel();
         this.sellMultiplierLevel = upgrades.getSellMultiplierLevel();
+        this.doubleDropsChanceLevel = upgrades.getDoubleDropsLevel();
+        this.fortuneChanceLevel = upgrades.getFortuneLevel();
         this.inventoryStorageLevel = upgrades.getInventoryStorageLevel();
         this.isBuffed = upgrades.isBuffed();
         this.isAutoMinerUnlocked = upgrades.isAutoMinerUnlocked();
@@ -169,7 +178,7 @@ public class TycoonBlock {
 
 
 
-        this.spawnedBlockLocations = new ArrayList<>();
+
 
 
         this.blockUID = Objects.requireNonNull(this.location.getWorld()).getName() + "_" +
@@ -183,14 +192,20 @@ public class TycoonBlock {
         checkIfBuffed();
     }
 
-
+    //<editor-fold desc="🔎 Increment and Check">
     public void incrementAndCheck() {
         tickCounter++;
 
         if (tickCounter >= spawnRate) {
             tickCounter = 0;
             if (isActive) {
-                trySpawnResource();
+                //trySpawnResource();
+                if (random.nextDouble() * 100.0 < doubleDropsChance) {
+                    Console.log(getClass(), "A double Drop has been spawned!");
+                    trySpawnMultiplyResources(2);
+                }else {
+                    trySpawnMultiplyResources(1);
+                }
             }
         }
         // 2. Der Auto-Miner Timer (Erz abbauen)
@@ -214,12 +229,8 @@ public class TycoonBlock {
                 }
             }
         }
-//        else {
-//            // Falls der Miner aus ist, setzen wir den Counter zurück,
-//            // damit er nicht "vorlädt" für den Moment des Einschaltens.
-//            miningTickCounter = 0;
-//        }
     }
+    //</editor-fold>
 
     public void handleReward(Block block) {
         levelManager.handleXpGain(this, 50);
@@ -228,6 +239,7 @@ public class TycoonBlock {
 
     }
 
+    //<editor-fold desc="📦 Inventory Methods">
     public void sellInventory(Inventory inventory, Player player) {
         Economy econ = OreTycoon.getEconomy();
         double worth = PriceUtility.calculateWorth(inventory) * sellMultiplier;
@@ -257,19 +269,9 @@ public class TycoonBlock {
             }
         }
     }
+    //</editor-fold>
 
     @Deprecated
-    public void withdrawBalance(Player player) {
-        Economy economy = OreTycoon.getEconomy();
-
-        if (storedBalance > 0) {
-            economy.depositPlayer(player, storedBalance);
-            player.sendMessage(ChatColor.GREEN + "You collected " + economy.format(storedBalance) + " from your tycoon!");
-            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.5f, 1);
-            storedBalance = 0;
-        }
-    }
-
     public void trySpawnResource() {
 
         Location center = getLocation();
@@ -307,6 +309,50 @@ public class TycoonBlock {
             world.playSound(randomLocation, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.5f);
             world.spawnParticle(Particle.EXPLOSION, randomLocation, 1);
         }
+    }
+    public void trySpawnMultiplyResources(int amount) {
+        if (amount <= 0) return;
+        Location center = getLocation();
+        World world = center.getWorld();
+
+
+        // 1. Definiere das 5x5 Areal (vom Zentrum aus -2 bis +2)
+        int minX = center.getBlockX() - 2;
+        int maxX = center.getBlockX() + 2;
+        int minZ = center.getBlockZ() - 2;
+        int maxZ = center.getBlockZ() + 2;
+        int fixedY = center.getBlockY(); // Wir spawnen nur auf der Y-Ebene des Tycoon-Block
+
+        for (int i = 0; i < amount; i++) {
+            //Find random spawn coordinate
+            int randomX = random.nextInt(maxX - minX + 1) + minX;
+            int randomZ = random.nextInt(maxZ - minZ + 1) + minZ;
+
+            //Save Spawn Location
+            Location randomLocation = new Location(center.getWorld(), randomX, fixedY, randomZ);
+            Block spawnBlock = randomLocation.getBlock();
+
+            //Check Spawn Location validity
+            if (spawnBlock.getType().equals(Material.AIR)) {
+                //Valid Spawn point
+                Material material = getRandomMaterial(ressourceMaterialsMap);
+                if (material == null) return;
+                spawnBlock.setType(material);
+                //Gespawnten Block merken!
+                //spawnedBlocksMap.put(spawnBlock.getLocation(), spawnBlock);
+                activeBlocks.add(spawnBlock);
+
+                spawnBlock.setMetadata("tycoon_id", new FixedMetadataValue(plugin, blockUID));
+
+                //tycoonBlock.manipulateHologram(tycoonBlock.getLocation(), material.name());
+                setLastSpawnedMaterial(material);
+                updateHologramPreset(getLocation(), "BLOCK");
+                assert world != null;
+                world.playSound(randomLocation, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.5f);
+                world.spawnParticle(Particle.EXPLOSION, randomLocation, 1);
+            }
+        }
+
 
     }
 
@@ -322,7 +368,6 @@ public class TycoonBlock {
             } else {
                 spawnRate = minSpawnRate;
             }
-
         }
 
         miningRateLevel = upgrades.getMiningRateLevel();
@@ -340,6 +385,12 @@ public class TycoonBlock {
         }
         sellMultiplier *= sellMultiplierBuff;
 
+        doubleDropsChanceLevel = upgrades.getDoubleDropsLevel();
+        doubleDropsChance = TycoonUpgrades.calculateNewDoubleDropChance(doubleDropsChanceLevel, 0.0);
+
+        fortuneChanceLevel = upgrades.getFortuneLevel();
+        fortuneChance = TycoonUpgrades.calculateNewFortuneChance(fortuneChanceLevel, 1.0);
+
         inventoryStorageLevel = upgrades.getInventoryStorageLevel();
         inventoryStorage = TycoonUpgrades.getMaxInventoryStorage(inventoryStorageLevel, type.getDefaultMaxInventoryStorage());
 
@@ -350,7 +401,7 @@ public class TycoonBlock {
         Bukkit.getPluginManager().callEvent(event);
     }
     //========== Upgrade Methods ==========
-
+    //<editor-fold desc="🔧 Upgrade Methods">
     public void upgradeSpawnRate(Player player) {
         if (spawnRate <= minSpawnRate) {
             player.sendMessage(ChatColor.RED + "Max Level Reached!");
@@ -374,7 +425,7 @@ public class TycoonBlock {
     }
 
     public void upgradeMiningRate(Player player) {
-        if (miningRate <= minMiningRate) {
+        if (miningRate <= MIN_MINING_RATE) {
             player.sendMessage(ChatColor.RED + "Max Level Reached!");
             return;
         }
@@ -422,13 +473,41 @@ public class TycoonBlock {
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
         }
     }
-
-    public void unlockAutoMiner(){
-
+    public void upgradeDoubleDropsChance(Player player) {
+        if (doubleDropsChance >= maxDoubleDropsChance) {
+            player.sendMessage(ChatColor.RED + "Max Level Reached!");
+            return;
+        }
+        double cost = TycoonUpgrades.getDoubleDropChanceUpgradeCost(this,doubleDropsChanceLevel + 1);
+        Economy economy = OreTycoon.getEconomy();
+        if (economy.has(player, cost)) {
+            economy.withdrawPlayer(player, cost);
+            int nextLevel = doubleDropsChanceLevel + 1;
+            upgrades.setDoubleDropsLevel(nextLevel);
+            updateAttributes();
+            player.sendMessage(ChatColor.GREEN + "You upgrade Double Drops to " + getDoubleDropsChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
+        }
     }
+    public void upgradeFortuneChance(Player player) {
+        if (fortuneChance >= maxFortuneChance) {
+            player.sendMessage(ChatColor.RED + "Max Level Reached!");
+            return;
+        }
+        double cost = TycoonUpgrades.getFortuneUpgradeCost(this,fortuneChanceLevel + 1);
+        Economy economy = OreTycoon.getEconomy();
+        if (economy.has(player, cost)) {
+            economy.withdrawPlayer(player, cost);
+            int nextLevel = fortuneChanceLevel + 1;
+            upgrades.setFortuneLevel(nextLevel);
+            updateAttributes();
+            player.sendMessage(ChatColor.GREEN + "You upgraded Fortune to " + getFortuneChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
+        }
+    }
+    //</editor-fold>
     //========== Upgrade Methods ==========
 
     //========= Buff methods =========
+    //<editor-fold desc="🔥 Buff Methods">
     public boolean checkIfBuffed() {
         Location checkLocation = location.clone();
         checkLocation.add(0, -1, 0);
@@ -454,6 +533,7 @@ public class TycoonBlock {
         isBuffed = false;
         updateAttributes();
     }
+    //</editor-fold>
     //========= Buff methods =========
 
 
@@ -514,6 +594,14 @@ public class TycoonBlock {
 
                     //tycoonBlock.getTycoonInventory().addItem(item);
                     ItemStack item = new ItemStack(blockLocation.getBlock().getType());
+
+                    //Fortune Multiplier
+                    if (random.nextDouble() * 100.0 < fortuneChance) {
+                        item.setAmount(2);
+                        Console.log(getClass(), "Fortune has doubled the drop!");
+                    }
+                    //Fortune Multiplier
+
                     TycoonAutoMinedEvent event = new TycoonAutoMinedEvent(tycoonBlock, item);
                     Bukkit.getPluginManager().callEvent(event);
 
@@ -973,6 +1061,15 @@ public class TycoonBlock {
     }
     public int getSellMultiplierLevel() {
         return sellMultiplierLevel;
+    }
+    public String getDoubleDropsChanceFormatted(){
+        return String.format("%.2f", doubleDropsChance) + "%";
+    }
+    public String getFortuneChanceFormatted(){
+        return String.format("%.2f", fortuneChance) + "%";
+    }
+    public double getFortuneChance() {
+        return fortuneChance;
     }
     public TycoonUpgrades getTycoonUpgrades() {
         return upgrades;
