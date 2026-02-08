@@ -191,11 +191,7 @@ public class TycoonBlockManager {
 //    }
     // ---------------- Filesave working ----------------
     //<editor-fold desc="🗂️Save Tycoons">
-
     public void saveTycoons(){
-//        if (!plugin.getDataFolder().exists()) {
-//            plugin.getDataFolder().mkdirs(); // Erstellt den Ordner, falls er fehlt
-//        }
 
         File file = new File(plugin.getDataFolder(), "tycoons.yml");
         // Vorherige Daten löschen, um Duplikate zu vermeiden
@@ -225,6 +221,7 @@ public class TycoonBlockManager {
             data.set(path + "miningRateLevel", tycoon.getMiningRateLevel());
             data.set(path + "sellMultiplierLevel", tycoon.getSellMultiplierLevel());
             data.set(path + "doubleDropsLevel", tycoon.getTycoonUpgrades().getDoubleDropsLevel());
+            data.set(path + "fortuneLevel", tycoon.getTycoonUpgrades().getFortuneLevel());
 
             data.set(path + "inventoryStorageLevel", tycoon.getTycoonUpgrades().getInventoryStorageLevel());
 
@@ -360,6 +357,7 @@ public class TycoonBlockManager {
                 int sellMultiplierLevel = section.getInt(path + "sellMultiplierLevel");
                 int inventoryStorageLevel = section.getInt(path + "inventoryStorageLevel");
                 int doubleDropsLevel = section.getInt(path + "doubleDropsLevel");
+                int fortuneLevel = section.getInt(path + "fortuneLevel");
                 List<Integer> claimedLevels = section.getIntegerList(path + "claimedLevels");
 
                 TycoonUpgrades tycoonUpgrades = new  TycoonUpgrades();
@@ -368,6 +366,8 @@ public class TycoonBlockManager {
                 tycoonUpgrades.setMiningRateLevel(miningRateLevel);
                 tycoonUpgrades.setSellMultiplierLevel(sellMultiplierLevel);
                 tycoonUpgrades.setDoubleDropsLevel(doubleDropsLevel);
+                tycoonUpgrades.setFortuneLevel(fortuneLevel);
+
                 tycoonUpgrades.setInventoryStorageLevel(inventoryStorageLevel);
                 tycoonUpgrades.setClaimedLevels(claimedLevels);
                 //⬆️========== Load Upgrade Attributes ==========⬆️

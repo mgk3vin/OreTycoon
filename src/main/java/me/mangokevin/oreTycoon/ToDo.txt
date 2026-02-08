@@ -14,11 +14,16 @@ Need SpawnBlock list for autominer✅
 Das "Eco-System" (Umgebungs-Buffs)✅
 🛠️ Booster Save ✅
 🛠️ Booster Timer ✅
+MultiSpawn Upgrade ✅
+Fortune Upgrade ✅
 
-➕MultiSpawn Upgrade
-➕Fortune Upgrade
+  Mining Combo System 🔥
+  Stock Market System 📊
+  Guild / Clan System 👥
+  Talent Tree / Skill Points 🌳
+➕Experience Multiplier
 ➕Spawn block Rarity / Spawn Rarity Upgrade
-➕Auto Sell Artifact
+➕Auto Sell Artifact (What about inv storage)
 "Seasonal Global Boosters" (Der Community-Grind)
 Das "Artifact-Hunting" (Archäologie)
 "Instabile Kristalle" (Seltener temporärer Boost)
@@ -32,3 +37,22 @@ Clean up 🕛
 //<editor-fold desc="Beschreibung">
 
 //</editor-fold>
+
+/*
+ * 54 SLOT INVENTORY CHEAT SHEET (9x6)
+ * -------------------------------------------------------
+ * [ 0][ 1][ 2][ 3][ 4][ 5][ 6][ 7][ 8]  <- Reihe 1
+ * [ 9][10][11][12][13][14][15][16][17]  <- Reihe 2
+ * [18][19][20][21][22][23][24][25][26]  <- Reihe 3
+ * [27][28][29][30][31][32][33][34][35]  <- Reihe 4
+ * [36][37][38][39][40][41][42][43][44]  <- Reihe 5
+ * [45][46][47][48][49][50][51][52][53]  <- Reihe 6
+ * -------------------------------------------------------
+ * * WICHTIGE SLOTS:
+ * Ecken: 0, 8, 45, 53
+ * Mitte: 22, 31
+ * * NAVIGATION (UNTERE REIHE):
+ * Zurück: 48 | Schließen: 49 | Vorwärts: 50
+ * * LOGIK:
+ * Slot = (Reihe - 1) * 9 + (Spalte - 1)
+ */

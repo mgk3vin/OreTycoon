@@ -86,6 +86,10 @@ public class TycoonBlock {
     private int doubleDropsChanceLevel;
     private double maxDoubleDropsChance = 100.0;
 
+    private double fortuneChance = 1.0;
+    private int fortuneChanceLevel;
+    private double maxFortuneChance = 100.0;
+
     private int inventoryStorage;
     private int inventoryStorageLevel;
 
@@ -163,6 +167,7 @@ public class TycoonBlock {
         this.miningRateLevel = upgrades.getMiningRateLevel();
         this.sellMultiplierLevel = upgrades.getSellMultiplierLevel();
         this.doubleDropsChanceLevel = upgrades.getDoubleDropsLevel();
+        this.fortuneChanceLevel = upgrades.getFortuneLevel();
         this.inventoryStorageLevel = upgrades.getInventoryStorageLevel();
         this.isBuffed = upgrades.isBuffed();
         this.isAutoMinerUnlocked = upgrades.isAutoMinerUnlocked();
@@ -383,6 +388,9 @@ public class TycoonBlock {
         doubleDropsChanceLevel = upgrades.getDoubleDropsLevel();
         doubleDropsChance = TycoonUpgrades.calculateNewDoubleDropChance(doubleDropsChanceLevel, 0.0);
 
+        fortuneChanceLevel = upgrades.getFortuneLevel();
+        fortuneChance = TycoonUpgrades.calculateNewFortuneChance(fortuneChanceLevel, 1.0);
+
         inventoryStorageLevel = upgrades.getInventoryStorageLevel();
         inventoryStorage = TycoonUpgrades.getMaxInventoryStorage(inventoryStorageLevel, type.getDefaultMaxInventoryStorage());
 
@@ -480,6 +488,21 @@ public class TycoonBlock {
             player.sendMessage(ChatColor.GREEN + "You upgrade Double Drops to " + getDoubleDropsChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
         }
     }
+    public void upgradeFortuneChance(Player player) {
+        if (fortuneChance >= maxFortuneChance) {
+            player.sendMessage(ChatColor.RED + "Max Level Reached!");
+            return;
+        }
+        double cost = TycoonUpgrades.getFortuneUpgradeCost(this,fortuneChanceLevel + 1);
+        Economy economy = OreTycoon.getEconomy();
+        if (economy.has(player, cost)) {
+            economy.withdrawPlayer(player, cost);
+            int nextLevel = fortuneChanceLevel + 1;
+            upgrades.setFortuneLevel(nextLevel);
+            updateAttributes();
+            player.sendMessage(ChatColor.GREEN + "You upgraded Fortune to " + getFortuneChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
+        }
+    }
     //</editor-fold>
     //========== Upgrade Methods ==========
 
@@ -571,6 +594,14 @@ public class TycoonBlock {
 
                     //tycoonBlock.getTycoonInventory().addItem(item);
                     ItemStack item = new ItemStack(blockLocation.getBlock().getType());
+
+                    //Fortune Multiplier
+                    if (random.nextDouble() * 100.0 < fortuneChance) {
+                        item.setAmount(2);
+                        Console.log(getClass(), "Fortune has doubled the drop!");
+                    }
+                    //Fortune Multiplier
+
                     TycoonAutoMinedEvent event = new TycoonAutoMinedEvent(tycoonBlock, item);
                     Bukkit.getPluginManager().callEvent(event);
 
@@ -1033,6 +1064,12 @@ public class TycoonBlock {
     }
     public String getDoubleDropsChanceFormatted(){
         return String.format("%.2f", doubleDropsChance) + "%";
+    }
+    public String getFortuneChanceFormatted(){
+        return String.format("%.2f", fortuneChance) + "%";
+    }
+    public double getFortuneChance() {
+        return fortuneChance;
     }
     public TycoonUpgrades getTycoonUpgrades() {
         return upgrades;

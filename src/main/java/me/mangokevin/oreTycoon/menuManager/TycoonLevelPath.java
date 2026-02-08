@@ -42,11 +42,10 @@ public class TycoonLevelPath implements MenuInterface{
     @Override
     public void refresh(Player player, Inventory inventory) {
         //========== Filler ==========
-        MenuManager.addFiller(inventory, Material.GRAY_STAINED_GLASS_PANE);
+        MenuManager.addFiller(inventory, Material.CYAN_STAINED_GLASS_PANE);
         //========== Filler ==========
 
         //========== Level items ==========
-
         int startIndex = page * usableSlots.size();
         for (int i = 0; i < usableSlots.size(); i++) {
             int slot = usableSlots.get(i);

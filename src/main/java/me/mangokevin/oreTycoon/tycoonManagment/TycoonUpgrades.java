@@ -11,6 +11,7 @@ public class TycoonUpgrades {
     private int sellMultiplierLevel = 0;
     private int inventoryStorageLevel = 0;
     private int doubleDropsLevel = 0;
+    private int fortuneLevel = 0;
 
     private boolean isBuffed = false;
     private double sellMultiplierBuff = 1.0;
@@ -39,14 +40,16 @@ public class TycoonUpgrades {
     public static double calculateNewDoubleDropChance(int level, double defaultDoubleDropChance){
         return defaultDoubleDropChance +  (level * 1.0);
     }
-    @Deprecated
-    public boolean shouldAutoMinerUnlocked(int level){
-        if (level >= 5){
-            return true;
-        }else {
-            return false;
-        }
+    public static double calculateNewFortuneChance(int level, double defaultFortuneChance){
+        return defaultFortuneChance +  (level * 1.0);
     }
+    public static int getMaxInventoryStorage(int level, int defaultMaxStorage){
+        return  defaultMaxStorage + (5 * level);
+    }
+    public static int calculateMaxInventoryStorage(int level, int defaultMaxStorage){
+        return  defaultMaxStorage + (5 * level);
+    }
+
     public static double getSpawnRateUpgradeCost(TycoonBlock tycoonBlock, int level){
         double base = tycoonBlock.getTycoonType().getBasePrice();
         double multi = 1.17;
@@ -67,9 +70,17 @@ public class TycoonUpgrades {
         double multi = 1.15;
         return Math.round(getExponentialUpgradeCost(level, base, multi));
     }
-    public static int getMaxInventoryStorage(int level, int defaultMaxStorage){
-        return  defaultMaxStorage + (5 * level);
+    public static double getFortuneUpgradeCost(TycoonBlock tycoonBlock, int level){
+        double base = tycoonBlock.getTycoonType().getBasePrice();
+        double multi = 1.13;
+        return Math.round(getExponentialUpgradeCost(level, base, multi));
     }
+    public static double getInventoryStorageUpgradeCost(TycoonBlock tycoonBlock, int level){
+        double base = tycoonBlock.getTycoonType().getBasePrice() * 10.0;
+        double multi = 1.05;
+        return Math.round(getExponentialUpgradeCost(level, base, multi));
+    }
+
     public static void testUpgradeCostFunction( int level,double base, double multi){
         Console.debug("[TycoonUpgrades] Testing upgrade cost function...");
         for(int i = 0; i <= level; i++){
@@ -117,6 +128,9 @@ public class TycoonUpgrades {
     public void setAutoMinerUnlocked(boolean autoMinerUnlocked){
         this.isAutoMinerUnlocked = autoMinerUnlocked;
     }
+    public void setFortuneLevel(int fortuneLevel){
+        this.fortuneLevel = fortuneLevel;
+    }
     //==========  Setter  ==========
     //==========  Getter  ==========
     public List<Integer> getClaimedLevels(){
@@ -145,6 +159,9 @@ public class TycoonUpgrades {
     }
     public boolean isAutoMinerUnlocked() {
         return isAutoMinerUnlocked;
+    }
+    public int getFortuneLevel() {
+        return fortuneLevel;
     }
     //==========  Getter  ==========
 }

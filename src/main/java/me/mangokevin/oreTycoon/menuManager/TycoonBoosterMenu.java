@@ -40,7 +40,7 @@ public class TycoonBoosterMenu implements MenuInterface{
 
     @Override
     public void refresh(Player player, Inventory inventory) {
-        MenuManager.addFiller(inventory, Material.GRAY_STAINED_GLASS_PANE);
+        MenuManager.addFiller(inventory, Material.MAGENTA_STAINED_GLASS_PANE);
 
         if (tycoonBlock.getTycoonBoosterManager().isAutoMinerBoosterActive()) {
             ItemStack autoMinerBooster = tycoonBlock.getAutoMinerSpeedBooster().getItem();
