@@ -1,5 +1,4 @@
 package me.mangokevin.oreTycoon.tycoonManagment;
-
 import de.oliver.fancyholograms.api.FancyHologramsPlugin;
 import de.oliver.fancyholograms.api.HologramManager;
 import de.oliver.fancyholograms.api.data.HologramData;
@@ -28,8 +27,9 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import java.util.*;
-
 public class TycoonBlock {
+
+    //<editor-fold desc="🪪Tycoon Variables">
 
     private final Location location;
     private final OfflinePlayer owner;
@@ -39,7 +39,7 @@ public class TycoonBlock {
     private int index;
     private final String tycoonDisplayName;
     private final String blockUID;
-
+    //</editor-fold>
     private int level;
     private int levelXp;
 
@@ -52,7 +52,6 @@ public class TycoonBlock {
     private int tickCounter = 0;
     private int miningTickCounter = 0;
 
-
     private final Inventory inventory;
     private final TycoonInventory tycoonInventory;
     private boolean autoMinerEnabled;
@@ -64,23 +63,23 @@ public class TycoonBlock {
     public static final Map<Location, String> hologramMap = new HashMap<>();
 
     private final Set<Block> activeBlocks = new HashSet<>();
-    private List<Location> spawnedBlockLocations = new ArrayList<>();
 
     HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
 
     private final double basePrice;
+    //<editor-fold desc="⚙️ Upgrade Variables">
     //⬇️========== Upgrade Attributes ==========⬇️
     private int spawnRate;
     private final int minSpawnRate = 10;
     private int spawnRateLevel;
 
     private int miningRate;
-    private final int minMiningRate = 10;
+    private static final int MIN_MINING_RATE = 10;
     private int miningRateLevel;
 
     private double sellMultiplier = 1;
     private int sellMultiplierLevel;
-    private double sellMultiplierBuff = 1.0;
+    private double sellMultiplierBuff;
     private double maxSellMultiplier = 5.0;
 
     private double doubleDropsChance = 0.0;
@@ -96,7 +95,7 @@ public class TycoonBlock {
 
     private final TycoonUpgrades upgrades;
     //⬆️========== Upgrade Attributes ==========⬆️
-
+    //</editor-fold>
     //========== Buff Attributes ==========
     private boolean isBuffed;
 
@@ -174,7 +173,7 @@ public class TycoonBlock {
 
 
 
-        this.spawnedBlockLocations = new ArrayList<>();
+
 
 
         this.blockUID = Objects.requireNonNull(this.location.getWorld()).getName() + "_" +
@@ -188,7 +187,7 @@ public class TycoonBlock {
         checkIfBuffed();
     }
 
-
+    //<editor-fold desc="🔎 Increment and Check">
     public void incrementAndCheck() {
         tickCounter++;
 
@@ -225,12 +224,8 @@ public class TycoonBlock {
                 }
             }
         }
-//        else {
-//            // Falls der Miner aus ist, setzen wir den Counter zurück,
-//            // damit er nicht "vorlädt" für den Moment des Einschaltens.
-//            miningTickCounter = 0;
-//        }
     }
+    //</editor-fold>
 
     public void handleReward(Block block) {
         levelManager.handleXpGain(this, 50);
@@ -239,6 +234,7 @@ public class TycoonBlock {
 
     }
 
+    //<editor-fold desc="📦 Inventory Methods">
     public void sellInventory(Inventory inventory, Player player) {
         Economy econ = OreTycoon.getEconomy();
         double worth = PriceUtility.calculateWorth(inventory) * sellMultiplier;
@@ -268,19 +264,9 @@ public class TycoonBlock {
             }
         }
     }
+    //</editor-fold>
 
     @Deprecated
-    public void withdrawBalance(Player player) {
-        Economy economy = OreTycoon.getEconomy();
-
-        if (storedBalance > 0) {
-            economy.depositPlayer(player, storedBalance);
-            player.sendMessage(ChatColor.GREEN + "You collected " + economy.format(storedBalance) + " from your tycoon!");
-            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.5f, 1);
-            storedBalance = 0;
-        }
-    }
-
     public void trySpawnResource() {
 
         Location center = getLocation();
@@ -407,7 +393,7 @@ public class TycoonBlock {
         Bukkit.getPluginManager().callEvent(event);
     }
     //========== Upgrade Methods ==========
-
+    //<editor-fold desc="🔧 Upgrade Methods">
     public void upgradeSpawnRate(Player player) {
         if (spawnRate <= minSpawnRate) {
             player.sendMessage(ChatColor.RED + "Max Level Reached!");
@@ -431,7 +417,7 @@ public class TycoonBlock {
     }
 
     public void upgradeMiningRate(Player player) {
-        if (miningRate <= minMiningRate) {
+        if (miningRate <= MIN_MINING_RATE) {
             player.sendMessage(ChatColor.RED + "Max Level Reached!");
             return;
         }
@@ -494,13 +480,11 @@ public class TycoonBlock {
             player.sendMessage(ChatColor.GREEN + "You upgrade Double Drops to " + getDoubleDropsChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
         }
     }
-
-    public void unlockAutoMiner(){
-
-    }
+    //</editor-fold>
     //========== Upgrade Methods ==========
 
     //========= Buff methods =========
+    //<editor-fold desc="🔥 Buff Methods">
     public boolean checkIfBuffed() {
         Location checkLocation = location.clone();
         checkLocation.add(0, -1, 0);
@@ -526,6 +510,7 @@ public class TycoonBlock {
         isBuffed = false;
         updateAttributes();
     }
+    //</editor-fold>
     //========= Buff methods =========
 
 

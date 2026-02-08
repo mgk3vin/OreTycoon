@@ -136,27 +136,17 @@ public class TycoonData {
         String tycoonName = pdc.getOrDefault(TycoonData.TYPE_KEY, PersistentDataType.STRING, "ERROR");
         TycoonType tycoonType = TycoonType.valueOf(tycoonName);
 
-        //Location aus String laden
-//        String locationData = pdc.get(TycoonData.LOCATION_KEY, PersistentDataType.STRING);
-//        Location location;
-//        if (locationData != null) {
-//            String[] parts = locationData.split(";");
-//            World world = Bukkit.getWorld(parts[0]);
-//            location = new Location(world, Double.parseDouble(parts[1]), Double.parseDouble(parts[2]), Double.parseDouble(parts[3]), Float.parseFloat(parts[4]), Float.parseFloat(parts[5]));
-//        }else{
-//            return null;
-//        }
         Location location = placedBlock.getLocation();
         UUID uuid = player.getUniqueId();
 
         //========== Load Upgrades ==========
         TycoonUpgrades upgrades = new TycoonUpgrades();
         upgrades.setAutoMinerUnlocked(pdc.getOrDefault(TYCOON_IS_AUTO_MINER_UNLOCKED_KEY, PersistentDataType.BOOLEAN, false));
-        upgrades.setSpawnRateLevel(pdc.getOrDefault(TycoonData.TYCOON_SPAWN_RATE_LEVEL_KEY, PersistentDataType.INTEGER, 0));
-        upgrades.setMiningRateLevel(pdc.getOrDefault(TycoonData.TYCOON_MINING_RATE_LEVEL_KEY, PersistentDataType.INTEGER, 0));
-        upgrades.setSellMultiplierLevel(pdc.getOrDefault(TycoonData.TYCOON_SELL_MULTIPLIER_LEVEL_KEY, PersistentDataType.INTEGER, 0));
+        upgrades.setSpawnRateLevel(pdc.getOrDefault(TYCOON_SPAWN_RATE_LEVEL_KEY, PersistentDataType.INTEGER, 0));
+        upgrades.setMiningRateLevel(pdc.getOrDefault(TYCOON_MINING_RATE_LEVEL_KEY, PersistentDataType.INTEGER, 0));
+        upgrades.setSellMultiplierLevel(pdc.getOrDefault(TYCOON_SELL_MULTIPLIER_LEVEL_KEY, PersistentDataType.INTEGER, 0));
         upgrades.setDoubleDropsLevel(pdc.getOrDefault(TYCOON_DOUBLE_DROPS_LEVEL_KEY, PersistentDataType.INTEGER, 0));
-        upgrades.setInventoryStorageLevel(pdc.getOrDefault(TycoonData.TYCOON_MAX_INVENTORY_STORAGE_KEY, PersistentDataType.INTEGER, 0));
+        upgrades.setInventoryStorageLevel(pdc.getOrDefault(TYCOON_MAX_INVENTORY_STORAGE_KEY, PersistentDataType.INTEGER, 0));
 
         //Load claimed Levels from String
         String claimedLevelsData = pdc.get(TycoonData.TYCOON_CLAIMED_LEVELS_KEY, PersistentDataType.STRING);
@@ -187,30 +177,5 @@ public class TycoonData {
 
         tycoonBlock.createHologram();
         return tycoonBlock;
-    }
-
-    public NamespacedKey getTYCOON_BLOCK_KEY() {
-        return TYCOON_BLOCK;
-    }
-    public NamespacedKey getLEVEL_KEY() {
-        return LEVEL;
-    }
-    public NamespacedKey getXP_KEY() {
-        return XP;
-    }
-    public NamespacedKey getCREATION_TIME_KEY() {
-        return CREATION_TIME;
-    }
-    public NamespacedKey getMATERIAL_KEY() {
-        return MATERIAL;
-    }
-    public NamespacedKey getSPAWN_INTERVAL_KEY() {
-        return SPAWN_INTERVAL;
-    }
-    public NamespacedKey getTYPE_KEY() {
-        return TYPE_KEY;
-    }
-    public NamespacedKey getTycoon_MENU_ITEM_KEY() {
-        return TYCOON_MENU_ITEM_KEY;
     }
 }
