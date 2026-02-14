@@ -1,7 +1,6 @@
-package me.mangokevin.oreTycoon.tycoonEvents;
+package me.mangokevin.oreTycoon.events.tycoonEvents;
 
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.TycoonBoosterAbstract;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

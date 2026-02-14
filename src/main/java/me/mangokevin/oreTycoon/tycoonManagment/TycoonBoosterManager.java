@@ -2,7 +2,7 @@ package me.mangokevin.oreTycoon.tycoonManagment;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.menuManager.MenuManager;
-import me.mangokevin.oreTycoon.tycoonEvents.TycoonBoosterTickedEvent;
+import me.mangokevin.oreTycoon.events.tycoonEvents.TycoonBoosterTickedEvent;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.AutoMinerSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SellMultiplyBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SpawnSpeedBooster;
@@ -13,7 +13,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.mvplugins.multiverse.external.vavr.collection.List;
 
 import java.util.Arrays;
 import java.util.HashMap;

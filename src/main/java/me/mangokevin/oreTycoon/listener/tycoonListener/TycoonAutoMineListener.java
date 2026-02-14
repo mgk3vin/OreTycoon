@@ -1,10 +1,8 @@
-package me.mangokevin.oreTycoon.tycoonListener;
+package me.mangokevin.oreTycoon.listener.tycoonListener;
 
 import me.mangokevin.oreTycoon.menuManager.*;
-import me.mangokevin.oreTycoon.tycoonEvents.TycoonAutoMinedEvent;
-import me.mangokevin.oreTycoon.utility.Console;
+import me.mangokevin.oreTycoon.events.tycoonEvents.TycoonAutoMinedEvent;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonHolder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;

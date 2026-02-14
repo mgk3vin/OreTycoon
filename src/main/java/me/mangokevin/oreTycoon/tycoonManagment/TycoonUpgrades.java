@@ -1,6 +1,7 @@
 package me.mangokevin.oreTycoon.tycoonManagment;
 
 import me.mangokevin.oreTycoon.utility.Console;
+import me.mangokevin.oreTycoon.worth.PriceUtility;
 
 import java.util.ArrayList;
 import java.util.List;

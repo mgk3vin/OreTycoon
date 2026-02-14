@@ -4,10 +4,12 @@ import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.menuManager.MenuManager;
 import me.mangokevin.oreTycoon.menuManager.OverviewMenu;
 import me.mangokevin.oreTycoon.menuManager.StatsMenu;
+import me.mangokevin.oreTycoon.menuManager.StockMarketMenu;
 import me.mangokevin.oreTycoon.tycoonManagment.*;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.AutoMinerSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SellMultiplyBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SpawnSpeedBooster;
+import me.mangokevin.oreTycoon.worth.WorthManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
@@ -44,6 +46,13 @@ public class TycoonCmd implements CommandExecutor {
         String action = args[0].toLowerCase();
 
         switch (action) {
+            case "stockmarket", "worth":
+                new StockMarketMenu(0).open(p);
+                break;
+            case "updatestockmarket":
+                WorthManager worthManager = plugin.getWorthManager();
+                worthManager.updateStockMarket();
+                break;
             case "booster":
                 if (args.length < 2) {
                     p.sendMessage(ChatColor.RED + "Usage: /tycoon " + action + " <booster_type>");

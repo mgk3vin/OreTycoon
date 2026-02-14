@@ -1,17 +1,23 @@
-package me.mangokevin.oreTycoon.tycoonManagment;
+package me.mangokevin.oreTycoon.worth;
 
+import com.earth2me.essentials.Worth;
 import me.mangokevin.oreTycoon.OreTycoon;
+import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
 import net.ess3.api.IEssentials;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Locale;
 
 public class PriceUtility {
-    public static double calculateWorth(Inventory inventory){
+
+
+    public static double calculateWorthEssentials(Inventory inventory){
         IEssentials ess = OreTycoon.getEssentials();
         if(ess==null)return 0;
 
@@ -27,10 +33,40 @@ public class PriceUtility {
         }
         return worth;
     }
-    public static String calculateWorthPerHour(double speed, double averageReward){
-        return formatMoney((3600/speed) * averageReward);
-    }
     public static double calculateWorth(ItemStack item){
+        WorthManager worthManager = OreTycoon.getInstance().getWorthManager();
+
+        if (item == null || item.getType() == Material.AIR) {
+            return 0.0;
+        }
+
+        double singleWorth = worthManager.getWorth(item.getType());
+
+        return singleWorth * item.getAmount();
+    }
+    public static double calculateWorth(Inventory inventory){
+        double totalWorth = 0.0;
+
+        for (ItemStack item : inventory.getContents()){
+            if (item != null)
+            {
+                ItemMeta meta = item.getItemMeta();
+                if (meta != null) {
+                    if (meta.getPersistentDataContainer().has(
+                            TycoonData.MENU_ITEM_KEY,
+                            PersistentDataType.STRING
+                    )){
+                        continue;
+                    }
+                }
+
+                totalWorth += calculateWorth(item);
+            }
+        }
+
+        return totalWorth;
+    }
+    public static double calculateWorthEssentials(ItemStack item){
         IEssentials ess = OreTycoon.getEssentials();
         if(ess==null)return 0;
 
@@ -45,6 +81,10 @@ public class PriceUtility {
 
         return worth;
     }
+    public static String calculateWorthPerHour(double speed, double averageReward){
+        return formatMoney((3600/speed) * averageReward);
+    }
+
     public static String calculateWorthFormatted(ItemStack item){
         return formatMoney(calculateWorth(item));
     }

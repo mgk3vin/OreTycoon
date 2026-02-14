@@ -6,14 +6,15 @@ import de.oliver.fancyholograms.api.data.TextHologramData;
 import de.oliver.fancyholograms.api.hologram.Hologram;
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.menuManager.TycoonInventory;
-import me.mangokevin.oreTycoon.tycoonEvents.TycoonAutoMinedEvent;
-import me.mangokevin.oreTycoon.tycoonEvents.TycoonChangedAttributesEvent;
+import me.mangokevin.oreTycoon.events.tycoonEvents.TycoonAutoMinedEvent;
+import me.mangokevin.oreTycoon.events.tycoonEvents.TycoonChangedAttributesEvent;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.AutoMinerSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SellMultiplyBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SpawnSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.TycoonBoosterAbstract;
 import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
+import me.mangokevin.oreTycoon.worth.PriceUtility;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -798,6 +799,7 @@ public class TycoonBlock {
     public void updateHologramPreset(Location location, String preset) {
         Hologram hologram = getHologram(location);
         if (hologram == null) {
+            Console.error(getClass() ,"No Hologram found at Location " + location);
             return;
         }
         HologramData data = hologram.getData();
