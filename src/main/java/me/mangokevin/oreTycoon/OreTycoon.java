@@ -4,20 +4,23 @@ import me.mangokevin.oreTycoon.commands.tycooncmds.TycoonCmd;
 import me.mangokevin.oreTycoon.commands.tycooncmds.TycoonTabCompleter;
 import me.mangokevin.oreTycoon.menuManager.InventoryClickListener;
 import me.mangokevin.oreTycoon.menuManager.MenuManager;
-import me.mangokevin.oreTycoon.tycoonListener.TycoonAutoMineListener;
+import me.mangokevin.oreTycoon.listener.tycoonListener.StockMarketUpdatedListener;
+import me.mangokevin.oreTycoon.listener.tycoonListener.TycoonAutoMineListener;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import me.mangokevin.oreTycoon.listener.*;
 import me.mangokevin.oreTycoon.papiExpansion.PlaceholderExpansion;
-import me.mangokevin.oreTycoon.tycoonListener.TycoonBoosterTickedListener;
-import me.mangokevin.oreTycoon.tycoonListener.TycoonChangedAttributesListener;
+import me.mangokevin.oreTycoon.listener.tycoonListener.TycoonBoosterTickedListener;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
+import me.mangokevin.oreTycoon.worth.WorthManager;
 import net.ess3.api.IEssentials;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.mvplugins.multiverse.core.MultiverseCoreApi;
 
 import java.util.Objects;
@@ -28,8 +31,11 @@ public final class OreTycoon extends JavaPlugin {
     private TycoonData tdData;
     private MenuManager menuManager;
     private LevelManager levelManager;
+    private WorthManager worthManager;
     private static Economy econ = null;
     private static IEssentials essentials;
+
+    private static OreTycoon instance;
 
     public OreTycoon() {}
 
@@ -37,8 +43,22 @@ public final class OreTycoon extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        instance = this;
         // Plugin startup logic
         saveDefaultConfig();
+
+        //========= WorthManager setup =========
+        this.worthManager = new WorthManager(this);
+
+//        new BukkitRunnable() {
+//
+//            @Override
+//            public void run() {
+//                worthManager.updateStockMarket();
+//                Bukkit.broadcastMessage(ChatColor.GOLD + "📊 Stock Market updated!");
+//            }
+//        }.runTaskTimer(this, 0, 20L * 60 * 10);
+        //========= WorthManager setup =========
 
         this.levelManager = new LevelManager();
         this.blockManager = new TycoonBlockManager(this, levelManager);
@@ -84,8 +104,11 @@ public final class OreTycoon extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
         getServer().getPluginManager().registerEvents(new InventoryClickListener(),this);
         getServer().getPluginManager().registerEvents(new TycoonAutoMineListener(), this);
+        getServer().getPluginManager().registerEvents(new StockMarketUpdatedListener(this), this);
         //getServer().getPluginManager().registerEvents(new TycoonChangedAttributesListener(), this);
         getServer().getPluginManager().registerEvents(new TycoonBoosterTickedListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerJoinListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerLeaveListener(), this);
         Objects.requireNonNull(getCommand("tycoon")).setExecutor(new TycoonCmd(this, blockManager));
         Objects.requireNonNull(getCommand("tycoon")).setTabCompleter(new TycoonTabCompleter());
         //-----------------------   Listeners & Commands    -----------------------
@@ -128,5 +151,11 @@ public final class OreTycoon extends JavaPlugin {
         // Plugin shutdown logic
     }
 
-
+    // Getter für andere Klassen
+    public WorthManager getWorthManager() {
+        return worthManager;
+    }
+    public static OreTycoon getInstance() {
+        return instance;
+    }
 }

@@ -16,11 +16,14 @@ Das "Eco-System" (Umgebungs-Buffs)✅
 🛠️ Booster Timer ✅
 MultiSpawn Upgrade ✅
 Fortune Upgrade ✅
+Stock Market System 📊:
+    -Event to update Holograms and Listeners ✅
+    -Fix menu ✅
+    -Timer? ✅
 
-  Mining Combo System 🔥
-  Stock Market System 📊
-  Guild / Clan System 👥
-  Talent Tree / Skill Points 🌳
+ Mining Combo System 🔥
+ Guild / Clan System 👥
+ Talent Tree / Skill Points 🌳
 ➕Experience Multiplier
 ➕Spawn block Rarity / Spawn Rarity Upgrade
 ➕Auto Sell Artifact (What about inv storage)

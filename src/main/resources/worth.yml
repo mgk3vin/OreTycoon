@@ -1,0 +1,36 @@
+# OreTycoon Worth System
+# Diese Werte sind deine Block-Basispreise
+# Ändere sie hier nach deinen Wünschen!
+
+materials:
+  IRON_ORE:
+    base_worth: 100.0
+    rarity: COMMON
+
+  GOLD_ORE:
+    base_worth: 250.0
+    rarity: UNCOMMON
+
+  DIAMOND_ORE:
+    base_worth: 1000.0
+    rarity: RARE
+
+  EMERALD_ORE:
+    base_worth: 500.0
+    rarity: UNCOMMON
+
+  LAPIS_ORE:
+    base_worth: 300.0
+    rarity: UNCOMMON
+
+  REDSTONE_ORE:
+    base_worth: 150.0
+    rarity: COMMON
+
+  AMETHYST_CLUSTER:
+    base_worth: 2000.0
+    rarity: EPIC
+
+  NETHERITE_SCRAP:
+    base_worth: 5000.0
+    rarity: LEGENDARY

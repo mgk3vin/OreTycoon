@@ -1,11 +1,12 @@
 package me.mangokevin.oreTycoon.tycoonManagment;
 
 import me.mangokevin.oreTycoon.OreTycoon;
-import me.mangokevin.oreTycoon.tycoonEvents.TycoonAutoMinedEvent;
+import me.mangokevin.oreTycoon.events.tycoonEvents.TycoonAutoMinedEvent;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.BoosterRegistry;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.TycoonBoosterAbstract;
 import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
+import me.mangokevin.oreTycoon.worth.PriceUtility;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
@@ -16,7 +17,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -145,15 +145,6 @@ public class TycoonBlockManager {
     }
 
 
-    public void openTycoonSpecificMenu(Player player, TycoonBlock tycoonBlock) {
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "dm open tycoon_gui " + player.getName());
-        player.setMetadata("viewing_tycoon", new FixedMetadataValue(plugin, tycoonBlock.getBlockUID()));
-    }
-    public void openTycoonMenu(Player player) {
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "dm open tycoon_menu " + player.getName());
-        player.setMetadata("viewing_tycoon_menu", new FixedMetadataValue(plugin, tycoonBlocks));
-    }
-
     public List<TycoonBlock> getTycoonBlocksFromPlayer(UUID playerUUID) {
         List<TycoonBlock> tycoonBlocksList = new ArrayList<>();
         for (TycoonBlock tycoonBlock : tycoonBlocks.values()) {
@@ -178,17 +169,13 @@ public class TycoonBlockManager {
         return tycoonBlocksList.get(index - 1);//1 basiert
     }
 
-//    public void playXpBlockHologram(TycoonBlock tycoonBlock, Block block, int xp) {
-//        tycoonBlock.displayXpHologram(block,xp);
-//        System.out.println("[BlockManager] displayXpHologram");
-//        new BukkitRunnable() {
-//            @Override
-//            public void run() {
-//                tycoonBlock.removeXpHologram(block);
-//                System.out.println("[BlockManager] removeXpHologram");
-//            }
-//        }.runTaskLater(plugin, 20L * 1);
-//    }
+    public Map<Location, TycoonBlock> getAllTycoonBlocksLocation(){
+        return tycoonBlocks;
+    }
+    public Map<String, TycoonBlock> getAllTycoonBlocksUID(){
+        return tycoonBlocksUID;
+    }
+
     // ---------------- Filesave working ----------------
     //<editor-fold desc="🗂️Save Tycoons">
     public void saveTycoons(){

@@ -1,7 +1,7 @@
 package me.mangokevin.oreTycoon.menuManager;
 
 import me.mangokevin.oreTycoon.OreTycoon;
-import me.mangokevin.oreTycoon.tycoonManagment.PriceUtility;
+import me.mangokevin.oreTycoon.worth.PriceUtility;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
 import org.bukkit.ChatColor;

@@ -66,6 +66,17 @@ public class MenuManager {
         }
     }
 
+    public static void refreshIfOpen(Player player) {
+        Inventory openInventory = player.getOpenInventory().getTopInventory();
+        if (openInventory.getHolder() instanceof TycoonHolder tycoonHolder) {
+            MenuInterface menu = tycoonHolder.getMenu();
+            if (menu == null) {
+                return;
+            }
+            menu.refresh(player, openInventory);
+        }
+    }
+
     public void openTycoonStats(TycoonBlock block, Player player) {
         new StatsMenu(block, plugin).open(player);
     }
