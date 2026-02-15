@@ -4,11 +4,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public enum TycoonType {
-    WOOD(Material.CRAFTING_TABLE,
+    WOOD(
+            Material.CRAFTING_TABLE,
             ChatColor.GOLD + "Wood Tycoon",
             10.0,
             5*20,
@@ -25,6 +27,32 @@ public enum TycoonType {
                 Material.SPRUCE_LOG, 10
     ), Arrays.asList(Material.OAK_LEAVES,
                     Material.JUNGLE_LEAVES)),
+    NETHER(
+            Material.NETHERRACK,
+            ChatColor.RED + "Nether Tycoon",
+            50.0,
+            20 * 5,
+            20 * 5,
+            1.0,
+            50,
+            new HashMap<Material, Integer>() {{
+                put(Material.NETHERRACK, 30);
+                put(Material.NETHER_BRICKS, 20);
+                put(Material.NETHER_QUARTZ_ORE, 10);
+                put(Material.SOUL_SAND, 30);
+                put(Material.SOUL_SOIL, 30);
+                put(Material.BASALT, 20);
+                put(Material.BLACKSTONE, 15);
+                put(Material.GLOWSTONE, 15);
+                put(Material.MAGMA_BLOCK, 20);
+                put(Material.NETHER_GOLD_ORE, 10);
+                put(Material.ANCIENT_DEBRIS, 5);
+                put(Material.GILDED_BLACKSTONE, 15);
+            }},
+            List.of(
+                    Material.AIR
+            )
+    ),
     STONE(Material.STONE,
             ChatColor.GRAY + "Stone Tycoon",
             20.0,
@@ -47,6 +75,7 @@ public enum TycoonType {
             Arrays.asList(
                     Material.FURNACE
             )),
+
     COAL(Material.COAL_BLOCK,
             "§8Coal Tycoon",
             30.0,
@@ -62,6 +91,7 @@ public enum TycoonType {
             Arrays.asList(
                             Material.COAL_ORE,
                             Material.DEEPSLATE_COAL_ORE)),
+
     IRON(Material.IRON_BLOCK,
             "§fIron Tycoon",
             70.0,
@@ -77,6 +107,7 @@ public enum TycoonType {
             Arrays.asList(
                             Material.IRON_ORE,
                             Material.DEEPSLATE_IRON_ORE)),
+
     DIAMOND(Material.DIAMOND_BLOCK,
             "§bDiamond Tycoon",
             100.0,

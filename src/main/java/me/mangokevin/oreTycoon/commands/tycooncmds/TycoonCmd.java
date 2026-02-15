@@ -142,25 +142,29 @@ public class TycoonCmd implements CommandExecutor {
                     return true;
                 }
                 switch (type) {
-                    case "wood":
+                    case "wood" -> {
                         blockManager.giveTycoonBlock(p, TycoonType.WOOD);
-                        return true;
-                    case "stone":
+                    }
+                    case "stone" -> {
                         blockManager.giveTycoonBlock(p, TycoonType.STONE);
-                        return true;
-                    case "coal":
+                    }
+                    case "coal" -> {
                         blockManager.giveTycoonBlock(p, TycoonType.COAL);
-                        return true;
-                    case "iron":
+                    }
+                    case "nether" -> {
+                        blockManager.giveTycoonBlock(p, TycoonType.NETHER);
+                    }
+                    case "iron" -> {
                         blockManager.giveTycoonBlock(p, TycoonType.IRON);
-                        return true;
-                    case "diamond":
+                    }
+                    case "diamond" -> {
                         blockManager.giveTycoonBlock(p, TycoonType.DIAMOND);
-                        return true;
-                    default:
+                    }
+                    default -> {
                         p.sendMessage(ChatColor.RED + "Not a valid tycoon type!");
-                        return true;
+                    }
                 }
+                return true;
             case "menu":
                 menuManager.openTycoonOverview(p, 0);
                 break;

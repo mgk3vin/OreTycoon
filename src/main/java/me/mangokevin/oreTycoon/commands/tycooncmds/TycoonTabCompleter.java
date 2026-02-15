@@ -19,7 +19,7 @@ public class TycoonTabCompleter implements TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
 
         if (strings.length == 1) {
-            List<String> subcommands = Arrays.asList("stockmarket", "updateStockMarket", "booster", "runtest" ,"toggle_selected", "toggle_all","upgrade", "block","info", "stats", "menu", "open", "give");
+            List<String> subcommands = Arrays.asList("worth", "stockMarket", "updateStockMarket", "booster", "runtest" ,"toggle_selected", "toggle_all","upgrade", "block","info", "stats", "menu", "open", "give");
 
             return subcommands.stream().filter(string -> string.toLowerCase().startsWith(strings[0].toLowerCase()))
                     .collect(Collectors.toList());
@@ -32,7 +32,7 @@ public class TycoonTabCompleter implements TabCompleter {
                     .collect(Collectors.toList());
         }
         if (strings.length == 2 && strings[0].equalsIgnoreCase("give")) {
-            List<String> subcommands = Arrays.asList("wood", "coal", "iron", "diamond");
+            List<String> subcommands = Arrays.asList("wood", "stone", "coal", "iron", "diamond");
 
             return subcommands.stream().filter(string -> string.toLowerCase().startsWith(strings[1].toLowerCase()))
                     .collect(Collectors.toList());
