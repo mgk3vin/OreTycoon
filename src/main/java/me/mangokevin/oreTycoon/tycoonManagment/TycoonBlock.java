@@ -200,7 +200,7 @@ public class TycoonBlock {
         if (tickCounter >= spawnRate) {
             tickCounter = 0;
             if (isActive) {
-                //trySpawnResource();
+
                 if (random.nextDouble() * 100.0 < doubleDropsChance) {
                     Console.log(getClass(), "A double Drop has been spawned!");
                     trySpawnMultiplyResources(2);
