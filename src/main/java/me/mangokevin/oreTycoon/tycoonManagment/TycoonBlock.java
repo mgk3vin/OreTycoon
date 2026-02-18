@@ -487,6 +487,9 @@ public class TycoonBlock {
             upgrades.setDoubleDropsLevel(nextLevel);
             updateAttributes();
             player.sendMessage(ChatColor.GREEN + "You upgrade Double Drops to " + getDoubleDropsChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
+        }else {
+            player.sendMessage(ChatColor.RED + "Not enough money!");
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
         }
     }
     public void upgradeFortuneChance(Player player) {
@@ -502,6 +505,9 @@ public class TycoonBlock {
             upgrades.setFortuneLevel(nextLevel);
             updateAttributes();
             player.sendMessage(ChatColor.GREEN + "You upgraded Fortune to " + getFortuneChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
+        }else {
+            player.sendMessage(ChatColor.RED + "Not enough money!");
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
         }
     }
     //</editor-fold>

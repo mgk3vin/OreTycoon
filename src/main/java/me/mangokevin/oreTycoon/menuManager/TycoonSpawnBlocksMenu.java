@@ -1,11 +1,13 @@
 package me.mangokevin.oreTycoon.menuManager;
 
+import com.earth2me.essentials.Worth;
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.worth.PriceUtility;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonHolder;
 import me.mangokevin.oreTycoon.utility.Console;
+import me.mangokevin.oreTycoon.worth.WorthManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -24,10 +26,12 @@ public class TycoonSpawnBlocksMenu implements MenuInterface{
 
     private final TycoonBlock tycoonBlock;
     private final OreTycoon plugin;
+    private final WorthManager worthManager;
 
     public TycoonSpawnBlocksMenu(TycoonBlock tycoonBlock, OreTycoon plugin) {
         this.tycoonBlock = tycoonBlock;
         this.plugin = plugin;
+        this.worthManager = plugin.getWorthManager();
     }
 
     @Override
@@ -61,12 +65,18 @@ public class TycoonSpawnBlocksMenu implements MenuInterface{
             if(isActive && totalWeight > 0) {
                 effectiveChance = Math.round(((double) chance / totalWeight) * 100.0);
             }
+            //Stockmarket Change
+            double worthMultiplier = worthManager.getMultiplier(material);
+            worthMultiplier = Math.round(worthMultiplier*100.0)/100.0;
+            double worthMultiplierFormatted = Math.round(worthMultiplier * 100.0 - 100.0);
+            String worthFormatted = (worthMultiplier >= 1.0 ? ChatColor.GREEN + " ( +" + worthMultiplierFormatted + "% )" : ChatColor.RED + " ( " + worthMultiplierFormatted + "% )");
+
             ItemStack spawnBlock = MenuManager.createItemstack(material,
                     1,
                     material.toString(),
                     Arrays.asList("§8§m-----------------------",
                             ChatColor.GRAY + "Spawn Chance: " + ChatColor.YELLOW + effectiveChance + "%",
-                            ChatColor.GRAY + "Worth: " + ChatColor.GREEN + PriceUtility.calculateWorthFormatted(new ItemStack(material)),
+                            ChatColor.GRAY + "Worth: " + ChatColor.GREEN + PriceUtility.calculateWorthFormatted(new ItemStack(material)) + worthFormatted,
                             "§8§m-----------------------"),
                     isActive,
                     true,

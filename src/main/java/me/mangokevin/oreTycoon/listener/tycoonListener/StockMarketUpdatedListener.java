@@ -36,7 +36,6 @@ public class StockMarketUpdatedListener implements Listener {
             Location location = entry.getKey();
             TycoonBlock tycoonBlock = entry.getValue();
             tycoonBlock.updateHologramPreset(location, "WORTH");
-            Console.debug(getClass(), "Updating Hologram and calling TycoonChangedAttributesEvent");
         }
         for (Player player : Bukkit.getOnlinePlayers()) {
             MenuManager.refreshIfOpen(player);

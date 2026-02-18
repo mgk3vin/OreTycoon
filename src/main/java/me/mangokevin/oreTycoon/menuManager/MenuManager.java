@@ -15,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -101,13 +102,38 @@ public class MenuManager {
                 lore,
                 glint,
                 true);
-        ItemMeta statsmeta = stats.getItemMeta();
-        if (statsmeta == null) return null;
-        statsmeta.getPersistentDataContainer().set(TycoonData.TYCOON_MENU_ITEM_KEY, PersistentDataType.STRING, "tycoon_menu_item");
-        statsmeta.getPersistentDataContainer().set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "tycoon_menu_item");
-        statsmeta.getPersistentDataContainer().set(TycoonData.TYCOON_MENU_ITEM_UID_KEY, PersistentDataType.STRING, block.getBlockUID());
-        stats.setItemMeta(statsmeta);
+        ItemMeta statsMeta = stats.getItemMeta();
+        if (statsMeta == null) return null;
+        statsMeta.getPersistentDataContainer().set(TycoonData.TYCOON_MENU_ITEM_KEY, PersistentDataType.STRING, "tycoon_menu_item");
+        statsMeta.getPersistentDataContainer().set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "tycoon_menu_item");
+        statsMeta.getPersistentDataContainer().set(TycoonData.TYCOON_MENU_ITEM_UID_KEY, PersistentDataType.STRING, block.getBlockUID());
+        stats.setItemMeta(statsMeta);
         return stats;
+    }
+    public static ItemStack createWorldItem(String worldName) {
+
+        List<String> lore = Arrays.asList(
+                "§8§m-----------------------",
+                "§8§m-----------------------"
+        );
+
+        ItemStack worldItem = MenuManager.createItemstack(
+                Material.GRASS_BLOCK,
+                1,
+                ChatColor.GREEN + worldName,
+                lore,
+                false,
+                true,
+                true,
+                "world_item"
+        );
+        ItemMeta worldItemMeta = worldItem.getItemMeta();
+        if (worldItemMeta == null) return null;
+        PersistentDataContainer pdc = worldItemMeta.getPersistentDataContainer();
+        pdc.set(TycoonData.WORLD_UID_KEY, PersistentDataType.STRING, worldName);
+
+        worldItem.setItemMeta(worldItemMeta);
+        return worldItem;
     }
     private String getMiningRateDisplay(TycoonBlock block) {
         return ChatColor.GRAY + "Mining rate: " + block.getMiningRateFormatted() + (block.getTycoonBoosterManager().isAutoMinerBoosterActive() ? ChatColor.GREEN + " [Boost -" + (block.getAutoMinerSpeedBooster().getBoostValue()/20) + "s]" : "");
