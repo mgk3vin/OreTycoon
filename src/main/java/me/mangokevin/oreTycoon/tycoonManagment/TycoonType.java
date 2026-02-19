@@ -61,16 +61,16 @@ public enum TycoonType {
             1.0,
             40,
             Map.of(
-                    Material.STONE, 10,
-                    Material.COBBLESTONE, 10,
+                    Material.STONE, 15,
+                    Material.COBBLESTONE, 15,
                     Material.ANDESITE, 10,
                     Material.DIORITE, 10,
                     Material.GRANITE, 10,
-                    Material.COBBLED_DEEPSLATE, 10,
-                    Material.TUFF, 10,
-                    Material.DIRT, 10,
-                    Material.CALCITE, 10,
-                    Material.SMOOTH_BASALT, 10
+                    Material.COBBLED_DEEPSLATE, 5,
+                    Material.TUFF, 15,
+                    Material.DIRT, 20,
+                    Material.CALCITE, 7,
+                    Material.SMOOTH_BASALT, 5
                     ),
             Arrays.asList(
                     Material.FURNACE

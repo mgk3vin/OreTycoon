@@ -12,15 +12,17 @@ import me.mangokevin.oreTycoon.papiExpansion.PlaceholderExpansion;
 import me.mangokevin.oreTycoon.listener.tycoonListener.TycoonBoosterTickedListener;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonWorlds.TycoonWorldManager;
+import me.mangokevin.oreTycoon.utility.Console;
+import me.mangokevin.oreTycoon.utility.ParticleGenerator;
+import me.mangokevin.oreTycoon.utility.ParticleManager;
 import me.mangokevin.oreTycoon.worth.WorthManager;
 import net.ess3.api.IEssentials;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.mvplugins.multiverse.core.MultiverseCoreApi;
 
 import java.util.Objects;
@@ -32,6 +34,10 @@ public final class OreTycoon extends JavaPlugin {
     private MenuManager menuManager;
     private LevelManager levelManager;
     private WorthManager worthManager;
+    private MultiverseCoreApi multiverseCoreApi;
+    private TycoonWorldManager tycoonWorldManager;
+    private ParticleGenerator particleGenerator;
+    private ParticleManager  particleManager;
     private static Economy econ = null;
     private static IEssentials essentials;
 
@@ -66,13 +72,6 @@ public final class OreTycoon extends JavaPlugin {
         this.menuManager = new MenuManager(this);
         TycoonData.init(this);
 
-
-        // TODO: Generate Tycoon Islands with Preset
-        RegisteredServiceProvider<MultiverseCoreApi> provider = Bukkit.getServicesManager().getRegistration(MultiverseCoreApi.class);
-        if (provider != null) {
-            @SuppressWarnings("unused")
-            MultiverseCoreApi coreApi = provider.getProvider();
-        }
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PlaceholderExpansion(blockManager).register();
             getLogger().info("PlaceholderAPI Expansion enabled!");
@@ -95,6 +94,16 @@ public final class OreTycoon extends JavaPlugin {
             getLogger().severe("EssentialsX wurde nicht gefunden! Preise können nicht berechnet werden.");
         }
         //-----------------------   Essentials setup    -----------------------
+        this.particleGenerator = new ParticleGenerator();
+        this.particleManager = new ParticleManager();
+        //-----------------------   MultiverseCore setup    -----------------------
+        multiverseCoreApi = MultiverseCoreApi.get();
+        if (multiverseCoreApi == null){
+            Console.error(getClass(), "MultiverseCoreAPI not found!");
+        }
+        Console.log(getClass(), "MultiverseCore loaded!");
+        this.tycoonWorldManager = new TycoonWorldManager(this);
+        //-----------------------   MultiverseCore setup    -----------------------
 
         //-----------------------   Listeners & Commands    -----------------------
         getServer().getPluginManager().registerEvents(new BlockPlacedListener(this, blockManager, tdData), this);
@@ -114,17 +123,10 @@ public final class OreTycoon extends JavaPlugin {
         //-----------------------   Listeners & Commands    -----------------------
 
         blockManager.loadTycoons();
+        tycoonWorldManager.loadPlayerWorlds();
     }
 
-    public MenuManager getMenuManager() {
-        return menuManager;
-    }
-    public TycoonBlockManager getBlockManager() {
-        return blockManager;
-    }
-    public LevelManager getLevelManager() {
-        return levelManager;
-    }
+
 
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
@@ -147,15 +149,39 @@ public final class OreTycoon extends JavaPlugin {
     public void onDisable() {
         if (blockManager != null) {
             blockManager.saveTycoons();
+            Console.log(getClass(), "BlockManager saved!");
+        }
+        if (tycoonWorldManager != null) {
+            tycoonWorldManager.savePlayerWorlds();
+            Console.log(getClass(), "TycoonWorldManager saved!");
         }
         // Plugin shutdown logic
     }
 
     // Getter für andere Klassen
+    public MenuManager getMenuManager() {
+        return menuManager;
+    }
+    public TycoonBlockManager getBlockManager() {
+        return blockManager;
+    }
+    public LevelManager getLevelManager() {
+        return levelManager;
+    }
+    public ParticleManager getParticleManager() {
+        return particleManager;
+    }
     public WorthManager getWorthManager() {
         return worthManager;
     }
+    public MultiverseCoreApi getMultiverseCoreApi() {return multiverseCoreApi;}
     public static OreTycoon getInstance() {
         return instance;
+    }
+    public TycoonWorldManager getTycoonWorldManager() {
+        return tycoonWorldManager;
+    }
+    public ParticleGenerator getParticleGenerator() {
+        return particleGenerator;
     }
 }

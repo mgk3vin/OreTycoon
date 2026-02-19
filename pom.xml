@@ -128,7 +128,7 @@
         <dependency>
             <groupId>org.mvplugins.multiverse.core</groupId> <!-- Replace for other sub-modules -->
             <artifactId>multiverse-core</artifactId> <!-- Replace for other sub-modules -->
-            <version>5.3.4</version> <!-- Replace with the version you need -->
+            <version>5.5.2-SNAPSHOT</version> <!-- Replace with the version you need -->
             <scope>provided</scope>
         </dependency>
 

@@ -21,6 +21,13 @@ Stock Market System 📊:
     -Fix menu ✅
     -Timer? ✅
 
+‼️Scoreboard system for worlds‼️
+Format upgrade prices red if not affordable
+XP drops worth
+Sell mode / drop mode in tycoon inventory
+drop mode goes one way
+Stock price history showing previous price changes
+
  Mining Combo System 🔥
  Guild / Clan System 👥
  Talent Tree / Skill Points 🌳

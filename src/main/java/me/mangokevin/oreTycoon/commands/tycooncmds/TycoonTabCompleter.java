@@ -19,7 +19,27 @@ public class TycoonTabCompleter implements TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
 
         if (strings.length == 1) {
-            List<String> subcommands = Arrays.asList("worth", "stockMarket", "updateStockMarket", "booster", "runtest" ,"toggle_selected", "toggle_all","upgrade", "block","info", "stats", "menu", "open", "give");
+            List<String> subcommands = Arrays.asList(
+                    "island",
+                    "worlds",
+                    "world",
+                    "list",
+                    "delete" ,
+                    "create",
+                    "worth",
+                    "stockMarket",
+                    "updateStockMarket",
+                    "booster",
+                    "runtest" ,
+                    "toggle_selected",
+                    "toggle_all",
+                    "upgrade",
+                    "block",
+                    "info",
+                    "stats",
+                    "menu",
+                    "open",
+                    "give");
 
             return subcommands.stream().filter(string -> string.toLowerCase().startsWith(strings[0].toLowerCase()))
                     .collect(Collectors.toList());

@@ -148,9 +148,9 @@ public class WorthManager {
 
             multiplierCache.put(material, newMultiplier);
 
-            Console.debug(getClass(), material.name() + ": " +
-                    String.format("%.2f", currentMultiplier) + "x → " +
-                    String.format("%.2f", newMultiplier) + "x");
+//            Console.debug(getClass(), material.name() + ": " +
+//                    String.format("%.2f", currentMultiplier) + "x → " +
+//                    String.format("%.2f", newMultiplier) + "x");
         }
 
         Bukkit.getPluginManager().callEvent(new StockMarketUpdatedEvent());

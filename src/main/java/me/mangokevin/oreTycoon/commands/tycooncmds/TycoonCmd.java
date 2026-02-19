@@ -1,14 +1,15 @@
 package me.mangokevin.oreTycoon.commands.tycooncmds;
 
 import me.mangokevin.oreTycoon.OreTycoon;
-import me.mangokevin.oreTycoon.menuManager.MenuManager;
-import me.mangokevin.oreTycoon.menuManager.OverviewMenu;
-import me.mangokevin.oreTycoon.menuManager.StatsMenu;
-import me.mangokevin.oreTycoon.menuManager.StockMarketMenu;
+import me.mangokevin.oreTycoon.menuManager.*;
+import me.mangokevin.oreTycoon.menuManager.worldMenus.WorldSettingsMenu;
+import me.mangokevin.oreTycoon.menuManager.worldMenus.WorldsMenu;
 import me.mangokevin.oreTycoon.tycoonManagment.*;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.AutoMinerSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SellMultiplyBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SpawnSpeedBooster;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonWorlds.TycoonWorldManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonWorlds.WorldSettings;
 import me.mangokevin.oreTycoon.worth.WorthManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -24,11 +25,13 @@ public class TycoonCmd implements CommandExecutor {
     private final OreTycoon plugin;
     private final TycoonBlockManager blockManager;
     private final MenuManager menuManager;
+    private final TycoonWorldManager tycoonWorldManager;
 
     public TycoonCmd(OreTycoon plugin, TycoonBlockManager blockManager) {
         this.plugin = plugin;
         this.blockManager = blockManager;
         this.menuManager = plugin.getMenuManager();
+        this.tycoonWorldManager = plugin.getTycoonWorldManager();
     }
 
     @Override
@@ -46,6 +49,41 @@ public class TycoonCmd implements CommandExecutor {
         String action = args[0].toLowerCase();
 
         switch (action) {
+            case "world", "worlds", "island":
+                String worldName = p.getWorld().getName();
+                plugin.getMultiverseCoreApi().getWorldManager().getWorld(worldName)
+                        .peek(world -> {
+                            List<String> worldsOfThisPlayer = tycoonWorldManager.getPlayerWorlds().get(p.getUniqueId());
+                            if (worldsOfThisPlayer.contains(worldName)) {
+                                //Owner of this world
+                                new WorldSettingsMenu(worldName).open(p);
+                            } else {
+                                new WorldsMenu(plugin).open(p);
+                            }
+                        })
+                        .onEmpty(()->{
+                            new WorldsMenu(plugin).open(p);
+                        });
+                break;
+            case "create":
+                tycoonWorldManager.createTycoonWorld(p);
+                break;
+            case "delete":
+                if (args.length < 2) {
+                    p.sendMessage(ChatColor.RED + "Usage: /tycoon " + action + " <world_number>");
+                    return true;
+                }
+                try {
+                    int worldNumber = Integer.parseInt(args[1]);
+                    tycoonWorldManager.deleteTycoonWorld(p, worldNumber);
+                }catch (NumberFormatException e) {
+                    p.sendMessage(ChatColor.RED + "Invalid world number");
+                }
+
+                break;
+            case "list":
+                tycoonWorldManager.listTycoonWorlds(p);
+                break;
             case "stockmarket", "worth":
                 new StockMarketMenu(0).open(p);
                 break;
