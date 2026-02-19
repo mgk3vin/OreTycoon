@@ -4,7 +4,10 @@ import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonHolder;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonWorlds.TycoonWorldManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonWorlds.WorldSettings;
 import me.mangokevin.oreTycoon.utility.Console;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -110,12 +113,21 @@ public class MenuManager {
         stats.setItemMeta(statsMeta);
         return stats;
     }
-    public static ItemStack createWorldItem(String worldName) {
+    public static ItemStack createWorldItem(String worldName, TycoonWorldManager worldManager) {
 
-        List<String> lore = Arrays.asList(
-                "§8§m-----------------------",
-                "§8§m-----------------------"
-        );
+        WorldSettings worldSettings = worldManager.getWorldSettings(worldName);
+        Player owner = Bukkit.getPlayer(worldSettings.getOwnerUUID());
+
+        List<String> lore = new ArrayList<>();
+        if (owner != null) {
+            lore = Arrays.asList(
+                    "§8§m-----------------------",
+                    ChatColor.YELLOW + "Owner: " + owner.getDisplayName(),
+                    ChatColor.YELLOW + "Private: " + (worldSettings.isPrivate() ? ChatColor.GREEN + "True" : ChatColor.RED + "False"),
+                    "§8§m-----------------------"
+            );
+        }
+
 
         ItemStack worldItem = MenuManager.createItemstack(
                 Material.GRASS_BLOCK,

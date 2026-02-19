@@ -6,11 +6,13 @@ import me.mangokevin.oreTycoon.menuManager.MenuManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonHolder;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonWorlds.TycoonWorldManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonWorlds.WorldSettings;
 import me.mangokevin.oreTycoon.utility.ParticleGenerator;
 import me.mangokevin.oreTycoon.utility.ParticleManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -18,6 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.mvplugins.multiverse.core.world.WorldManager;
 
 public class WorldSettingsMenu implements MenuInterface {
@@ -27,11 +30,14 @@ public class WorldSettingsMenu implements MenuInterface {
     private final ParticleGenerator particleGenerator = plugin.getParticleGenerator();
     private final ParticleManager particleManager = plugin.getParticleManager();
 
+    private WorldSettings worldSettings;
+
     private final String worldName;
 
     public WorldSettingsMenu(String worldName) {
         this.worldName = worldName;
         this.worldManager = plugin.getMultiverseCoreApi().getWorldManager();
+        this.worldSettings = tycoonWorldManager.getWorldSettings(worldName);
     }
 
     @Override
@@ -46,15 +52,15 @@ public class WorldSettingsMenu implements MenuInterface {
         MenuManager.addFiller(inventory, Material.GRAY_STAINED_GLASS_PANE);
 
         //22 World Item
-        ItemStack worldItem = MenuManager.createWorldItem(worldName);
+        ItemStack worldItem = MenuManager.createWorldItem(worldName, tycoonWorldManager);
         inventory.setItem(22, worldItem);
         //37 Spawn Beacon Item
         ItemStack toggleSpawnBeaconItem = MenuManager.createItemstack(
                 Material.BEACON,
                 1,
-                ChatColor.AQUA + "Show World Spawn",
+                (worldSettings.isSpawnBeaconActive() ? ChatColor.RED + "Hide World Spawn" : ChatColor.GREEN + "Show World Spawn"),
                 null,
-                (particleManager.isBeaconActive()),
+                worldSettings.isSpawnBeaconActive(),
                 true,
                 true,
                 "toggle_spawn_beacon"
@@ -97,6 +103,18 @@ public class WorldSettingsMenu implements MenuInterface {
                 "set_world_spawn"
         );
         inventory.setItem(42, setWorldSpawnItem);
+        //53 Back to main menu Item
+        ItemStack returnItem = MenuManager.createItemstack(
+                Material.OAK_DOOR,
+                1,
+                ChatColor.RED + "<- Back to main Menu",
+                null,
+                false,
+                true,
+                true,
+                "return"
+        );
+        inventory.setItem(53, returnItem);
     }
 
     @Override
@@ -116,6 +134,7 @@ public class WorldSettingsMenu implements MenuInterface {
         switch (action) {
             case "teleport_player" -> {
                 tycoonWorldManager.teleportToWorld(player, worldName);
+                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1, 1);
             }
             case "delete_world" -> {
                 tycoonWorldManager.deleteTycoonWorld(player ,worldName);
@@ -126,13 +145,21 @@ public class WorldSettingsMenu implements MenuInterface {
             }
             case "toggle_spawn_beacon" -> {
                 //TODO: make it toggleable and last as long as it turned on
-                particleManager.setBeaconActive(!particleManager.isBeaconActive());
+                boolean newState = !worldSettings.isSpawnBeaconActive();
+                worldSettings.setSpawnBeacon(newState);
 
-                worldManager.getWorld(worldName)
-                                .peek(world -> {
-                                    particleManager.spawnBeaconBeam(world.getSpawnLocation());
-                                });
+                if (newState) {
+                    worldManager.getWorld(worldName)
+                            .peek(world -> {
+                                particleManager.startBeacon(worldName ,world.getSpawnLocation());
+                            });
+                } else {
+                    particleManager.stopBeacon(worldName);
+                }
                 refresh(player, inventory);
+            }
+            case "return" -> {
+                new WorldsMenu(plugin).open(player);
             }
             case null, default -> {}
         }

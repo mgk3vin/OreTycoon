@@ -32,6 +32,8 @@ public class TycoonWorldManager {
     private final int maxWorldsPerPlayer = 5;
 
     private final Map<UUID, List<String>> playerWorlds = new HashMap<>();
+    //NEW
+    private final Map<String, WorldSettings> worldSettings = new HashMap<>();
 
     public TycoonWorldManager(OreTycoon plugin) {
         this.plugin = plugin;
@@ -46,12 +48,28 @@ public class TycoonWorldManager {
         // Vorherige Daten löschen, um Duplikate zu vermeiden
         YamlConfiguration data = new YamlConfiguration();
 
-        for (UUID uuid : playerWorlds.keySet()) {
-            String path = "worlds." + uuid.toString();
-            data.set(path, new ArrayList<>(playerWorlds.get(uuid)));
-            for (String worldName : playerWorlds.get(uuid)) {
-                data.set(path + "." + worldName, "test");
-            }
+//        for (UUID uuid : playerWorlds.keySet()) {
+//            String path = "worlds." + uuid.toString();
+//            data.set(path, new ArrayList<>(playerWorlds.get(uuid)));
+//            for (String worldName : playerWorlds.get(uuid)) {
+//                data.set(path + "." + worldName, "test");
+//            }
+//        }
+        //NEW
+        for (String worldName : worldSettings.keySet()) {
+            WorldSettings worldSetting = worldSettings.get(worldName);
+            String path = "worlds." + worldName + ".";
+
+            data.set(path + "owner", worldSetting.getOwnerUUID().toString());
+            data.set(path + "isSpawnBeaconActive", worldSetting.isSpawnBeaconActive());
+            data.set(path + "worldItem", worldSetting.getWorldItem().name());
+            data.set(path + "isPrivate", worldSetting.isPrivate());
+
+            List<String> trustedPlayers = worldSetting.getTrustedPlayer()
+                    .stream()
+                    .map(UUID::toString)
+                    .toList();
+            data.set(path + "trustedPlayers", trustedPlayers);
         }
 
         try {
@@ -71,17 +89,63 @@ public class TycoonWorldManager {
         if (section == null) return;
 
         playerWorlds.clear();
+        //NEW
+        worldSettings.clear();
 
-        for (String key : section.getKeys(false)) {
-            try {
-                UUID uuid = UUID.fromString(key);
-                List<String> worlds = section.getStringList(key);
-                playerWorlds.put(uuid, new ArrayList<>(worlds));
+//        for (String key : section.getKeys(false)) {
+//            try {
+//                UUID uuid = UUID.fromString(key);
+//                List<String> worlds = section.getStringList(key);
+//                playerWorlds.put(uuid, new ArrayList<>(worlds));
+//
+//                Console.debug(getClass(), "Loaded worlds for " + uuid + ": " + worlds.size());
+//
+//            } catch (Exception e) {
+//                Console.error(getClass(), "Error occurred while loading playerWorlds: " + key + ": " + e.getMessage());
+//            }
+//        }
+        //NEW
+        for (String worldName : section.getKeys(false)) {
+            Console.log(getClass(), "Found world entry: " + worldName);
+            String path = worldName + ".";
 
-                Console.debug(getClass(), "Loaded worlds for " + uuid + ": " + worlds.size());
+            String ownerUUIDString = section.getString(path + "owner");
+            if (ownerUUIDString == null) {
+                Console.error(getClass(), "Error occurred while loading player worlds: " + worldName + " Owner not found!");
+                continue;
+            };
+            UUID ownerUUID = UUID.fromString(section.getString(path + "owner"));
 
-            } catch (Exception e) {
-                Console.error(getClass(), "Error occurred while loading playerWorlds: " + key + ": " + e.getMessage());
+            WorldSettings worldSetting = new WorldSettings(ownerUUID);
+
+            worldSetting.setSpawnBeacon(section.getBoolean(path + "isSpawnBeaconActive"));
+
+            String materialString = section.getString(path + "worldItem");
+            if (materialString == null) {
+                Console.error(getClass(), "Error occurred while loading player worlds: " + worldName + " World Item Material not found!");
+                continue;
+            }
+            worldSetting.setWorldItem(Material.matchMaterial(materialString));
+            worldSetting.setPrivate(section.getBoolean(path + "isPrivate"));
+            List<String> trustedPlayers = section.getStringList(path + "trustedPlayers");
+
+            List<UUID> trustedPlayerUUIDs = trustedPlayers
+                    .stream()
+                    .map(UUID::fromString)
+                    .toList();
+            worldSetting.setTrustedPlayer(trustedPlayerUUIDs);
+
+            playerWorlds
+                    .computeIfAbsent(ownerUUID, k -> new ArrayList<>())
+                    .add(worldName);
+            worldSettings.put(worldName, worldSetting);
+
+            if (worldSetting.isSpawnBeaconActive()){
+                worldManager.getWorld(worldName).peek(world -> {
+                    particleManager.startBeacon(worldName, world.getSpawnLocation());
+                }).onEmpty(() -> {
+                    Console.error(getClass(), "No world found for " + worldName);
+                });
             }
         }
     }
@@ -125,9 +189,24 @@ public class TycoonWorldManager {
         });
 
         attempt.onSuccess(newWorld -> {
-            player.sendMessage(ChatColor.GREEN + "Created new world!");
+            //✅World creation succeeded
+
+            // ========== Create World Settings Default ==========
+            WorldSettings worldSetting = createWorldSettings(newWorldName, player.getUniqueId());
+
+            worldSetting.setSpawnBeacon(true);
+
             addPlayerWorld(player, newWorldName);
+            worldSettings.put(newWorldName, worldSetting);
+            // ========== Create World Settings Default ==========
+
+            worldManager.getWorld(newWorldName).peek(world -> {
+                particleManager.startBeacon(newWorldName ,world.getSpawnLocation());
+            });
+
+            player.sendMessage(ChatColor.GREEN + "Created new world!");
             listTycoonWorlds(player);
+
             //Teleport Player
             multiverseCoreApi.getDestinationsProvider()
                     .parseDestination("e:" + newWorldName + ":8,33,8:0:0")
@@ -135,16 +214,6 @@ public class TycoonWorldManager {
                         multiverseCoreApi.getSafetyTeleporter().to(destination)
                                 .checkSafety(true)
                                 .teleport(List.of(player));
-                    })
-                    .onSuccess(destination -> {
-                        worldManager.getWorld(newWorldName).peek(
-                                world -> {
-                                    particleManager.setBeaconActive(true);
-                                    particleManager.spawnBeaconBeam(world.getSpawnLocation());
-                                }
-                        ).onEmpty(() ->{
-                            Console.error(getClass(), "No World Found");
-                        });
                     })
                     .onFailure(reason -> {
                         player.sendMessage(ChatColor.RED + "Failed to teleport to destination!");
@@ -214,8 +283,13 @@ public class TycoonWorldManager {
                         player.sendMessage(ChatColor.RED + "Failed to set teleport destination!");
                     });
                     result.onSuccess(success -> {
+                        particleManager.stopBeacon(worldName);
+
                         world.setSpawnLocation(targetLocation);
                         worldManager.saveWorldsConfig();
+
+                        particleManager.startBeacon(worldName, world.getSpawnLocation());
+
                         player.sendMessage(ChatColor.GREEN + "Teleported destination set to your location!");
                     });
                 })
@@ -239,7 +313,13 @@ public class TycoonWorldManager {
                                 // send success message
                                 Console.debug(getClass(), "Deleted Tycoon world!");
                                 player.sendMessage(ChatColor.GREEN + "Deleted Tycoon world: " + worldName);
+
+                                particleManager.spawnBeaconBeam(world.getSpawnLocation(), false);
+
+                                worldSettings.remove(worldName);
+
                                 removePlayerWorld(player, worldName);
+
                                 listTycoonWorlds(player);
                             });
                 })
@@ -285,6 +365,11 @@ public class TycoonWorldManager {
         player.sendMessage(ChatColor.GREEN + "===================================");
     }
 
+    public WorldSettings createWorldSettings(String worldName, UUID owner) {
+        return worldSettings.computeIfAbsent(worldName,
+                k -> new WorldSettings(owner));
+    }
+
     private int getNextFreeWorldNumber(Player player) {
         List<String> worlds = playerWorlds.getOrDefault(player.getUniqueId(), new ArrayList<>());
 
@@ -299,6 +384,10 @@ public class TycoonWorldManager {
 
     private String generateWorldName(Player player, int worldNumber) {
         return "tycoon_" + player.getName() + "_" + worldNumber;
+    }
+
+    public WorldSettings getWorldSettings(String worldName) {
+        return worldSettings.get(worldName);
     }
 
     public Map<UUID, List<String>> getPlayerWorlds() {

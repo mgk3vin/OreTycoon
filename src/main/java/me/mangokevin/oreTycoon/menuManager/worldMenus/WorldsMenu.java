@@ -66,7 +66,7 @@ public class WorldsMenu implements MenuInterface {
                 );
                 inventory.setItem(startSlot + i, item);
             } else {
-                ItemStack worldIcon = MenuManager.createWorldItem(worldNames.get(i));
+                ItemStack worldIcon = MenuManager.createWorldItem(worldNames.get(i), tycoonWorldManager);
                 inventory.setItem(startSlot + i, worldIcon);
             }
         }

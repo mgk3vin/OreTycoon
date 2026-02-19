@@ -2,12 +2,14 @@ package me.mangokevin.oreTycoon.commands.tycooncmds;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.menuManager.*;
+import me.mangokevin.oreTycoon.menuManager.worldMenus.WorldSettingsMenu;
 import me.mangokevin.oreTycoon.menuManager.worldMenus.WorldsMenu;
 import me.mangokevin.oreTycoon.tycoonManagment.*;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.AutoMinerSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SellMultiplyBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SpawnSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonWorlds.TycoonWorldManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonWorlds.WorldSettings;
 import me.mangokevin.oreTycoon.worth.WorthManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -48,7 +50,20 @@ public class TycoonCmd implements CommandExecutor {
 
         switch (action) {
             case "world", "worlds", "island":
-                new WorldsMenu(plugin).open(p);
+                String worldName = p.getWorld().getName();
+                plugin.getMultiverseCoreApi().getWorldManager().getWorld(worldName)
+                        .peek(world -> {
+                            List<String> worldsOfThisPlayer = tycoonWorldManager.getPlayerWorlds().get(p.getUniqueId());
+                            if (worldsOfThisPlayer.contains(worldName)) {
+                                //Owner of this world
+                                new WorldSettingsMenu(worldName).open(p);
+                            } else {
+                                new WorldsMenu(plugin).open(p);
+                            }
+                        })
+                        .onEmpty(()->{
+                            new WorldsMenu(plugin).open(p);
+                        });
                 break;
             case "create":
                 tycoonWorldManager.createTycoonWorld(p);
