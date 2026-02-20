@@ -10,6 +10,7 @@ import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import me.mangokevin.oreTycoon.listener.*;
 import me.mangokevin.oreTycoon.papiExpansion.PlaceholderExpansion;
 import me.mangokevin.oreTycoon.listener.tycoonListener.TycoonBoosterTickedListener;
+import me.mangokevin.oreTycoon.scoreboard.ScoreBoardManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonWorlds.TycoonWorldManager;
@@ -20,9 +21,12 @@ import me.mangokevin.oreTycoon.worth.WorthManager;
 import net.ess3.api.IEssentials;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.ScoreboardManager;
 import org.mvplugins.multiverse.core.MultiverseCoreApi;
 
 import java.util.Objects;
@@ -38,6 +42,7 @@ public final class OreTycoon extends JavaPlugin {
     private TycoonWorldManager tycoonWorldManager;
     private ParticleGenerator particleGenerator;
     private ParticleManager  particleManager;
+    private ScoreBoardManager scoreboardManager;
     private static Economy econ = null;
     private static IEssentials essentials;
 
@@ -52,6 +57,18 @@ public final class OreTycoon extends JavaPlugin {
         instance = this;
         // Plugin startup logic
         saveDefaultConfig();
+
+        //========= ScoreBoard setup =========
+        scoreboardManager = new ScoreBoardManager(this);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    scoreboardManager.updateScoreboard(player);
+                }
+            }
+        }.runTaskTimer(this, 0, 20L);
+        //========= ScoreBoard setup =========
 
         //========= WorthManager setup =========
         this.worthManager = new WorthManager(this);
@@ -116,8 +133,8 @@ public final class OreTycoon extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new StockMarketUpdatedListener(this), this);
         //getServer().getPluginManager().registerEvents(new TycoonChangedAttributesListener(), this);
         getServer().getPluginManager().registerEvents(new TycoonBoosterTickedListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerJoinListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerLeaveListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerLeaveListener(this), this);
         Objects.requireNonNull(getCommand("tycoon")).setExecutor(new TycoonCmd(this, blockManager));
         Objects.requireNonNull(getCommand("tycoon")).setTabCompleter(new TycoonTabCompleter());
         //-----------------------   Listeners & Commands    -----------------------
@@ -183,5 +200,8 @@ public final class OreTycoon extends JavaPlugin {
     }
     public ParticleGenerator getParticleGenerator() {
         return particleGenerator;
+    }
+    public ScoreBoardManager getScoreboardManager() {
+        return scoreboardManager;
     }
 }
