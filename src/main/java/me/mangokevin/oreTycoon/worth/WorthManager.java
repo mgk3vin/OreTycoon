@@ -11,6 +11,7 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
@@ -70,6 +71,14 @@ public class WorthManager {
 
         Console.log(getClass(), "BossBar has been created.");
     }
+
+    public String getWorthMultiplierFormatted(Material material) {
+        double worthMultiplier = getMultiplier(material);
+        worthMultiplier = Math.round(worthMultiplier*100.0)/100.0;
+        double worthMultiplierFormatted = Math.round(worthMultiplier * 100.0 - 100.0);
+        return  (worthMultiplier >= 1.0 ? ChatColor.GREEN + " ( +" + worthMultiplierFormatted + "% )" : ChatColor.RED + " ( " + worthMultiplierFormatted + "% )");
+    }
+
 
     private void startUpdateTimer() {
         new BukkitRunnable() {
