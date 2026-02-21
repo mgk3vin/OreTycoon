@@ -23,6 +23,10 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.mvplugins.multiverse.core.world.WorldManager;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.LogRecord;
+
 public class WorldSettingsMenu implements MenuInterface {
     private final OreTycoon plugin = OreTycoon.getInstance();
     private final TycoonWorldManager tycoonWorldManager = plugin.getTycoonWorldManager();
@@ -103,7 +107,27 @@ public class WorldSettingsMenu implements MenuInterface {
                 "set_world_spawn"
         );
         inventory.setItem(42, setWorldSpawnItem);
+
+        //43 WorldIcon Item
+        List<String> worldIconLore = Arrays.asList(
+                "§8§m-----------------------",
+                ChatColor.GRAY + "Click to set the icon",
+                ChatColor.GRAY + "to the item in your hand!",
+                "§8§m-----------------------"
+        );
+        ItemStack worldIconItem = MenuManager.createItemstack(
+                Material.CHEST,
+                1,
+                ChatColor.GOLD + "Click to Change Icon",
+                worldIconLore,
+                false,
+                true,
+                true,
+                "change_icon"
+        );
+        inventory.setItem(43, worldIconItem);
         //53 Back to main menu Item
+
         ItemStack returnItem = MenuManager.createItemstack(
                 Material.OAK_DOOR,
                 1,
@@ -132,6 +156,17 @@ public class WorldSettingsMenu implements MenuInterface {
         String action = pdc.get(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING);
 
         switch (action) {
+            case "change_icon" -> {
+                ItemStack icon = player.getInventory().getItemInMainHand();
+                if (icon.getType().equals(Material.AIR)) {
+                    player.sendMessage(ChatColor.RED + "Invalid item!");
+                    return;
+                }
+
+                worldSettings.setWorldItem(icon.getType());
+                refresh(player, inventory);
+                player.sendMessage(ChatColor.GREEN+ "Changed World Icon to " + icon.getType().name());
+            }
             case "teleport_player" -> {
                 tycoonWorldManager.teleportToWorld(player, worldName);
                 player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1, 1);

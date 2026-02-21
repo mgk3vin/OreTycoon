@@ -4,6 +4,7 @@ import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.worth.PriceUtility;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
+import me.mangokevin.oreTycoon.worth.WorthManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -14,14 +15,18 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.Arrays;
+
 public class TycoonInventory implements MenuInterface {
 
     private final TycoonBlock tycoonBlock;
     private final OreTycoon plugin;
+    private final WorthManager worthManager;
 
     public TycoonInventory(TycoonBlock tycoonBlock, OreTycoon plugin) {
         this.tycoonBlock = tycoonBlock;
         this.plugin = plugin;
+        this.worthManager = plugin.getWorthManager();
     }
 
     @Override
@@ -80,8 +85,21 @@ public class TycoonInventory implements MenuInterface {
         inventory.setItem(31, item);
     }
     public boolean addItem(ItemStack item){
+
+
         Inventory inv = tycoonBlock.getInventory();
         if (!(tycoonBlock.canFitItem(inv, item))) {return false;}
+        // --- Formatt the item Worth ---
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setLore(Arrays.asList(
+                    "§8§m-----------------------",
+                    ChatColor.GRAY + "Worth: " + PriceUtility.formatMoney(PriceUtility.calculateWorth(item)) + worthManager.getWorthMultiplierFormatted(item.getType()),
+                    "§8§m-----------------------"
+            ));
+            item.setItemMeta(meta);
+        } else plugin.getLogger().warning("Item meta is null");
+        // --- Formatt the item Worth ---
         for (int i = 0; i < 27; i++){
             ItemStack slotItem = inv.getItem(i);
 
@@ -92,10 +110,24 @@ public class TycoonInventory implements MenuInterface {
             }
 
             // 2. Slot hat das gleiche Item und noch Platz
-            if (slotItem.isSimilar(item)) {
+            if (slotItem.getType().equals(item.getType())) {
                 int canAdd = slotItem.getMaxStackSize() - slotItem.getAmount();
                 if (canAdd >= item.getAmount()) {
+                    // Es ist noch platz im stack
                     slotItem.setAmount(slotItem.getAmount() + item.getAmount());
+
+                    // --- Formatt the item Worth ---
+                    ItemMeta slotItemMeta = slotItem.getItemMeta();
+                    if (slotItemMeta != null) {
+                        slotItemMeta.setLore(Arrays.asList(
+                                "§8§m-----------------------",
+                                ChatColor.GRAY + "Worth: " + PriceUtility.formatMoney(PriceUtility.calculateWorth(slotItem)) + worthManager.getWorthMultiplierFormatted(slotItem.getType()),
+                                "§8§m-----------------------"
+                        ));
+                        slotItem.setItemMeta(slotItemMeta);
+                    } else plugin.getLogger().warning("Item meta is null");
+                    // --- Formatt the item Worth ---
+
                     return true;
                 } else if (canAdd > 0) {
                     // Teilweise füllen und Rest weitersuchen (optional)
@@ -124,8 +156,6 @@ public class TycoonInventory implements MenuInterface {
                 break;
             case "return":
                 new StatsMenu(tycoonBlock, plugin).open(player);
-            case "filler_item":
-                break;
             case null, default:
                 break;
         }

@@ -115,6 +115,8 @@ public class MenuManager {
     }
     public static ItemStack createWorldItem(String worldName, TycoonWorldManager worldManager) {
 
+        Material icon = worldManager.getWorldSettings(worldName).getWorldItem();
+
         WorldSettings worldSettings = worldManager.getWorldSettings(worldName);
         Player owner = Bukkit.getPlayer(worldSettings.getOwnerUUID());
 
@@ -130,7 +132,7 @@ public class MenuManager {
 
 
         ItemStack worldItem = MenuManager.createItemstack(
-                Material.GRASS_BLOCK,
+                icon,
                 1,
                 ChatColor.GREEN + worldName,
                 lore,

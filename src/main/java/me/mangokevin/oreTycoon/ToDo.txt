@@ -21,6 +21,8 @@ Stock Market System 📊:
     -Fix menu ✅
     -Timer? ✅
 
+❓Chunk based islands
+
 ‼️Scoreboard system for worlds‼️
 Format upgrade prices red if not affordable
 XP drops worth

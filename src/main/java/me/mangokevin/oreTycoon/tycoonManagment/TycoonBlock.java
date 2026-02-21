@@ -450,10 +450,25 @@ public class TycoonBlock {
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
         }
     }
-    public void upgradeMaxInventoryStorage(Player player) {
+    public void upgradeMaxInventoryStorageForce(Player player) {
         upgrades.setInventoryStorageLevel(inventoryStorageLevel + 1);
         updateAttributes();
         player.sendMessage(ChatColor.GREEN + "Upgraded Storage to " + getStorageStatisticFormatted());
+    }
+    public void upgradeMaxInventoryStorage(Player player) {
+
+        double cost = TycoonUpgrades.getInventoryStorageUpgradeCost(this,inventoryStorageLevel + 1);
+        Economy economy = OreTycoon.getEconomy();
+        if (economy.has(player, cost)) {
+            economy.withdrawPlayer(player, cost);
+            int nextLevel = inventoryStorageLevel + 1;
+            upgrades.setInventoryStorageLevel(nextLevel);
+            updateAttributes();
+            player.sendMessage(ChatColor.GREEN + "You upgraded the Inventory Storage to " + getStorageStatisticFormatted() + ChatColor.GREEN + " for: " + PriceUtility.formatMoney(cost));
+        }else {
+            player.sendMessage(ChatColor.RED + "Not enough money!");
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+        }
     }
 
     public void upgradeSellMultiplier(Player player) {
@@ -515,19 +530,17 @@ public class TycoonBlock {
 
     //========= Buff methods =========
     //<editor-fold desc="🔥 Buff Methods">
-    public boolean checkIfBuffed() {
+    public void checkIfBuffed() {
         Location checkLocation = location.clone();
         checkLocation.add(0, -1, 0);
         if (buffMaterials.contains(checkLocation.getBlock().getType())) {
             isBuffed = true;
             activateSellMultiplierBuff();
             updateHologramPreset(location, "BUFF");
-            return true;
         }else  {
             isBuffed = false;
             deactivateSellMultiplierBuff();
             updateHologramPreset(location, "BUFF");
-            return false;
         }
     }
     public void activateSellMultiplierBuff() {
