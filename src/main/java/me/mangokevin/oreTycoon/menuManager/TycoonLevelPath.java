@@ -187,12 +187,11 @@ public class TycoonLevelPath implements MenuInterface{
                     //tycoonBlock.upgradeMaxInventoryStorage(player);
                     tycoonBlock.getTycoonUpgrades().claimLevel(level);
                     int sellMultiplierLevel = tycoonBlock.getTycoonUpgrades().getSellMultiplierLevel();
-                    tycoonBlock.getTycoonUpgrades().setSellMultiplierLevel(level + 1);
+                    tycoonBlock.getTycoonUpgrades().setSellMultiplierLevel(sellMultiplierLevel + 1);
                     tycoonBlock.updateAttributes();
                     switch (level) {
                         case 1, 2, 3, 4:
-                            tycoonBlock.upgradeMaxInventoryStorage(player);
-
+                            tycoonBlock.upgradeMaxInventoryStorageForce(player);
                             break;
                         case 5:
                             tycoonBlock.getTycoonUpgrades().setAutoMinerUnlocked(true);
