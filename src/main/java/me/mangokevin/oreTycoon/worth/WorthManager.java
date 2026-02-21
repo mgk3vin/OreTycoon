@@ -157,9 +157,6 @@ public class WorthManager {
 
             multiplierCache.put(material, newMultiplier);
 
-//            Console.debug(getClass(), material.name() + ": " +
-//                    String.format("%.2f", currentMultiplier) + "x → " +
-//                    String.format("%.2f", newMultiplier) + "x");
         }
 
         Bukkit.getPluginManager().callEvent(new StockMarketUpdatedEvent());
@@ -203,7 +200,6 @@ public class WorthManager {
         if(!stockMarketFile.exists()){
             try{
                 stockMarketFile.createNewFile();
-
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

@@ -530,19 +530,17 @@ public class TycoonBlock {
 
     //========= Buff methods =========
     //<editor-fold desc="🔥 Buff Methods">
-    public boolean checkIfBuffed() {
+    public void checkIfBuffed() {
         Location checkLocation = location.clone();
         checkLocation.add(0, -1, 0);
         if (buffMaterials.contains(checkLocation.getBlock().getType())) {
             isBuffed = true;
             activateSellMultiplierBuff();
             updateHologramPreset(location, "BUFF");
-            return true;
         }else  {
             isBuffed = false;
             deactivateSellMultiplierBuff();
             updateHologramPreset(location, "BUFF");
-            return false;
         }
     }
     public void activateSellMultiplierBuff() {

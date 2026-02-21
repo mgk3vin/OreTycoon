@@ -1,8 +1,6 @@
 package me.mangokevin.oreTycoon.menuManager;
 
-import com.earth2me.essentials.Worth;
 import me.mangokevin.oreTycoon.OreTycoon;
-import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.worth.PriceUtility;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
@@ -158,8 +156,6 @@ public class TycoonInventory implements MenuInterface {
                 break;
             case "return":
                 new StatsMenu(tycoonBlock, plugin).open(player);
-            case "filler_item":
-                break;
             case null, default:
                 break;
         }
