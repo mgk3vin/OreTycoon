@@ -270,12 +270,10 @@ public class TycoonBlockManager {
                 if (meta == null) continue;
 
                 PersistentDataContainer pdc = meta.getPersistentDataContainer();
-                if (pdc.has(TycoonData.MENU_ITEM_KEY) || pdc.has(TycoonData.MENU_ACTION_KEY)) continue;
-
-                inventoryItems.add(item.getType().name() + ":" + item.getAmount());
-
-
-                Console.log("[BlockManager] saving inventory item: " + item.getAmount() + "x " + item.getType().name());
+                if (pdc.has(TycoonData.INVENTORY_ITEM_KEY)) {
+                    inventoryItems.add(item.getType().name() + ":" + item.getAmount());
+                    Console.log("[BlockManager] saving inventory item: " + item.getAmount() + "x " + item.getType().name());
+                }
             }
             data.set(path + "inventoryItems", inventoryItems);
             //---------- Inventory save ----------
@@ -432,8 +430,8 @@ public class TycoonBlockManager {
                 }
                 //⬆️---------- Inventory Load ----------⬆️
 
-                List<String> blockLocs = section.getStringList(path + "spawnedBlocks");
-                for (String s : blockLocs) {
+                List<String> blockLocations = section.getStringList(path + "spawnedBlocks");
+                for (String s : blockLocations) {
                     String[] parts = s.split(",");
                     int bx = Integer.parseInt(parts[0]);
                     int by = Integer.parseInt(parts[1]);
@@ -448,11 +446,12 @@ public class TycoonBlockManager {
 
 
             } catch (Exception e) {
-                plugin.getLogger().severe("Fehler beim Laden von Tycoon " + key + ": " + e.getMessage());
+                plugin.getLogger().severe("Error while loading tycoon " + key + ": " + e.getMessage());
             }
         }
         for (TycoonBlock block : tycoonBlocks.values()) {
             block.createHologram();
+            block.setLoaded(true);
         }
     }
     //</editor-fold>

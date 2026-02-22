@@ -55,6 +55,7 @@ public class TycoonData {
     public static NamespacedKey WORLD_UID_KEY;
     //========== Worlds Keys ==========
 
+    public static NamespacedKey INVENTORY_ITEM_KEY;
 
 
     // Wird einmal in der onEnable deiner Main aufgerufen: TycoonData.init(this);
@@ -99,6 +100,8 @@ public class TycoonData {
         //========== Worlds Keys ==========
         WORLD_UID_KEY = new  NamespacedKey(plugin, "world_uid");
         //========== Worlds Keys ==========
+
+        INVENTORY_ITEM_KEY = new  NamespacedKey(plugin, "inventory_item");
     }
     // Speichert die Daten eines Tycoons auf ein Item
     public static void writeToItem(ItemStack item, int level, int xp, long creation,Location loc, Material material, int spawnInterval, long creationTime, String type, Inventory inventory, TycoonUpgrades upgrades) {
