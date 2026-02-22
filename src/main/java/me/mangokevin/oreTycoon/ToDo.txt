@@ -20,10 +20,8 @@ Stock Market System 📊:
     -Event to update Holograms and Listeners ✅
     -Fix menu ✅
     -Timer? ✅
+Scoreboard system for worlds‼ ✅
 
-❓Chunk based islands
-
-‼️Scoreboard system for worlds‼️
 Format upgrade prices red if not affordable
 XP drops worth
 Sell mode / drop mode in tycoon inventory

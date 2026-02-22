@@ -75,7 +75,7 @@ public class TycoonBlock {
     private int spawnRateLevel;
 
     private int miningRate;
-    private static final int MIN_MINING_RATE = 10;
+    private static final int min_mining_rate = 10;
     private int miningRateLevel;
 
     private double sellMultiplier = 1;
@@ -103,7 +103,6 @@ public class TycoonBlock {
     //</editor-fold>
     //========== Buff Attributes ==========
     private boolean isBuffed;
-
     //========== Buff Attributes ==========
 
     //========== Booster Attributes ==========
@@ -113,6 +112,7 @@ public class TycoonBlock {
     private SpawnSpeedBooster spawnSpeedBooster;
     //========== Booster Attributes ==========
 
+    private boolean isLoaded;   //Set loaded when tycoonManager has succesfully loaded every tycoon
 
     private final OreTycoon plugin;
     private final TycoonBlockManager blockManager;
@@ -125,6 +125,8 @@ public class TycoonBlock {
 
 
     public TycoonBlock(TycoonType type, Location location, UUID ownerUuid, boolean isActive, OreTycoon plugin, TycoonUpgrades upgrades) {
+        this.isLoaded = false;
+
         this.location = location;
         this.block = location.getBlock();
         this.ownerUuid = ownerUuid;
@@ -253,6 +255,15 @@ public class TycoonBlock {
         updateHologramPreset(location, "WORTH");
     }
 
+    public void dropItem(ItemStack droppedItem, Player player) {
+        Location dropLocation = location.clone();
+        dropLocation.setY(dropLocation.getY() + 1);
+        player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.3f, 1);
+        ItemStack freshItem = new ItemStack(droppedItem.getType(), droppedItem.getAmount());
+        player.getWorld().dropItem(dropLocation, freshItem);
+        updateHologramPreset(location, "WORTH");
+    }
+
     public void cleanInventory(Inventory inventory) {
         for (int i = 0; i < inventory.getSize(); i++) {
             ItemStack item = inventory.getItem(i);
@@ -260,13 +271,12 @@ public class TycoonBlock {
             if (item == null || item.getType() == Material.AIR) continue;
 
             ItemMeta meta = item.getItemMeta();
-            if (meta == null) {
-                inventory.setItem(i, null);
-                continue;
-            }
-
-            if (!meta.getPersistentDataContainer().has(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING)) {
-                inventory.setItem(i, null);
+            if (meta != null) {
+                PersistentDataContainer pdc = meta.getPersistentDataContainer();
+                if (pdc.has(TycoonData.INVENTORY_ITEM_KEY, PersistentDataType.STRING)) {
+                    //It's an inventory item so remove it
+                    inventory.setItem(i, null);
+                }
             }
         }
     }
@@ -397,7 +407,7 @@ public class TycoonBlock {
 
         isAutoMinerUnlocked = upgrades.isAutoMinerUnlocked();
 
-        updateHologramPreset(getLocation(), "ALL");
+        //updateHologramPreset(getLocation(), "ALL");
         TycoonChangedAttributesEvent event = new TycoonChangedAttributesEvent(this);
         Bukkit.getPluginManager().callEvent(event);
     }
@@ -405,50 +415,32 @@ public class TycoonBlock {
     //<editor-fold desc="🔧 Upgrade Methods">
     public void upgradeSpawnRate(Player player) {
         if (spawnRate <= minSpawnRate) {
-            player.sendMessage(ChatColor.RED + "Max Level Reached!");
+            giveMaxLevelMSG(player);
             return;
         }
-        double cost = TycoonUpgrades.getSpawnRateUpgradeCost(this,spawnRateLevel + 1);
-        Economy economy = OreTycoon.getEconomy();
-        if (economy.has(player, cost)) {
-            economy.withdrawPlayer(player, cost);
-            int nextLevel = spawnRateLevel + 1;
+        int nextLevel = spawnRateLevel + 1;
+        double cost = TycoonUpgrades.getSpawnRateUpgradeCost(this,nextLevel);
+        handleUpgrade(player, cost, () -> {
             upgrades.setSpawnRateLevel(nextLevel);
-            updateAttributes();
-            Console.debug("Upgrade spawn rate level to: " + nextLevel + " New spawn rate: " + spawnRate + " At cost: " + economy.format(cost));
             player.sendMessage(ChatColor.GREEN + "You upgraded the Spawn rate to " + getSpawnRateFormatted() + "s for: " + PriceUtility.formatMoney(cost));
-            Bukkit.getPluginManager().callEvent(new TycoonChangedAttributesEvent(this));
-        }else {
-            player.sendMessage(ChatColor.RED + "Not enough money!");
-            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-        }
-
+        });
     }
 
     public void upgradeMiningRate(Player player) {
-        if (miningRate <= MIN_MINING_RATE) {
-            player.sendMessage(ChatColor.RED + "Max Level Reached!");
+        if (miningRate <= min_mining_rate) {
+            giveMaxLevelMSG(player);
             return;
         }
-        double cost = TycoonUpgrades.getMiningRateUpgradeCost(this,miningRateLevel + 1);
-        Economy economy = OreTycoon.getEconomy();
-        if (miningRate == spawnRate) {
+        int nextLevel = miningRateLevel + 1;
+        double cost = TycoonUpgrades.getMiningRateUpgradeCost(this,nextLevel);
+        if (miningRate <= spawnRate) {
             player.sendMessage(ChatColor.RED + "Mining rate level " + miningRateLevel + " can't be higher than spawn rate level: " + spawnRateLevel);
             return;
         }
-        if (economy.has(player, cost)) {
-            economy.withdrawPlayer(player, cost);
-            int nextLevel = miningRateLevel + 1;
+        handleUpgrade(player, cost, () -> {
             upgrades.setMiningRateLevel(nextLevel);
-            updateAttributes();
-            Console.debug("Upgrade mining rate level to " + nextLevel + " New mining rate: " + miningRate + " At cost: " + economy.format(cost));
             player.sendMessage(ChatColor.GREEN + "You upgraded the Mining rate to " + getMiningRateFormatted() + "s for: " + PriceUtility.formatMoney(cost));
-
-            Bukkit.getPluginManager().callEvent(new TycoonChangedAttributesEvent(this));
-        }else {
-            player.sendMessage(ChatColor.RED + "Not enough money!");
-            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-        }
+        });
     }
     public void upgradeMaxInventoryStorageForce(Player player) {
         upgrades.setInventoryStorageLevel(inventoryStorageLevel + 1);
@@ -456,74 +448,68 @@ public class TycoonBlock {
         player.sendMessage(ChatColor.GREEN + "Upgraded Storage to " + getStorageStatisticFormatted());
     }
     public void upgradeMaxInventoryStorage(Player player) {
+        int nextLevel = inventoryStorageLevel + 1;
+        double cost = TycoonUpgrades.getInventoryStorageUpgradeCost(this,nextLevel);
 
-        double cost = TycoonUpgrades.getInventoryStorageUpgradeCost(this,inventoryStorageLevel + 1);
-        Economy economy = OreTycoon.getEconomy();
-        if (economy.has(player, cost)) {
-            economy.withdrawPlayer(player, cost);
-            int nextLevel = inventoryStorageLevel + 1;
+        handleUpgrade(player, cost, () -> {
             upgrades.setInventoryStorageLevel(nextLevel);
-            updateAttributes();
             player.sendMessage(ChatColor.GREEN + "You upgraded the Inventory Storage to " + getStorageStatisticFormatted() + ChatColor.GREEN + " for: " + PriceUtility.formatMoney(cost));
-        }else {
-            player.sendMessage(ChatColor.RED + "Not enough money!");
-            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-        }
+        });
     }
 
     public void upgradeSellMultiplier(Player player) {
         if (sellMultiplier >= maxSellMultiplier) {
-            player.sendMessage(ChatColor.RED + "Max Level Reached!");
+            giveMaxLevelMSG(player);
             return;
         }
-        double cost = TycoonUpgrades.getSellMultiplierUpgradeCost(this,sellMultiplierLevel + 1);
-        Economy economy = OreTycoon.getEconomy();
-        if (economy.has(player, cost)) {
-            economy.withdrawPlayer(player, cost);
-            int nextLevel = sellMultiplierLevel + 1;
+        int nextLevel = sellMultiplierLevel + 1;
+        double cost = TycoonUpgrades.getSellMultiplierUpgradeCost(this,nextLevel);
+        handleUpgrade(player, cost, () -> {
             upgrades.setSellMultiplierLevel(nextLevel);
-            updateAttributes();
             player.sendMessage(ChatColor.GREEN + "You upgraded the Sell Multiplier to " + getSellMultiplier() + "x for: " + PriceUtility.formatMoney(cost));
-        }else {
-            player.sendMessage(ChatColor.RED + "Not enough money!");
-            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-        }
+        });
     }
     public void upgradeDoubleDropsChance(Player player) {
         if (doubleDropsChance >= maxDoubleDropsChance) {
             player.sendMessage(ChatColor.RED + "Max Level Reached!");
             return;
         }
-        double cost = TycoonUpgrades.getDoubleDropChanceUpgradeCost(this,doubleDropsChanceLevel + 1);
+        int nextLevel = doubleDropsChanceLevel + 1;
+        double cost = TycoonUpgrades.getDoubleDropChanceUpgradeCost(this,nextLevel);
+        handleUpgrade(player, cost, () -> {
+            upgrades.setDoubleDropsLevel(nextLevel);
+            player.sendMessage(ChatColor.GREEN + "You upgrade Double Drops to " + getDoubleDropsChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
+        });
+    }
+    public void upgradeFortuneChance(Player player) {
+        if (fortuneChance >= maxFortuneChance) {
+            giveMaxLevelMSG(player);
+            return;
+        }
+        int nextLevel = fortuneChanceLevel + 1;
+        double cost = TycoonUpgrades.getFortuneUpgradeCost(this,nextLevel);
+        handleUpgrade(player, cost, () -> {
+            upgrades.setFortuneLevel(nextLevel);
+            player.sendMessage(ChatColor.GREEN + "You upgraded Fortune to " + getFortuneChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
+        });
+    }
+    private void handleUpgrade(Player player, double cost, Runnable onSuccess) {
         Economy economy = OreTycoon.getEconomy();
+
         if (economy.has(player, cost)) {
             economy.withdrawPlayer(player, cost);
-            int nextLevel = doubleDropsChanceLevel + 1;
-            upgrades.setDoubleDropsLevel(nextLevel);
+
+            onSuccess.run();
+
             updateAttributes();
-            player.sendMessage(ChatColor.GREEN + "You upgrade Double Drops to " + getDoubleDropsChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
+            Bukkit.getPluginManager().callEvent(new TycoonChangedAttributesEvent(this));
         }else {
             player.sendMessage(ChatColor.RED + "Not enough money!");
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
         }
     }
-    public void upgradeFortuneChance(Player player) {
-        if (fortuneChance >= maxFortuneChance) {
-            player.sendMessage(ChatColor.RED + "Max Level Reached!");
-            return;
-        }
-        double cost = TycoonUpgrades.getFortuneUpgradeCost(this,fortuneChanceLevel + 1);
-        Economy economy = OreTycoon.getEconomy();
-        if (economy.has(player, cost)) {
-            economy.withdrawPlayer(player, cost);
-            int nextLevel = fortuneChanceLevel + 1;
-            upgrades.setFortuneLevel(nextLevel);
-            updateAttributes();
-            player.sendMessage(ChatColor.GREEN + "You upgraded Fortune to " + getFortuneChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
-        }else {
-            player.sendMessage(ChatColor.RED + "Not enough money!");
-            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-        }
+    private void giveMaxLevelMSG(Player player) {
+        player.sendMessage(ChatColor.RED + "Max Level Reached!");
     }
     //</editor-fold>
     //========== Upgrade Methods ==========
@@ -816,6 +802,11 @@ public class TycoonBlock {
         }
     }
     public void updateHologramPreset(Location location, String preset) {
+        if (!isLoaded) {
+            Console.error(getClass(), "Cannot update hologram preset Tycoon is not loaded!");
+            return;
+        }
+
         Hologram hologram = getHologram(location);
         if (hologram == null) {
             Console.error(getClass() ,"No Hologram found at Location " + location);
@@ -1115,6 +1106,9 @@ public class TycoonBlock {
     }
     public AutoMinerSpeedBooster getAutoMinerSpeedBooster() {return autoMinerSpeedBooster;}
     public SpawnSpeedBooster getSpawnSpeedBooster() {return spawnSpeedBooster;}
+    public boolean isLoaded() {
+        return isLoaded;
+    }
     // ---------     Getter      ---------
 
     // ---------     Setter      ---------
@@ -1156,6 +1150,9 @@ public class TycoonBlock {
     }
     public void setSpawnSpeedBooster(SpawnSpeedBooster spawnSpeedBooster) {
         this.spawnSpeedBooster = spawnSpeedBooster;
+    }
+    public void setLoaded(boolean loaded) {
+        isLoaded = loaded;
     }
     // ---------     Setter      ---------
 }
