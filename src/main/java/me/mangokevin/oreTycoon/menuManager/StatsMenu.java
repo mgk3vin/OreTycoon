@@ -23,13 +23,12 @@ public class StatsMenu implements MenuInterface {
     private final OreTycoon plugin;
     private final TycoonBlock tycoonBlock;
     private final MenuManager menuManager;
-    private final TycoonBlockManager blockManager;
 
     public StatsMenu(TycoonBlock tycoonBlock, OreTycoon plugin) {
         this.plugin = plugin;
         this.tycoonBlock = tycoonBlock;
         this.menuManager = plugin.getMenuManager();
-        this.blockManager = plugin.getBlockManager();
+
     }
     @Override
     public void open(Player player) {

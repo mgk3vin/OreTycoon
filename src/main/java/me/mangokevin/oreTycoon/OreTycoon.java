@@ -2,17 +2,19 @@ package me.mangokevin.oreTycoon;
 
 import me.mangokevin.oreTycoon.commands.tycooncmds.TycoonCmd;
 import me.mangokevin.oreTycoon.commands.tycooncmds.TycoonTabCompleter;
+import me.mangokevin.oreTycoon.listener.tycoonListener.*;
 import me.mangokevin.oreTycoon.menuManager.InventoryClickListener;
 import me.mangokevin.oreTycoon.menuManager.MenuManager;
-import me.mangokevin.oreTycoon.listener.tycoonListener.StockMarketUpdatedListener;
-import me.mangokevin.oreTycoon.listener.tycoonListener.TycoonAutoMineListener;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import me.mangokevin.oreTycoon.listener.*;
 import me.mangokevin.oreTycoon.papiExpansion.PlaceholderExpansion;
-import me.mangokevin.oreTycoon.listener.tycoonListener.TycoonBoosterTickedListener;
 import me.mangokevin.oreTycoon.scoreboard.ScoreBoardManager;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
+import me.mangokevin.oreTycoon.sqlite.DatabaseManager;
+import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.NewTycoonManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonBlockFactory;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonWorlds.TycoonWorldManager;
 import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.utility.ParticleGenerator;
@@ -26,14 +28,15 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scoreboard.ScoreboardManager;
 import org.mvplugins.multiverse.core.MultiverseCoreApi;
 
 import java.util.Objects;
 
 public final class OreTycoon extends JavaPlugin {
 
-    private TycoonBlockManager blockManager;
+    private NewTycoonManager newTycoonManager;
+    private TycoonRegistry tycoonRegistry;
+    private TycoonBlockFactory tycoonFactory;
     private TycoonData tdData;
     private MenuManager menuManager;
     private LevelManager levelManager;
@@ -43,6 +46,7 @@ public final class OreTycoon extends JavaPlugin {
     private ParticleGenerator particleGenerator;
     private ParticleManager  particleManager;
     private ScoreBoardManager scoreboardManager;
+    private DatabaseManager databaseManager;
     private static Economy econ = null;
     private static IEssentials essentials;
 
@@ -57,9 +61,16 @@ public final class OreTycoon extends JavaPlugin {
         instance = this;
         // Plugin startup logic
         saveDefaultConfig();
+        this.tycoonRegistry = new TycoonRegistry(this);
 
+        this.tycoonFactory = new TycoonBlockFactory(this);
+        this.newTycoonManager = new NewTycoonManager(this);
+
+        //========= DatabaseManager setup =========
+        databaseManager = new DatabaseManager(this);
+        //========= DatabaseManager setup =========
         //========= ScoreBoard setup =========
-        scoreboardManager = new ScoreBoardManager(this);
+        scoreboardManager = new ScoreBoardManager();
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -84,13 +95,12 @@ public final class OreTycoon extends JavaPlugin {
         //========= WorthManager setup =========
 
         this.levelManager = new LevelManager();
-        this.blockManager = new TycoonBlockManager(this, levelManager);
         this.tdData = new TycoonData();
         this.menuManager = new MenuManager(this);
         TycoonData.init(this);
 
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            new PlaceholderExpansion(blockManager).register();
+            new PlaceholderExpansion(this).register();
             getLogger().info("PlaceholderAPI Expansion enabled!");
         }
         //-----------------------   Vault setup    -----------------------
@@ -123,24 +133,29 @@ public final class OreTycoon extends JavaPlugin {
         //-----------------------   MultiverseCore setup    -----------------------
 
         //-----------------------   Listeners & Commands    -----------------------
-        getServer().getPluginManager().registerEvents(new BlockPlacedListener(this, blockManager, tdData), this);
-        getServer().getPluginManager().registerEvents(new BlockBreakListener(this, blockManager, levelManager), this);
-        getServer().getPluginManager().registerEvents(new BlockInteractListener(this, blockManager), this);
-        getServer().getPluginManager().registerEvents(new TycoonManipulationListener(blockManager), this);
+        getServer().getPluginManager().registerEvents(new BlockPlacedListener(this), this);
+        getServer().getPluginManager().registerEvents(new BlockBreakListener(this), this);
+        getServer().getPluginManager().registerEvents(new BlockInteractListener(this), this);
+        getServer().getPluginManager().registerEvents(new TycoonManipulationListener(this), this);
         getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
         getServer().getPluginManager().registerEvents(new InventoryClickListener(),this);
         getServer().getPluginManager().registerEvents(new TycoonAutoMineListener(), this);
         getServer().getPluginManager().registerEvents(new StockMarketUpdatedListener(this), this);
-        //getServer().getPluginManager().registerEvents(new TycoonChangedAttributesListener(), this);
+        getServer().getPluginManager().registerEvents(new TycoonUpdateListener(this), this);
         getServer().getPluginManager().registerEvents(new TycoonBoosterTickedListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerLeaveListener(this), this);
-        Objects.requireNonNull(getCommand("tycoon")).setExecutor(new TycoonCmd(this, blockManager));
+        getServer().getPluginManager().registerEvents(new TycoonSpawnedBlockMinedListener(), this);
+        Objects.requireNonNull(getCommand("tycoon")).setExecutor(new TycoonCmd(this));
         Objects.requireNonNull(getCommand("tycoon")).setTabCompleter(new TycoonTabCompleter());
         //-----------------------   Listeners & Commands    -----------------------
 
-        blockManager.loadTycoons();
+        //blockManager.loadTycoons();
+        databaseManager.loadTycoons();
+
         tycoonWorldManager.loadPlayerWorlds();
+
+        databaseManager.startAutoSaveTimer();
     }
 
 
@@ -162,25 +177,33 @@ public final class OreTycoon extends JavaPlugin {
     public static IEssentials getEssentials() {
         return essentials;
     }
+
+
     @Override
     public void onDisable() {
-        if (blockManager != null) {
-            blockManager.saveTycoons();
-            Console.log(getClass(), "BlockManager saved!");
+        for (TycoonBlock tycoonBlock : tycoonRegistry.getAllTycoons()){
+            databaseManager.saveTycoon(tycoonBlock);
         }
+//        if (blockManager != null) {
+//            blockManager.saveTycoons();
+//            Console.log(getClass(), "BlockManager saved!");
+//            if (databaseManager != null) {
+//                for (TycoonBlock tycoonBlock : blockManager.getTycoonBlocks().values()) {
+//                    databaseManager.saveTycoon(tycoonBlock);
+//                }
+//            }
+//        }
         if (tycoonWorldManager != null) {
             tycoonWorldManager.savePlayerWorlds();
             Console.log(getClass(), "TycoonWorldManager saved!");
         }
+
         // Plugin shutdown logic
     }
 
     // Getter für andere Klassen
     public MenuManager getMenuManager() {
         return menuManager;
-    }
-    public TycoonBlockManager getBlockManager() {
-        return blockManager;
     }
     public LevelManager getLevelManager() {
         return levelManager;
@@ -203,5 +226,17 @@ public final class OreTycoon extends JavaPlugin {
     }
     public ScoreBoardManager getScoreboardManager() {
         return scoreboardManager;
+    }
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
+    }
+    public TycoonRegistry getTycoonRegistry() {
+        return tycoonRegistry;
+    }
+    public TycoonBlockFactory getTycoonFactory() {
+        return tycoonFactory;
+    }
+    public NewTycoonManager getNewTycoonManager() {
+        return newTycoonManager;
     }
 }

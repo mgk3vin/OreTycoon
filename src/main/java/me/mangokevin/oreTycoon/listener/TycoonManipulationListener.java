@@ -1,8 +1,8 @@
 package me.mangokevin.oreTycoon.listener;
 
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
+import me.mangokevin.oreTycoon.OreTycoon;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
@@ -13,17 +13,17 @@ import java.util.List;
 
 public class TycoonManipulationListener implements Listener {
 
-    private final TycoonBlockManager blockManager;
+    private final TycoonRegistry tycoonRegistry;
 
-    public TycoonManipulationListener(TycoonBlockManager blockManager) {
-        this.blockManager = blockManager;
+    public TycoonManipulationListener(OreTycoon plugin) {
+        this.tycoonRegistry = plugin.getTycoonRegistry();
     }
 
     @EventHandler
-    public void onlockPistonExtend(BlockPistonExtendEvent event) {
+    public void onBlockPistonExtend(BlockPistonExtendEvent event) {
         List<Block> blocks = event.getBlocks();
         for (Block block : blocks) {
-            if (blockManager.isTycoonBlock(block)) {
+            if (tycoonRegistry.isTycoonBlock(block)) {
                 event.setCancelled(true);
             }
         }
@@ -32,7 +32,7 @@ public class TycoonManipulationListener implements Listener {
     public void onBlockPistonRetract(BlockPistonRetractEvent event) {
         List<Block> blocks = event.getBlocks();
         for (Block block : blocks) {
-            if (blockManager.isTycoonBlock(block)) {
+            if (tycoonRegistry.isTycoonBlock(block)) {
                 event.setCancelled(true);
             }
         }
@@ -40,63 +40,63 @@ public class TycoonManipulationListener implements Listener {
     @EventHandler
     public void onBlockBurnEvent(BlockBurnEvent event) {
         Block block = event.getBlock();
-        if (blockManager.isTycoonBlock(block)) {
+        if (tycoonRegistry.isTycoonBlock(block)) {
             event.setCancelled(true);
         }
     }
     @EventHandler
     public void onBlockFadeEvent(BlockFadeEvent event) {
         Block block = event.getBlock();
-        if (blockManager.isTycoonBlock(block)) {
+        if (tycoonRegistry.isTycoonBlock(block)) {
             event.setCancelled(true);
         }
     }
     @EventHandler
     public void onBlockFromToEvent(BlockFromToEvent event) {
         Block block = event.getBlock();
-        if (blockManager.isTycoonBlock(block)) {
+        if (tycoonRegistry.isTycoonBlock(block)) {
             event.setCancelled(true);
         }
     }
     @EventHandler
     public void onBlockIgniteEvent(BlockIgniteEvent event) {
         Block block = event.getBlock();
-        if (blockManager.isTycoonBlock(block)) {
+        if (tycoonRegistry.isTycoonBlock(block)) {
             event.setCancelled(true);
         }
     }
     @EventHandler
     public void onEntityChangeBlockEvent(EntityChangeBlockEvent event) {
         Block block = event.getBlock();
-        if (blockManager.isTycoonBlock(block)) {
+        if (tycoonRegistry.isTycoonBlock(block)) {
             event.setCancelled(true);
         }
     }
     @EventHandler
     public void onBlockPhysicsEvent(BlockPhysicsEvent event) {
         Block block = event.getBlock();
-        if (blockManager.isTycoonBlock(block)) {
+        if (tycoonRegistry.isTycoonBlock(block)) {
             event.setCancelled(true);
         }
     }
     @EventHandler
     public void onBlockFertilizeEvent(BlockFertilizeEvent event) {
         Block block = event.getBlock();
-        if (blockManager.isTycoonBlock(block)) {
+        if (tycoonRegistry.isTycoonBlock(block)) {
             event.setCancelled(true);
         }
     }
     @EventHandler
     public void onBlockExplodeEvent(BlockExplodeEvent event) {
         Block block = event.getBlock();
-        if (blockManager.isTycoonBlock(block)) {
+        if (tycoonRegistry.isTycoonBlock(block)) {
             event.setCancelled(true);
         }
     }
     @EventHandler
     public void onBlockGrow(BlockGrowEvent event) {
         Block block = event.getBlock();
-        if (blockManager.isTycoonBlock(block)) {
+        if (tycoonRegistry.isTycoonBlock(block)) {
             event.setCancelled(true);
         }
     }
@@ -105,7 +105,7 @@ public class TycoonManipulationListener implements Listener {
         // Entfernt alle Tycoon-Blöcke aus der Liste der Blöcke, die zerstört werden sollen
         List<Block> blocks = event.blockList();
         for (Block block : blocks) {
-            if (blockManager.isTycoonBlock(block)) {
+            if (tycoonRegistry.isTycoonBlock(block)) {
                 blocks.remove(block);
             }
         }

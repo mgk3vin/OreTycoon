@@ -9,10 +9,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.*;
 
 public class ScoreBoardManager {
-    private final OreTycoon plugin;
 
-    public ScoreBoardManager(OreTycoon plugin) {
-        this.plugin = plugin;
+    public ScoreBoardManager() {
+
     }
 
     public void setupScoreboard(Player player) {

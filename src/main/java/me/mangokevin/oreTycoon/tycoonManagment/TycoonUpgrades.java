@@ -5,6 +5,7 @@ import me.mangokevin.oreTycoon.worth.PriceUtility;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class TycoonUpgrades {
     private int spawnRateLevel = 0;
@@ -92,7 +93,13 @@ public class TycoonUpgrades {
 
     }
 
-
+    public static boolean shouldFortuneActivate(TycoonBlock tycoonBlock){
+        Random random = new Random();
+        if (random.nextDouble() * 100.0 < tycoonBlock.getFortuneChance()) {
+            return true;
+        }
+        return false;
+    }
 
     public static double getExponentialUpgradeCost(int level, double basePrice, double multiplier){
         return basePrice * Math.pow(multiplier, level);

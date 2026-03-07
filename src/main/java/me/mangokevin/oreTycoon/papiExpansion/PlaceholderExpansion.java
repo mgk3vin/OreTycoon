@@ -1,7 +1,10 @@
 package me.mangokevin.oreTycoon.papiExpansion;
 
+import me.mangokevin.oreTycoon.OreTycoon;
+import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.NewTycoonManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -10,9 +13,13 @@ import java.util.List;
 
 public class PlaceholderExpansion extends me.clip.placeholderapi.expansion.PlaceholderExpansion {
 
-    private final TycoonBlockManager blockManager;
-    public PlaceholderExpansion(TycoonBlockManager blockManager) {
-        this.blockManager = blockManager;
+    private final NewTycoonManager tycoonManager;
+    private final TycoonRegistry tycoonRegistry;
+    private final LevelManager levelManager;
+    public PlaceholderExpansion(OreTycoon plugin) {
+        tycoonManager = plugin.getNewTycoonManager();
+        tycoonRegistry = plugin.getTycoonRegistry();
+        levelManager = plugin.getLevelManager();
     }
 
     @Override
@@ -50,7 +57,7 @@ public class PlaceholderExpansion extends me.clip.placeholderapi.expansion.Place
                 int index = Integer.parseInt(parts[1]) - 1;
                 String type = parts[2];
 
-                List<TycoonBlock> tycoons = blockManager.getTycoonBlocksFromPlayer(onlinePlayer.getUniqueId());
+                List<TycoonBlock> tycoons = tycoonRegistry.getAllTycoonsFromPlayer(onlinePlayer.getUniqueId());
                 System.out.println("[PlaceholderExpansion] " + tycoons);
                 if (index < 0 || index >= tycoons.size()) {
                     if (type.equals("material")) return "BARRIER";
@@ -75,22 +82,22 @@ public class PlaceholderExpansion extends me.clip.placeholderapi.expansion.Place
         }
 
         if (paramsLower.equalsIgnoreCase("limit")) {
-            return String.valueOf(blockManager.getMaxBlocksPerPlayer());
+            return String.valueOf(tycoonManager.getMaxTycoonsPerPlayer());
         }
 
         if (!onlinePlayer.hasMetadata("viewing_tycoon")) return "N/A";
 
         String tycoonUID = onlinePlayer.getMetadata("viewing_tycoon").getFirst().asString();
-        TycoonBlock tycoonBlock = blockManager.getTycoonBlock(tycoonUID);
+        TycoonBlock tycoonBlock = tycoonRegistry.getTycoonBlock(tycoonUID);
         if (tycoonBlock == null) return "[Error] No tycoon found!";
 
         return switch (params.toLowerCase()) {
             case "level" -> String.valueOf(tycoonBlock.getLevel());
             case "xp_current" -> String.valueOf(tycoonBlock.getLevelXp());
             case "xp_needed" ->
-                    String.valueOf(blockManager.getLevelManager().getXpNeededForLevel(tycoonBlock.getLevel() + 1));
+                    String.valueOf(levelManager.getXpNeededForLevel(tycoonBlock.getLevel() + 1));
             case "progress_percent" ->
-                    String.valueOf(blockManager.getLevelManager().getProgressPercentage(tycoonBlock.getLevelXp(), tycoonBlock.getLevel() + 1));
+                    String.valueOf(levelManager.getProgressPercentage(tycoonBlock.getLevelXp(), tycoonBlock.getLevel() + 1));
             case "progress_bar" -> String.valueOf(tycoonBlock.getProgressBar(20));
             case "status" -> String.valueOf(tycoonBlock.isActive());
             case "owner" -> String.valueOf(tycoonBlock.getOfflineOwner().getName());

@@ -57,6 +57,7 @@ public class LevelManager {
             currentLevel++;
             Objects.requireNonNull(tycoonBlock.getLocation().getWorld()).playEffect(tycoonBlock.getLocation(), Effect.MOBSPAWNER_FLAMES, 1);
             tycoonBlock.getLocation().getWorld().playSound(tycoonBlock.getLocation(), Sound.BLOCK_ANVIL_USE, 1, 1.5f);
+            tycoonBlock.callTycoonUpdateEvent();
 //            System.out.println("[LevelManager] Leveled up to " + currentLevel);
         }
 

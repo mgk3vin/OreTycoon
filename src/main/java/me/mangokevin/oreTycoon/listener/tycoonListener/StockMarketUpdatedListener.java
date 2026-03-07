@@ -4,38 +4,34 @@ import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.menuManager.MenuManager;
 import me.mangokevin.oreTycoon.events.tycoonEvents.StockMarketUpdatedEvent;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import me.mangokevin.oreTycoon.utility.Console;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-import java.util.Map;
+import java.util.List;
 
 public class StockMarketUpdatedListener implements Listener {
 
-    private final OreTycoon plugin;
+
+    private final TycoonRegistry tycoonRegistry;
 
     public StockMarketUpdatedListener(OreTycoon plugin) {
-        this.plugin = plugin;
+        this.tycoonRegistry = plugin.getTycoonRegistry();
     }
 
     @EventHandler
     public void onStockMarketUpdated(StockMarketUpdatedEvent event) {
-        TycoonBlockManager tycoonManager = plugin.getBlockManager();
-        Map<Location, TycoonBlock> tycoonBlockMap = tycoonManager.getAllTycoonBlocksLocation();
+        List<TycoonBlock> tycoonBlocksList = tycoonRegistry.getAllTycoons();
         Console.debug(getClass(), "StockMarket Updated Event called");
-        if (tycoonBlockMap.isEmpty()) {
+        if (tycoonBlocksList.isEmpty()) {
             Console.error(getClass(), "No Tycoon blocks found");
             return;
         };
-        for (Map.Entry<Location, TycoonBlock> entry : tycoonBlockMap.entrySet()){
-
-            Location location = entry.getKey();
-            TycoonBlock tycoonBlock = entry.getValue();
-            tycoonBlock.updateHologramPreset(location, "WORTH");
+        for (TycoonBlock tycoonBlock : tycoonBlocksList) {
+            tycoonBlock.updateHologram();
         }
         for (Player player : Bukkit.getOnlinePlayers()) {
             MenuManager.refreshIfOpen(player);

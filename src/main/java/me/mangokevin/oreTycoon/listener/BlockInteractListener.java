@@ -3,7 +3,8 @@ package me.mangokevin.oreTycoon.listener;
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.menuManager.MenuManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.NewTycoonManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -15,54 +16,51 @@ import org.bukkit.inventory.EquipmentSlot;
 
 public class BlockInteractListener implements Listener {
 
-    private final OreTycoon plugin;
-    private final TycoonBlockManager blockManager;
+    private final NewTycoonManager tycoonManager;
+    private final TycoonRegistry tycoonRegistry;
     private final MenuManager menuManager;
 
-    public BlockInteractListener(OreTycoon plugin, TycoonBlockManager blockManager) {
-        this.plugin = plugin;
-        this.blockManager = blockManager;
+    public BlockInteractListener(OreTycoon plugin) {
+        this.tycoonManager = plugin.getNewTycoonManager();
         this.menuManager = plugin.getMenuManager();
+        this.tycoonRegistry = plugin.getTycoonRegistry();
     }
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
-        Block block = event.getClickedBlock();
+        Block interactedBlock = event.getClickedBlock();
 
-        if (block == null) return;
+        if (interactedBlock == null) return;
 
-        TycoonBlock blockData = blockManager.getTycoonBlock(block);
+        TycoonBlock tycoonBlock = tycoonRegistry.getTycoonBlock(interactedBlock);
 
-        if (blockData == null) return;
+        if (tycoonBlock == null) return;
 
         if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
-            if (blockManager.isTycoonBlock(block)) {
-                TycoonBlock b = blockManager.getTycoonBlock(block);
-                event.setCancelled(true);
-                if (!b.isActive()) {
-                    player.sendMessage(ChatColor.GREEN + "Spawning...");
-                    b.setActive(true);
-                    //blockManager.startGenerator(b, player);
-                }else{
-                    player.sendMessage(ChatColor.RED + "Stopped Spawning...");
-                    b.setActive(false);
-                    //blockManager.stopGenerator(b);
-                }
 
+            event.setCancelled(true);
+            if (!tycoonBlock.isActive()) {
+                player.sendMessage(ChatColor.GREEN + "Spawning...");
+                tycoonBlock.setActive(true);
+            }else{
+                player.sendMessage(ChatColor.RED + "Stopped Spawning...");
+                tycoonBlock.setActive(false);
             }
+
+
         }
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK && player.isSneaking()) {
-            if (!player.getUniqueId().equals(blockData.getOwnerUuid())) {
-                player.sendMessage(ChatColor.RED + "You can't pickup " + blockData.getOwnerName() + "'s Tycoon Block!");
-                event.setCancelled(true); // Block wird nicht zerstört
+            if (!player.getUniqueId().equals(tycoonBlock.getOwnerUuid())) {
+                player.sendMessage(ChatColor.RED + "You can't pickup " + tycoonBlock.getOwnerName() + "'s Tycoon Block!");
+                event.setCancelled(true); // Tycoon will not be picked up
                 return;
             }
             //Pickup
-            if (blockManager.isTycoonBlock(block)) {
+            if (tycoonRegistry.isTycoonBlock(interactedBlock)) {
                 event.setCancelled(true);
                 player.sendMessage(ChatColor.AQUA + "Picking up Tycoon Block");
-                blockManager.pickupTycoonBlock(block, player, blockData);
+                tycoonManager.pickUpTycoonBlock(player, tycoonBlock, interactedBlock);
                 return;
             }
         }
@@ -70,15 +68,9 @@ public class BlockInteractListener implements Listener {
 
             if (event.getHand() == EquipmentSlot.OFF_HAND) return;
 
-            Block b = event.getClickedBlock();
-            Player p = event.getPlayer();
-            if (blockManager.isTycoonBlock(b)) {
-                TycoonBlock tycoonBlock = blockManager.getTycoonBlock(b);
+            if (tycoonRegistry.isTycoonBlock(interactedBlock)) {
                 event.setCancelled(true);
-                //blockManager.openTycoonSpecificMenu(p, tycoonBlock);
-                //Replaced by:
-//                menuManager.openTycoonGui(p, tycoonBlock, tycoonBlock.isActive());
-                menuManager.openTycoonStats(tycoonBlock, p);
+                menuManager.openTycoonStats(tycoonBlock, player);
                 System.out.println("Tycoon GUI Opened");
             }
         }

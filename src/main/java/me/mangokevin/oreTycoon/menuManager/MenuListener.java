@@ -1,7 +1,6 @@
 package me.mangokevin.oreTycoon.menuManager;
 
 import me.mangokevin.oreTycoon.OreTycoon;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -12,13 +11,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public class MenuListener implements Listener {
 
-    private final OreTycoon plugin;
-    private final MenuManager menuManager;
-    private final TycoonBlockManager blockManager;
-    public MenuListener(OreTycoon plugin) {
-        this.plugin = plugin;
-        this.menuManager = plugin.getMenuManager();
-        this.blockManager = plugin.getBlockManager();
+    public MenuListener() {
+
     }
 
     @EventHandler
