@@ -1,6 +1,5 @@
 package me.mangokevin.oreTycoon.menuManager;
 
-import com.earth2me.essentials.Worth;
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.worth.PriceUtility;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
@@ -127,7 +126,7 @@ public class TycoonSpawnBlocksMenu implements MenuInterface{
                 activeResources.put(clickedMaterial, !isActive);
 
                 Console.debug("[TycoonSpawnBlocksMenu] Setting inventory item: " + !isActive + " Item -> " + item.getType().name());
-                tycoonBlock.setActiveRessourceMaterialsMap(activeResources);
+                tycoonBlock.setActiveResourceMaterialsMap(activeResources);
 
                 refresh(player, inventory);
                 break;

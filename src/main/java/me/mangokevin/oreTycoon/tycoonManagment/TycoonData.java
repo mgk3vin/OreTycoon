@@ -16,10 +16,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class TycoonData {
+    public static NamespacedKey TYCOON_BLOCK_KEY;
     private static NamespacedKey TYCOON_BLOCK;
     private static NamespacedKey LEVEL;
     public static NamespacedKey XP;
-    private static NamespacedKey CREATION;
     private static NamespacedKey MATERIAL;
     private static NamespacedKey SPAWN_INTERVAL;
     private static NamespacedKey CREATION_TIME;
@@ -60,10 +60,10 @@ public class TycoonData {
 
     // Wird einmal in der onEnable deiner Main aufgerufen: TycoonData.init(this);
     public static void init(Plugin plugin) {
+        TYCOON_BLOCK_KEY = new NamespacedKey(plugin, "Tycoon_block");
         TYCOON_BLOCK = new NamespacedKey(plugin, "IS_TYCOON_BLOCK");
         LEVEL = new NamespacedKey(plugin, "level");
         XP = new NamespacedKey(plugin, "xp");
-        CREATION = new NamespacedKey(plugin, "creation_date");
         MATERIAL = new NamespacedKey(plugin, "material");
         SPAWN_INTERVAL = new NamespacedKey(plugin, "spawn_interval");
         CREATION_TIME = new NamespacedKey(plugin, "creation_time");
@@ -104,16 +104,16 @@ public class TycoonData {
         INVENTORY_ITEM_KEY = new  NamespacedKey(plugin, "inventory_item");
     }
     // Speichert die Daten eines Tycoons auf ein Item
-    public static void writeToItem(ItemStack item, int level, int xp, long creation,Location loc, Material material, int spawnInterval, long creationTime, String type, Inventory inventory, TycoonUpgrades upgrades) {
+    public static void writeToItem(ItemStack item, int level, int xp, Location loc, Material material, int spawnInterval, long creationTime, String type, Inventory inventory, TycoonUpgrades upgrades) {
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
 
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
         pdc.set(TYCOON_BLOCK, PersistentDataType.BYTE,  (byte) 1);
+        pdc.set(TYCOON_BLOCK_KEY, PersistentDataType.BYTE, (byte) 1);
         pdc.set(TYPE_KEY, PersistentDataType.STRING, type);
         pdc.set(LEVEL, PersistentDataType.INTEGER, level);
         pdc.set(XP, PersistentDataType.INTEGER, xp);
-        pdc.set(CREATION, PersistentDataType.LONG, creation);
 
         // Wir bauen einen String: "world;x;y;z;yaw;pitch"
         String locString = String.format(Locale.US, "%s;%.2f;%.2f;%.2f;%.2f;%.2f",
@@ -183,7 +183,6 @@ public class TycoonData {
         tycoonBlock.setLevelXp(xp);
         tycoonBlock.setCreationTime(creationTime);
 
-        plugin.getBlockManager().addTycoonBlock(tycoonBlock);
 
         if (pdc.has(TycoonData.INVENTORY_KEY, PersistentDataType.BYTE_ARRAY)){
             byte[] byteArray =  pdc.get(TycoonData.INVENTORY_KEY, PersistentDataType.BYTE_ARRAY);
@@ -191,6 +190,8 @@ public class TycoonData {
             StorageUtils.fromByteArray(byteArray, tycoonBlock.getInventory());
         }
 
+        tycoonBlock.setLoaded(true);
+        plugin.getTycoonRegistry().addTycoon(tycoonBlock);
         tycoonBlock.createHologram();
         return tycoonBlock;
     }

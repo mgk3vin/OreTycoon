@@ -1,8 +1,9 @@
 package me.mangokevin.oreTycoon.commands.tycooncmds;
 
-import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+
+import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlockManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
@@ -13,10 +14,10 @@ import org.jetbrains.annotations.NotNull;
 
 public class toggle_selected implements CommandExecutor {
 
-    private final TycoonBlockManager blockManager;
+    private final TycoonRegistry tycoonRegistry;
 
-    public toggle_selected(TycoonBlockManager blockManager) {
-        this.blockManager = blockManager;
+    public toggle_selected(OreTycoon plugin) {
+        tycoonRegistry = plugin.getTycoonRegistry();
     }
 
     @Override
@@ -29,7 +30,7 @@ public class toggle_selected implements CommandExecutor {
         }
 
         String tycoonUID = player.getMetadata("viewing_tycoon").getFirst().asString();
-        TycoonBlock tycoonBlock = blockManager.getTycoonBlock(tycoonUID);
+        TycoonBlock tycoonBlock = tycoonRegistry.getTycoonBlock(tycoonUID);
 
         if (tycoonBlock == null) return true;
 

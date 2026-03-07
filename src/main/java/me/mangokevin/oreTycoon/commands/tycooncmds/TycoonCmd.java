@@ -8,6 +8,8 @@ import me.mangokevin.oreTycoon.tycoonManagment.*;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.AutoMinerSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SellMultiplyBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SpawnSpeedBooster;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.NewTycoonManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonWorlds.TycoonWorldManager;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonWorlds.WorldSettings;
 import me.mangokevin.oreTycoon.worth.WorthManager;
@@ -23,13 +25,15 @@ import java.util.List;
 public class TycoonCmd implements CommandExecutor {
 
     private final OreTycoon plugin;
-    private final TycoonBlockManager blockManager;
+    private final NewTycoonManager tycoonManager;
+    private final TycoonRegistry tycoonRegistry;
     private final MenuManager menuManager;
     private final TycoonWorldManager tycoonWorldManager;
 
-    public TycoonCmd(OreTycoon plugin, TycoonBlockManager blockManager) {
+    public TycoonCmd(OreTycoon plugin) {
         this.plugin = plugin;
-        this.blockManager = blockManager;
+        this.tycoonManager = plugin.getNewTycoonManager();
+        tycoonRegistry = plugin.getTycoonRegistry();
         this.menuManager = plugin.getMenuManager();
         this.tycoonWorldManager = plugin.getTycoonWorldManager();
     }
@@ -148,7 +152,7 @@ public class TycoonCmd implements CommandExecutor {
                     p.sendMessage(ChatColor.RED + "Incorrect arguments. Use /tycoon toggle_all <on/off>");
                     return true;
                 }
-                List<TycoonBlock> tycoonBlockList = blockManager.getTycoonBlocksFromPlayer(p.getUniqueId());
+                List<TycoonBlock> tycoonBlockList = tycoonRegistry.getAllTycoonsFromPlayer(p.getUniqueId());
                 String state;
                 if (args[1] == null) {
                     p.sendMessage(ChatColor.RED + "Incorrect arguments. Use /tycoon toggle_all <on/off>");
@@ -181,22 +185,22 @@ public class TycoonCmd implements CommandExecutor {
                 }
                 switch (type) {
                     case "wood" -> {
-                        blockManager.giveTycoonBlock(p, TycoonType.WOOD);
+                        tycoonManager.giveDefaultTycoonBlock(p, TycoonType.WOOD);
                     }
                     case "stone" -> {
-                        blockManager.giveTycoonBlock(p, TycoonType.STONE);
+                        tycoonManager.giveDefaultTycoonBlock(p, TycoonType.STONE);
                     }
                     case "coal" -> {
-                        blockManager.giveTycoonBlock(p, TycoonType.COAL);
+                        tycoonManager.giveDefaultTycoonBlock(p, TycoonType.COAL);
                     }
                     case "nether" -> {
-                        blockManager.giveTycoonBlock(p, TycoonType.NETHER);
+                        tycoonManager.giveDefaultTycoonBlock(p, TycoonType.NETHER);
                     }
                     case "iron" -> {
-                        blockManager.giveTycoonBlock(p, TycoonType.IRON);
+                        tycoonManager.giveDefaultTycoonBlock(p,  TycoonType.IRON);
                     }
                     case "diamond" -> {
-                        blockManager.giveTycoonBlock(p, TycoonType.DIAMOND);
+                        tycoonManager.giveDefaultTycoonBlock(p, TycoonType.DIAMOND);
                     }
                     default -> {
                         p.sendMessage(ChatColor.RED + "Not a valid tycoon type!");
@@ -221,7 +225,7 @@ public class TycoonCmd implements CommandExecutor {
                     p.sendMessage("§cIndex must be an integer!");
                     return true;
                 }
-                TycoonBlock tycoonBlock = blockManager.getTycoonBlockFromIndex(p, index);
+                TycoonBlock tycoonBlock = tycoonRegistry.getTycoonBlockFromIndex(p.getUniqueId(), index);
                 if (tycoonBlock == null) {
                     p.sendMessage(ChatColor.RED + "No tycoon block found!");
                     return true;
@@ -239,7 +243,7 @@ public class TycoonCmd implements CommandExecutor {
         }
 
         String tycoonUID = player.getMetadata("viewing_tycoon").getFirst().asString();
-        TycoonBlock tycoonBlock = blockManager.getTycoonBlock(tycoonUID);
+        TycoonBlock tycoonBlock = tycoonRegistry.getTycoonBlock(tycoonUID);
 
         if (tycoonBlock == null) return;
 

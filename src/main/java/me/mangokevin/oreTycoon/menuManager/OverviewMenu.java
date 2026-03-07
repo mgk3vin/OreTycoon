@@ -2,6 +2,8 @@ package me.mangokevin.oreTycoon.menuManager;
 
 
 import me.mangokevin.oreTycoon.OreTycoon;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.NewTycoonManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.tycoonManagment.*;
 import me.mangokevin.oreTycoon.worth.PriceUtility;
@@ -23,14 +25,16 @@ import java.util.List;
 public class OverviewMenu implements MenuInterface{
 
     private final OreTycoon plugin;
-    private final TycoonBlockManager blockManager;
+    private final NewTycoonManager tycoonManager;
+    private final TycoonRegistry tycoonRegistry;
     private final MenuManager menuManager;
     private final int page;
 
 
     public OverviewMenu(OreTycoon plugin, int page) {
         this.plugin = plugin;
-        this.blockManager = plugin.getBlockManager();
+        this.tycoonManager = plugin.getNewTycoonManager();
+        this.tycoonRegistry = plugin.getTycoonRegistry();
         this.menuManager = plugin.getMenuManager();
         this.page = page;
     }
@@ -43,7 +47,9 @@ public class OverviewMenu implements MenuInterface{
     }
     @Override
     public void refresh(Player player, Inventory inventory) {
-        List<TycoonBlock> tycoonBlockList = blockManager.getTycoonBlocksFromPlayer(player.getUniqueId());
+        List<TycoonBlock> tycoonBlockList = tycoonRegistry.getAllTycoonsFromPlayer(player.getUniqueId());
+
+        int maxTycoonsPerPlayer = tycoonManager.getMaxTycoonsPerPlayer();
 
         MenuManager.addFiller(inventory, Material.GRAY_STAINED_GLASS_PANE);
         boolean toggleAll = true;
@@ -84,7 +90,7 @@ public class OverviewMenu implements MenuInterface{
             if (tycoonIndex < tycoonBlockList.size()) {
                 TycoonBlock block = tycoonBlockList.get(tycoonIndex);
                 inventory.setItem(slot, menuManager.createTycoonItem(block));
-            } else if (tycoonIndex < blockManager.getMaxBlocksPerPlayer()) {
+            } else if (tycoonIndex < maxTycoonsPerPlayer) {
                 inventory.setItem(slot, MenuManager.createItemstack(Material.BLACK_STAINED_GLASS_PANE, 1, "§8Free Slot", null, false, true));
             }
         }
@@ -93,7 +99,7 @@ public class OverviewMenu implements MenuInterface{
         if (page > 0) {
             inventory.setItem(45, createNavArrow("§e<- Page " + page, "page_prev"));
         }
-        if (startIndex + itemsPerPage < blockManager.getMaxBlocksPerPlayer()) {
+        if (startIndex + itemsPerPage < maxTycoonsPerPlayer) {
             inventory.setItem(53, createNavArrow("§ePage " + (page + 2) + " ->", "page_next"));
         }
         ItemStack item;
@@ -149,7 +155,7 @@ public class OverviewMenu implements MenuInterface{
 
         if (pdc.has(TycoonData.TYCOON_MENU_ITEM_UID_KEY, PersistentDataType.STRING)) {
             String blockUIDStr = pdc.get(TycoonData.TYCOON_MENU_ITEM_UID_KEY, PersistentDataType.STRING);
-            TycoonBlock block = blockManager.getTycoonBlock(blockUIDStr);
+            TycoonBlock block = tycoonRegistry.getTycoonBlock(blockUIDStr);
             if (block != null) {
                 new StatsMenu(block, plugin).open(player);
             }
@@ -195,7 +201,7 @@ public class OverviewMenu implements MenuInterface{
         return arrow;
     }
     private void collectAllBalance(Player p) {
-        List<TycoonBlock> allTycoons = blockManager.getTycoonBlocksFromPlayer(p.getUniqueId());
+        List<TycoonBlock> allTycoons = tycoonRegistry.getAllTycoonsFromPlayer(p.getUniqueId());
         List<Integer> usableSlots = getUsableSlots();
         int startIndex = this.page * usableSlots.size();
 
@@ -214,7 +220,7 @@ public class OverviewMenu implements MenuInterface{
         this.open(p);
     }
     private double getAllWorth(Player p){
-        List<TycoonBlock> allTycoons = blockManager.getTycoonBlocksFromPlayer(p.getUniqueId());
+        List<TycoonBlock> allTycoons = tycoonRegistry.getAllTycoonsFromPlayer(p.getUniqueId());
         List<Integer> usableSlots = getUsableSlots();
         int startIndex = this.page * usableSlots.size();
 
@@ -233,7 +239,7 @@ public class OverviewMenu implements MenuInterface{
         return totalWorth;
     }
     private void toggleTycoonsAutoMiner(boolean toggle, Player p) {
-        List<TycoonBlock> allTycoons = blockManager.getTycoonBlocksFromPlayer(p.getUniqueId());
+        List<TycoonBlock> allTycoons = tycoonRegistry.getAllTycoonsFromPlayer(p.getUniqueId());
         List<Integer> usableSlots = getUsableSlots();
         int startIndex = this.page * usableSlots.size();
 
@@ -256,7 +262,7 @@ public class OverviewMenu implements MenuInterface{
         this.open(p);
     }
     private void toggleTycoons(Material clickedItem, Player p) {
-        List<TycoonBlock> allTycoons = blockManager.getTycoonBlocksFromPlayer(p.getUniqueId());
+        List<TycoonBlock> allTycoons = tycoonRegistry.getAllTycoonsFromPlayer(p.getUniqueId());
         List<Integer> usableSlots = getUsableSlots();
         int startIndex = this.page * usableSlots.size();
 

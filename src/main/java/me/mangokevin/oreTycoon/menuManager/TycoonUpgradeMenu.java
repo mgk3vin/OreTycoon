@@ -115,7 +115,7 @@ public class TycoonUpgradeMenu implements MenuInterface{
 
         //<editor-fold desc="🍀 Fortune Upgrade">
         double fortuneUpgradeCost = TycoonUpgrades.getFortuneUpgradeCost(tycoonBlock,tycoonBlock.getTycoonUpgrades().getFortuneLevel() + 1);
-        String fortuneUpgradeString = PriceUtility.formatMoney(fortuneUpgradeCost) +  " -> " + (tycoonBlock.getTycoonUpgrades().getFortuneLevel() + 1) +" ]";
+        String fortuneUpgradeString = PriceUtility.formatMoney(fortuneUpgradeCost) + ChatColor.GRAY + " -> " + (tycoonBlock.getTycoonUpgrades().getFortuneLevel() + 1) +" ]";
         List<String> fortuneLore = Arrays.asList("§8§m-----------------------",
                 ChatColor.GRAY + "[ Level: " + tycoonBlock.getTycoonUpgrades().getFortuneLevel() + " ]",
                 ChatColor.GRAY + "[ Chance: " + tycoonBlock.getFortuneChanceFormatted() + " ]",

@@ -5,6 +5,7 @@ import de.oliver.fancyholograms.api.data.HologramData;
 import de.oliver.fancyholograms.api.data.TextHologramData;
 import de.oliver.fancyholograms.api.hologram.Hologram;
 import me.mangokevin.oreTycoon.OreTycoon;
+import me.mangokevin.oreTycoon.events.tycoonEvents.TycoonUpdateEvent;
 import me.mangokevin.oreTycoon.menuManager.TycoonInventory;
 import me.mangokevin.oreTycoon.events.tycoonEvents.TycoonAutoMinedEvent;
 import me.mangokevin.oreTycoon.events.tycoonEvents.TycoonChangedAttributesEvent;
@@ -12,6 +13,8 @@ import me.mangokevin.oreTycoon.tycoonManagment.booster.AutoMinerSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SellMultiplyBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SpawnSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.TycoonBoosterAbstract;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.NewTycoonManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import me.mangokevin.oreTycoon.worth.PriceUtility;
@@ -29,6 +32,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import java.util.*;
 public class TycoonBlock {
+
+
 
     //<editor-fold desc="🪪Tycoon Variables">
 
@@ -115,8 +120,9 @@ public class TycoonBlock {
     private boolean isLoaded;   //Set loaded when tycoonManager has succesfully loaded every tycoon
 
     private final OreTycoon plugin;
-    private final TycoonBlockManager blockManager;
+    private final NewTycoonManager tycoonManager;
     private final LevelManager levelManager;
+    private final TycoonRegistry tycoonRegistry;
 
     private final Map<Material, Integer> ressourceMaterialsMap;
     private Map<Material, Boolean> activeRessourceMaterialsMap = new HashMap<>();
@@ -134,8 +140,10 @@ public class TycoonBlock {
         this.isActive = isActive;
 
         this.plugin = plugin;
-        this.blockManager = plugin.getBlockManager();
+
         this.levelManager = plugin.getLevelManager();
+        this.tycoonRegistry = plugin.getTycoonRegistry();
+        this.tycoonManager = plugin.getNewTycoonManager();
 
         this.creationTime = System.currentTimeMillis();
         level = 1;
@@ -503,6 +511,7 @@ public class TycoonBlock {
 
             updateAttributes();
             Bukkit.getPluginManager().callEvent(new TycoonChangedAttributesEvent(this));
+            callTycoonUpdateEvent();
         }else {
             player.sendMessage(ChatColor.RED + "Not enough money!");
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
@@ -624,6 +633,25 @@ public class TycoonBlock {
     }
     //---------- AutoMiner ----------
 
+    public boolean isObstructed(Player player) {
+        World world = location.getWorld();
+        int centerX = location.getBlockX();
+        int centerZ = location.getBlockZ();
+        int centerY = location.getBlockY();
+
+        for (int x = centerX - 4; x <=  centerX + 4; x++) {
+            for (int z = centerZ - 4; z <=  centerZ + 4; z++) {
+                for (int y = centerY -2; y <=  centerY + 2; y++) {
+                    Location checkLocation = new Location(world, x, y, z);
+                    if (tycoonRegistry.isTycoonBlock(checkLocation)){
+                        player.sendMessage(ChatColor.RED + "Tycoon blocks must be placed at least 5 blocks away from each other!");
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
     private Material getRandomMaterial(Map<Material, Integer> map) {
         //Only from active Materials
         int totalActiveWeight = 0;
@@ -755,15 +783,16 @@ public class TycoonBlock {
 
         TextHologramData hologramData = new TextHologramData(hologramUID, l);
 
-        List<TycoonBlock> tycoonBlockList = blockManager.getTycoonBlocksFromPlayer(ownerUuid);
+        List<TycoonBlock> tycoonBlockList = tycoonRegistry.getAllTycoonsFromPlayer(ownerUuid);
 
-        index = -1;
-        for (int i = 0; i < tycoonBlockList.size(); i++) {
-            if (tycoonBlockList.get(i).getBlockUID().equals(blockUID)) {
-                index = i + 1;
-                break;
-            }
+        //Calculate index/Order
+        if (tycoonBlockList.contains(this)) {
+            index = tycoonBlockList.indexOf(this) + 1;  // 1 based
+        } else {
+            index = -1;
+            Console.error(getClass() ,"Error while loading tycoon index! Tycoon is not registered!");
         }
+
 
         List<String> name = new LinkedList<>();
         name.add("[ " + getOwnerName() + "'s Tycoon #" + index + " ]");
@@ -795,11 +824,56 @@ public class TycoonBlock {
                 hologramMap.remove(location);
             }
     }
-    public void updateHologram(Location location) {
+    public void removeHologram() {
+        if (getHologram(location) != null) {
+            manager.removeHologram(getHologram(location));
+            hologramMap.remove(location);
+        }
+    }
+    public void queueHologramUpdate(Location location) {
         Hologram hologram = getHologram(location);
         if (hologram != null) {
             hologram.queueUpdate();
         }
+    }
+    public void queueHologramUpdate() {
+        queueHologramUpdate(location);
+    }
+    public void updateHologram() {
+        if (!isLoaded()) {
+            Console.error(getClass() + " Cant update hologram, Tycoon is not loaded!");
+            return;
+        }
+        Hologram hologram = getHologram(location);
+        if (hologram == null) {
+            Console.error(getClass() ,"No Hologram found at Location " + location);
+            return;
+        }
+        HologramData data = hologram.getData();
+        List<String> hologramLines = ((TextHologramData) data).getText();
+
+        double currentWorth;
+        List<TycoonBlock> tycoonBlockList = plugin.getTycoonRegistry().getAllTycoons();
+
+        hologramLines.set(1, tycoonDisplayName + ChatColor.RESET);
+        hologramLines.set(2, "Status: " + isActiveFormatted() + ChatColor.WHITE + " | " + isBuffedFormatted() + ChatColor.RESET);
+        hologramLines.set(3, "Level: " + level);
+        hologramLines.set(4, "xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + (int) levelManager.getProgressPercentage(levelXp, level + 1) + "%");
+        hologramLines.set(5, ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
+        currentWorth = PriceUtility.calculateWorth(inventory);
+        hologramLines.set(6, ChatColor.RESET + "Inventory: "+ ChatColor.GREEN + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
+
+        //Calculate index/Order
+        if (tycoonBlockList.contains(this)) {
+            index = tycoonBlockList.indexOf(this) + 1;  // 1 based
+        } else {
+            index = -1;
+            Console.error(getClass() ,"Error while loading tycoon index! Tycoon is not registered!");
+        }
+
+        hologramLines.set(0, "[ " + getOwnerName() + "'s Tycoon #" + index + " ]");
+
+        queueHologramUpdate();
     }
     public void updateHologramPreset(Location location, String preset) {
         if (!isLoaded) {
@@ -817,7 +891,7 @@ public class TycoonBlock {
         List<String> hologramLines = ((TextHologramData) data).getText();
 
         double currentWorth;
-        List<TycoonBlock> tycoonBlockList = blockManager.getTycoonBlocksFromPlayer(ownerUuid);
+        List<TycoonBlock> tycoonBlockList = tycoonRegistry.getAllTycoonsFromPlayer(ownerUuid);
         switch (preset) {
             case "BLOCKNAME":
                 hologramLines.set(1, tycoonDisplayName + ChatColor.RESET);
@@ -871,7 +945,7 @@ public class TycoonBlock {
             default:
                 break;
         }
-        updateHologram(location);
+        queueHologramUpdate(location);
     }
     public String isBuffedFormatted(){
         if(isBuffed){
@@ -924,6 +998,10 @@ public class TycoonBlock {
         }
         return null;
     }
+    public void callTycoonUpdateEvent(){
+        Bukkit.getPluginManager().callEvent(new TycoonUpdateEvent(this));
+    }
+
 
     // ---------     Adder      ---------
     public void addActiveBlocks(Block block) {
@@ -1139,7 +1217,7 @@ public class TycoonBlock {
             this.autoMinerEnabled = autoMinerEnabled;
         }
     }
-    public void setActiveRessourceMaterialsMap(Map<Material, Boolean> activeRessourceMaterialsMap) {
+    public void setActiveResourceMaterialsMap(Map<Material, Boolean> activeRessourceMaterialsMap) {
         this.activeRessourceMaterialsMap = activeRessourceMaterialsMap;
     }
     public void setSellMultiplierBooster(SellMultiplyBooster sellMultiplierBooster) {
