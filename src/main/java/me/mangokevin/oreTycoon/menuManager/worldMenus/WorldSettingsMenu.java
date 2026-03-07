@@ -34,7 +34,7 @@ public class WorldSettingsMenu implements MenuInterface {
     private final ParticleGenerator particleGenerator = plugin.getParticleGenerator();
     private final ParticleManager particleManager = plugin.getParticleManager();
 
-    private WorldSettings worldSettings;
+    private final WorldSettings worldSettings;
 
     private final String worldName;
 

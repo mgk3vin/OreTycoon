@@ -23,7 +23,7 @@ import java.util.List;
 
 public class StockMarketMenu implements MenuInterface {
 
-    private WorthManager worthManager = OreTycoon.getInstance().getWorthManager();
+    private final WorthManager worthManager = OreTycoon.getInstance().getWorthManager();
     private Map<Material, Double> allWorths = worthManager.getAllWorths();
 
     private final int page;

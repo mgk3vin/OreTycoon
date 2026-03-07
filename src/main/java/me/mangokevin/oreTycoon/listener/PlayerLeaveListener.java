@@ -10,11 +10,9 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerLeaveListener implements Listener {
 
-    private final OreTycoon plugin;
     private final WorthManager worthManager;
 
     public PlayerLeaveListener(OreTycoon plugin) {
-        this.plugin = plugin;
         this.worthManager = plugin.getWorthManager();
     }
 

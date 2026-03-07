@@ -21,7 +21,6 @@ import java.util.Map;
 public class TycoonBoosterManager {
 
     private boolean isAutoMinerBoosterActive = false;
-    private long autoMinerBoostTime = 0L;
 
     private boolean isSpawnSpeedBoosterActive = false;
 
@@ -29,9 +28,6 @@ public class TycoonBoosterManager {
     private double sellMultiplierBoost = 0.5;
     private long sellMultiplierBoostTime = 0L;
 
-    // Aktive Booster-Werte
-    private double currentSellBoost = 0.0;
-    //private double currentSpeedBoost = 0.0;
 
     private final Map<String, Long> expirationTimes = new HashMap<>();
 

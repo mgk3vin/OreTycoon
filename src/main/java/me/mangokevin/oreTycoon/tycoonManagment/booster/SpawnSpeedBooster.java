@@ -1,7 +1,6 @@
 package me.mangokevin.oreTycoon.tycoonManagment.booster;
 
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonBoosterManager;
 import me.mangokevin.oreTycoon.utility.Console;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;

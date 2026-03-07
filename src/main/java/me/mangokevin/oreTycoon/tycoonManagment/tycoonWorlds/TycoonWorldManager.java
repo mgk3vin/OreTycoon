@@ -2,7 +2,6 @@ package me.mangokevin.oreTycoon.tycoonManagment.tycoonWorlds;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.utility.Console;
-import me.mangokevin.oreTycoon.utility.ParticleGenerator;
 import me.mangokevin.oreTycoon.utility.ParticleManager;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
@@ -26,7 +25,7 @@ public class TycoonWorldManager {
     private final MultiverseCoreApi multiverseCoreApi;
 
     private final WorldManager worldManager;
-    private final ParticleGenerator particleGenerator;
+
     private final ParticleManager particleManager;
 
     private final int maxWorldsPerPlayer = 5;
@@ -39,7 +38,6 @@ public class TycoonWorldManager {
         this.plugin = plugin;
         multiverseCoreApi = plugin.getMultiverseCoreApi();
         this.worldManager = multiverseCoreApi.getWorldManager();
-        this.particleGenerator = plugin.getParticleGenerator();
         this.particleManager = plugin.getParticleManager();
     }
 

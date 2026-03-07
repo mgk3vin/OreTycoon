@@ -1,4 +1,5 @@
 package me.mangokevin.oreTycoon.tycoonManagment;
+
 import de.oliver.fancyholograms.api.FancyHologramsPlugin;
 import de.oliver.fancyholograms.api.HologramManager;
 import de.oliver.fancyholograms.api.data.HologramData;
@@ -13,7 +14,6 @@ import me.mangokevin.oreTycoon.tycoonManagment.booster.AutoMinerSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SellMultiplyBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SpawnSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.TycoonBoosterAbstract;
-import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonManager;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
@@ -111,16 +111,15 @@ public class TycoonBlock {
     //========== Buff Attributes ==========
 
     //========== Booster Attributes ==========
-    private TycoonBoosterManager tycoonBooster;
+    private final TycoonBoosterManager tycoonBooster;
     private SellMultiplyBooster sellMultiplyBooster;
     private AutoMinerSpeedBooster autoMinerSpeedBooster;
     private SpawnSpeedBooster spawnSpeedBooster;
     //========== Booster Attributes ==========
 
     private boolean isLoaded;   //Set loaded when tycoonManager has succesfully loaded every tycoon
-
     private final OreTycoon plugin;
-    private final TycoonManager tycoonManager;
+
     private final LevelManager levelManager;
     private final TycoonRegistry tycoonRegistry;
 
@@ -143,7 +142,6 @@ public class TycoonBlock {
 
         this.levelManager = plugin.getLevelManager();
         this.tycoonRegistry = plugin.getTycoonRegistry();
-        this.tycoonManager = plugin.getTycoonManager();
 
         this.creationTime = System.currentTimeMillis();
         level = 1;

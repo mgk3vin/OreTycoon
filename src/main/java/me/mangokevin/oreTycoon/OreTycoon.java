@@ -37,7 +37,6 @@ public final class OreTycoon extends JavaPlugin {
     private TycoonManager tycoonManager;
     private TycoonRegistry tycoonRegistry;
     private TycoonBlockFactory tycoonFactory;
-    private TycoonData tdData;
     private MenuManager menuManager;
     private LevelManager levelManager;
     private WorthManager worthManager;
@@ -63,7 +62,7 @@ public final class OreTycoon extends JavaPlugin {
         saveDefaultConfig();
         this.tycoonRegistry = new TycoonRegistry(this);
 
-        this.tycoonFactory = new TycoonBlockFactory(this);
+        this.tycoonFactory = new TycoonBlockFactory();
         this.tycoonManager = new TycoonManager(this);
 
         //========= DatabaseManager setup =========
@@ -95,7 +94,6 @@ public final class OreTycoon extends JavaPlugin {
         //========= WorthManager setup =========
 
         this.levelManager = new LevelManager();
-        this.tdData = new TycoonData();
         this.menuManager = new MenuManager(this);
         TycoonData.init(this);
 

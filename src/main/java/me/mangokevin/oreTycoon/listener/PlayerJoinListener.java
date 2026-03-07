@@ -10,12 +10,10 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 public class PlayerJoinListener implements Listener {
 
-    private final OreTycoon plugin;
     private final WorthManager worthManager;
     private final ScoreBoardManager scoreBoardManager;
 
     public PlayerJoinListener(OreTycoon plugin) {
-        this.plugin = plugin;
         this.worthManager = plugin.getWorthManager();
         this.scoreBoardManager = plugin.getScoreboardManager();
     }

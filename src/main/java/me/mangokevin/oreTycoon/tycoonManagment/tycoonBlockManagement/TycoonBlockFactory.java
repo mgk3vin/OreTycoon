@@ -1,7 +1,5 @@
 package me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement;
 
-import me.mangokevin.oreTycoon.OreTycoon;
-import me.mangokevin.oreTycoon.sqlite.DatabaseManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonType;
@@ -20,13 +18,9 @@ import java.util.List;
 public class TycoonBlockFactory {
     //Creates Tycoon Objects
 
-    private final OreTycoon plugin;
-    private final DatabaseManager databaseManager;
 
-    public TycoonBlockFactory(OreTycoon plugin) {
-        this.plugin = plugin;
-        this.databaseManager = plugin.getDatabaseManager();
-    }
+
+    public TycoonBlockFactory() {}
 
 
 
