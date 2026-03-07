@@ -2,7 +2,7 @@ package me.mangokevin.oreTycoon.listener;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.*;
-import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.NewTycoonManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonManager;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import me.mangokevin.oreTycoon.utility.Console;
 import org.bukkit.ChatColor;
@@ -20,13 +20,13 @@ import org.bukkit.persistence.PersistentDataContainer;
 public class BlockPlacedListener implements Listener {
 
     private final OreTycoon plugin;
-    private final NewTycoonManager tycoonManager;
+    private final TycoonManager tycoonManager;
     private final TycoonRegistry tycoonRegistry;
 
 
     public BlockPlacedListener(OreTycoon oreTycoon) {
         this.plugin = oreTycoon;
-        this.tycoonManager = plugin.getNewTycoonManager();
+        this.tycoonManager = plugin.getTycoonManager();
         this.tycoonRegistry = plugin.getTycoonRegistry();
     }
 

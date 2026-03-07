@@ -3,7 +3,7 @@ package me.mangokevin.oreTycoon.listener;
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.menuManager.MenuManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
-import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.NewTycoonManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonManager;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
@@ -16,12 +16,12 @@ import org.bukkit.inventory.EquipmentSlot;
 
 public class BlockInteractListener implements Listener {
 
-    private final NewTycoonManager tycoonManager;
+    private final TycoonManager tycoonManager;
     private final TycoonRegistry tycoonRegistry;
     private final MenuManager menuManager;
 
     public BlockInteractListener(OreTycoon plugin) {
-        this.tycoonManager = plugin.getNewTycoonManager();
+        this.tycoonManager = plugin.getTycoonManager();
         this.menuManager = plugin.getMenuManager();
         this.tycoonRegistry = plugin.getTycoonRegistry();
     }

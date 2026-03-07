@@ -13,7 +13,7 @@ import me.mangokevin.oreTycoon.tycoonManagment.booster.AutoMinerSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SellMultiplyBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SpawnSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.TycoonBoosterAbstract;
-import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.NewTycoonManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonManager;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
@@ -120,7 +120,7 @@ public class TycoonBlock {
     private boolean isLoaded;   //Set loaded when tycoonManager has succesfully loaded every tycoon
 
     private final OreTycoon plugin;
-    private final NewTycoonManager tycoonManager;
+    private final TycoonManager tycoonManager;
     private final LevelManager levelManager;
     private final TycoonRegistry tycoonRegistry;
 
@@ -143,7 +143,7 @@ public class TycoonBlock {
 
         this.levelManager = plugin.getLevelManager();
         this.tycoonRegistry = plugin.getTycoonRegistry();
-        this.tycoonManager = plugin.getNewTycoonManager();
+        this.tycoonManager = plugin.getTycoonManager();
 
         this.creationTime = System.currentTimeMillis();
         level = 1;

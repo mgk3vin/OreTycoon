@@ -3,7 +3,7 @@ package me.mangokevin.oreTycoon.papiExpansion;
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
-import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.NewTycoonManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonManager;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -13,11 +13,11 @@ import java.util.List;
 
 public class PlaceholderExpansion extends me.clip.placeholderapi.expansion.PlaceholderExpansion {
 
-    private final NewTycoonManager tycoonManager;
+    private final TycoonManager tycoonManager;
     private final TycoonRegistry tycoonRegistry;
     private final LevelManager levelManager;
     public PlaceholderExpansion(OreTycoon plugin) {
-        tycoonManager = plugin.getNewTycoonManager();
+        tycoonManager = plugin.getTycoonManager();
         tycoonRegistry = plugin.getTycoonRegistry();
         levelManager = plugin.getLevelManager();
     }

@@ -2,9 +2,7 @@ package me.mangokevin.oreTycoon.listener;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.events.tycoonEvents.TycoonSpawnedBlockMinedEvent;
-import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
-import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.NewTycoonManager;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import org.bukkit.*;
 import org.bukkit.block.Block;

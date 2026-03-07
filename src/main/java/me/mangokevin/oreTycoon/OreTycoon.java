@@ -12,7 +12,7 @@ import me.mangokevin.oreTycoon.scoreboard.ScoreBoardManager;
 import me.mangokevin.oreTycoon.sqlite.DatabaseManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
-import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.NewTycoonManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonManager;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonBlockFactory;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonWorlds.TycoonWorldManager;
@@ -34,7 +34,7 @@ import java.util.Objects;
 
 public final class OreTycoon extends JavaPlugin {
 
-    private NewTycoonManager newTycoonManager;
+    private TycoonManager tycoonManager;
     private TycoonRegistry tycoonRegistry;
     private TycoonBlockFactory tycoonFactory;
     private TycoonData tdData;
@@ -64,7 +64,7 @@ public final class OreTycoon extends JavaPlugin {
         this.tycoonRegistry = new TycoonRegistry(this);
 
         this.tycoonFactory = new TycoonBlockFactory(this);
-        this.newTycoonManager = new NewTycoonManager(this);
+        this.tycoonManager = new TycoonManager(this);
 
         //========= DatabaseManager setup =========
         databaseManager = new DatabaseManager(this);
@@ -236,7 +236,7 @@ public final class OreTycoon extends JavaPlugin {
     public TycoonBlockFactory getTycoonFactory() {
         return tycoonFactory;
     }
-    public NewTycoonManager getNewTycoonManager() {
-        return newTycoonManager;
+    public TycoonManager getTycoonManager() {
+        return tycoonManager;
     }
 }
