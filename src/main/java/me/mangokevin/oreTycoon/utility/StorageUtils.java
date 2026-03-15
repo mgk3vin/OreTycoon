@@ -20,7 +20,6 @@ public class StorageUtils {
             //Jedes Item nacheinander zerlegen
             for (int i = 0; i < inventory.getSize(); i++) {
                 objectOutputStream.writeObject(inventory.getItem(i));
-                Console.log("Writing item at position " + i);
             }
             return outputStream.toByteArray();
         } catch (IOException e) {
@@ -35,7 +34,6 @@ public class StorageUtils {
             int size = objectInputStream.readInt();
             for (int i = 0; i < size; i++) {
                 inventory.setItem(i, (ItemStack) objectInputStream.readObject());
-                Console.log("Reading item at position " + i);
             }
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);

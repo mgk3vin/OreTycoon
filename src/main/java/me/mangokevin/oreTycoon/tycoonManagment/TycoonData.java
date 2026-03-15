@@ -191,8 +191,6 @@ public class TycoonData {
         }
 
         tycoonBlock.setLoaded(true);
-        plugin.getTycoonRegistry().addTycoon(tycoonBlock);
-        tycoonBlock.createHologram();
         return tycoonBlock;
     }
 }

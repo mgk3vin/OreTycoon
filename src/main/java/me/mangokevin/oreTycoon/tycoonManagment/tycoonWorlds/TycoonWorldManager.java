@@ -46,13 +46,6 @@ public class TycoonWorldManager {
         // Vorherige Daten löschen, um Duplikate zu vermeiden
         YamlConfiguration data = new YamlConfiguration();
 
-//        for (UUID uuid : playerWorlds.keySet()) {
-//            String path = "worlds." + uuid.toString();
-//            data.set(path, new ArrayList<>(playerWorlds.get(uuid)));
-//            for (String worldName : playerWorlds.get(uuid)) {
-//                data.set(path + "." + worldName, "test");
-//            }
-//        }
         //NEW
         for (String worldName : worldSettings.keySet()) {
             WorldSettings worldSetting = worldSettings.get(worldName);
@@ -77,6 +70,7 @@ public class TycoonWorldManager {
             Console.error(getClass(), "Error occurred while saving: " + e.getMessage());
         }
     }
+    //TODO: fix Ghost world bug, not saving/loading correctly
     public void loadPlayerWorlds() {
         File file = new File(plugin.getDataFolder(), "playerWorlds.yml");
         if (!file.exists()) return;
@@ -90,60 +84,53 @@ public class TycoonWorldManager {
         //NEW
         worldSettings.clear();
 
-//        for (String key : section.getKeys(false)) {
-//            try {
-//                UUID uuid = UUID.fromString(key);
-//                List<String> worlds = section.getStringList(key);
-//                playerWorlds.put(uuid, new ArrayList<>(worlds));
-//
-//                Console.debug(getClass(), "Loaded worlds for " + uuid + ": " + worlds.size());
-//
-//            } catch (Exception e) {
-//                Console.error(getClass(), "Error occurred while loading playerWorlds: " + key + ": " + e.getMessage());
-//            }
-//        }
         //NEW
         for (String worldName : section.getKeys(false)) {
-            Console.log(getClass(), "Found world entry: " + worldName);
-            String path = worldName + ".";
+            try {
+                Console.log(getClass(), "Found world entry: " + worldName);
+                String path = worldName + ".";
 
-            String ownerUUIDString = section.getString(path + "owner");
-            if (ownerUUIDString == null) {
-                Console.error(getClass(), "Error occurred while loading player worlds: " + worldName + " Owner not found!");
-                continue;
-            };
-            UUID ownerUUID = UUID.fromString(section.getString(path + "owner"));
+                String ownerUUIDString = section.getString(path + "owner");
+                if (ownerUUIDString == null) {
+                    Console.error(getClass(), "Error occurred while loading player worlds: " + worldName + " Owner not found!");
+                    continue;
+                };
+                UUID ownerUUID = UUID.fromString(section.getString(path + "owner"));
 
-            WorldSettings worldSetting = new WorldSettings(ownerUUID);
+                WorldSettings worldSetting = new WorldSettings(ownerUUID);
 
-            worldSetting.setSpawnBeacon(section.getBoolean(path + "isSpawnBeaconActive"));
+                worldSetting.setSpawnBeacon(section.getBoolean(path + "isSpawnBeaconActive"));
 
-            String materialString = section.getString(path + "worldItem");
-            if (materialString == null) {
-                Console.error(getClass(), "Error occurred while loading player worlds: " + worldName + " World Item Material not found!");
-                continue;
-            }
-            worldSetting.setWorldItem(Material.matchMaterial(materialString));
-            worldSetting.setPrivate(section.getBoolean(path + "isPrivate"));
-            List<String> trustedPlayers = section.getStringList(path + "trustedPlayers");
+                String materialString = section.getString(path + "worldItem");
+                if (materialString == null) {
+                    Console.error(getClass(), "Error occurred while loading player worlds: " + worldName + " World Item Material not found!");
+                    continue;
+                }
+                worldSetting.setWorldItem(Material.matchMaterial(materialString));
+                worldSetting.setPrivate(section.getBoolean(path + "isPrivate"));
+                List<String> trustedPlayers = section.getStringList(path + "trustedPlayers");
 
-            List<UUID> trustedPlayerUUIDs = trustedPlayers
-                    .stream()
-                    .map(UUID::fromString)
-                    .toList();
-            worldSetting.setTrustedPlayer(trustedPlayerUUIDs);
+                List<UUID> trustedPlayerUUIDs = trustedPlayers
+                        .stream()
+                        .map(UUID::fromString)
+                        .toList();
+                worldSetting.setTrustedPlayer(trustedPlayerUUIDs);
 
-            playerWorlds
-                    .computeIfAbsent(ownerUUID, k -> new ArrayList<>())
-                    .add(worldName);
-            worldSettings.put(worldName, worldSetting);
+                playerWorlds
+                        .computeIfAbsent(ownerUUID, k -> new ArrayList<>())
+                        .add(worldName);
+                worldSettings.put(worldName, worldSetting);
 
-            if (worldSetting.isSpawnBeaconActive()){
-                worldManager.getWorld(worldName).peek(world -> {
-                    particleManager.startBeacon(worldName, world.getSpawnLocation());
-                }).onEmpty(() -> {
-                    Console.error(getClass(), "No world found for " + worldName);
-                });
+                if (worldSetting.isSpawnBeaconActive()) {
+                    worldManager.getWorld(worldName).peek(world -> {
+                        particleManager.startBeacon(worldName, world.getSpawnLocation());
+                    }).onEmpty(() -> {
+                        Console.error(getClass(), "No world found for " + worldName);
+                    });
+                }
+
+            } catch (Exception e) {
+                Console.error(getClass(), "Error occurred while loading world: " + worldName + " ERROR: " + e.getMessage());
             }
         }
     }

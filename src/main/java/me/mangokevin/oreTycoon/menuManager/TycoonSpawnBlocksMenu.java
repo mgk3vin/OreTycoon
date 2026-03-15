@@ -84,12 +84,10 @@ public class TycoonSpawnBlocksMenu implements MenuInterface{
 
             if (itemPerRow >= 8){
                 //if row is full
-                Console.debug("[TycoonSpawnBlocksMenu] Row full: " + itemPerRow + " resetting, -> starting: " + startIndex);
                 startIndex += 2;    //skip to next row
                 itemPerRow = 1;     //reset row counter
             }
             inventory.setItem(startIndex, spawnBlock);   //set to start index slot and get Material
-            Console.debug("[TycoonSpawnBlocksMenu] setting inventory item: " + startIndex + " Item -> " + itemPerRow + "/7");
             itemPerRow++;   //next item counter
             startIndex++;   //next slot counter
         }

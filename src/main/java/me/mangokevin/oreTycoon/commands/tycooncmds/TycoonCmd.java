@@ -56,7 +56,7 @@ public class TycoonCmd implements CommandExecutor {
                 String worldName = p.getWorld().getName();
                 plugin.getMultiverseCoreApi().getWorldManager().getWorld(worldName)
                         .peek(world -> {
-                            List<String> worldsOfThisPlayer = tycoonWorldManager.getPlayerWorlds().get(p.getUniqueId());
+                            List<String> worldsOfThisPlayer = tycoonWorldManager.getPlayerWorlds().getOrDefault(p.getUniqueId(), List.of());
                             if (worldsOfThisPlayer.contains(worldName)) {
                                 //Owner of this world
                                 new WorldSettingsMenu(worldName).open(p);
@@ -142,9 +142,6 @@ public class TycoonCmd implements CommandExecutor {
                     }
                 }
 
-                break;
-            case "toggle_selected":
-                handleToggle(p);
                 break;
             case "toggle_all":
                 if (args.length < 2) {

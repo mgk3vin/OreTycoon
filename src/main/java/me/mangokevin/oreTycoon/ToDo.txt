@@ -23,10 +23,14 @@ Stock Market System 📊:
 Scoreboard system for worlds‼ ✅
 Sell mode / drop mode in tycoon inventory ✅
 Format upgrade prices red if not affordable ✅
+FIX TYCOON INDEX ✅
 
-FIX TYCOON INDEX
 XP drops worth
 Stock price history showing previous price changes
+Show booster icon in stats menu if active
+fix overview menu autominer icon
+more tycoon types
+
 
  Mining Combo System 🔥
  Guild / Clan System 👥

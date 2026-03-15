@@ -31,7 +31,6 @@ public class TycoonTabCompleter implements TabCompleter {
                     "updateStockMarket",
                     "booster",
                     "runtest" ,
-                    "toggle_selected",
                     "toggle_all",
                     "upgrade",
                     "block",

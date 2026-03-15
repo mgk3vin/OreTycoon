@@ -81,9 +81,6 @@ public class MenuManager {
         }
     }
 
-    public void openTycoonStats(TycoonBlock block, Player player) {
-        new StatsMenu(block, plugin).open(player);
-    }
     public void openTycoonOverview(Player player, int page) {
         new OverviewMenu(plugin, page).open(player);
     }
@@ -189,22 +186,6 @@ public class MenuManager {
         }
         return itemstack;
     }
-    @Deprecated
-    public static ItemStack createItemstack(Material material, int amount, String name, List<String> lore, String KEY){
-        ItemStack item = createItemstack(material, amount, name, lore, false, null);
-        ItemMeta meta = item.getItemMeta();
-        if(meta != null){
-            PersistentDataContainer pdc = meta.getPersistentDataContainer();
-            switch (KEY){
-                case "menu_item":
-                    pdc.set(TycoonData.MENU_ITEM_KEY, PersistentDataType.STRING, KEY);
-                    break;
-            }
-        }
-
-
-        return item;
-    }
 
     public static void addFiller(Inventory inventory, Material material){
         ItemStack filler = createFiller(material);
@@ -228,7 +209,7 @@ public class MenuManager {
         }
 
     }
-    public static ItemStack  createFiller(Material material){
+    public static ItemStack createFiller(Material material){
         return createItemstack(material, 1, " ", null, false, true);
     }
 }

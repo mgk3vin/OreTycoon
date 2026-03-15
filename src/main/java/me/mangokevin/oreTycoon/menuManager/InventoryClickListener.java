@@ -9,7 +9,7 @@ public class InventoryClickListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        // 1. Ist es ein Inventar mit unserem Holder?
+        // Does inventory have TycoonHolder?
         if (!(event.getInventory().getHolder() instanceof TycoonHolder holder)) return;
 
 

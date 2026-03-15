@@ -135,7 +135,6 @@ public final class OreTycoon extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BlockBreakListener(this), this);
         getServer().getPluginManager().registerEvents(new BlockInteractListener(this), this);
         getServer().getPluginManager().registerEvents(new TycoonManipulationListener(this), this);
-        getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
         getServer().getPluginManager().registerEvents(new InventoryClickListener(),this);
         getServer().getPluginManager().registerEvents(new TycoonAutoMineListener(), this);
         getServer().getPluginManager().registerEvents(new StockMarketUpdatedListener(this), this);

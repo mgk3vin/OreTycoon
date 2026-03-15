@@ -25,6 +25,7 @@ public class StockMarketUpdatedListener implements Listener {
     @EventHandler
     public void onStockMarketUpdated(StockMarketUpdatedEvent event) {
         List<TycoonBlock> tycoonBlocksList = tycoonRegistry.getAllTycoons();
+
         Console.debug(getClass(), "StockMarket Updated Event called");
         if (tycoonBlocksList.isEmpty()) {
             Console.error(getClass(), "No Tycoon blocks found");

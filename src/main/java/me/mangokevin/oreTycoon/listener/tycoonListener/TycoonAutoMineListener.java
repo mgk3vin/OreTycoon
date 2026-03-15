@@ -17,12 +17,14 @@ public class TycoonAutoMineListener implements Listener {
         TycoonBlock tycoon = event.getTycoonBlock();
         Inventory inventory = tycoon.getInventory();
         Player owner = tycoon.getOfflineOwner().getPlayer();
+
         //add Item when Block is auto mined
         boolean itemFits = tycoon.getTycoonInventory().addItem(event.getItemStack());
         if (itemFits) {
             for (org.bukkit.entity.HumanEntity entity : inventory.getViewers()) {
                 if (entity instanceof Player player) {
-                    tycoon.getTycoonInventory().refresh(player, inventory);
+                    //tycoon.getTycoonInventory().refresh(player, inventory);
+                    MenuManager.refreshOpenInventory(player, tycoon);
                 }
             }
         }else {
@@ -31,14 +33,11 @@ public class TycoonAutoMineListener implements Listener {
             }
             tycoon.setAutoMinerEnabled(false);
         }
-        //Refresh Tycoon Hologram Worth
-        tycoon.updateHologramPreset(tycoon.getLocation(), "WORTH");
+        //Refresh Tycoon Hologram
+        tycoon.updateHologram();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            Inventory openInventory = player.getOpenInventory().getTopInventory();
-
             MenuManager.refreshOpenInventory(player, tycoon);
-
         }
 
 

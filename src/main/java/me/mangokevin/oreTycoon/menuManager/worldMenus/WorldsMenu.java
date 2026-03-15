@@ -72,7 +72,6 @@ public class WorldsMenu implements MenuInterface {
 
     @Override
     public void handleAction(InventoryClickEvent event) {
-        Inventory inventory = event.getInventory();
         Player player = (Player) event.getWhoClicked();
         ItemStack item = event.getCurrentItem();
         if (item == null) {
