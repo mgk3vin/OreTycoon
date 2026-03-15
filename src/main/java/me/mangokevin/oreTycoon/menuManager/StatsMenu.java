@@ -185,7 +185,7 @@ public class StatsMenu implements MenuInterface {
         switch (action) {
             case "tycoon_menu_item":
                 if (inventoryClick == ClickType.LEFT) {
-                    tycoonBlock.setActive(!tycoonBlock.isActive());
+                    tycoonBlock.setActiveByPlayer(!tycoonBlock.isActive());
                     refresh(player, inventory);
                     if (tycoonBlock.isActive()) {
                         player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 2f, 1.5f);

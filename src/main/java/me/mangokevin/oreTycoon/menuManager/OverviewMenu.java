@@ -275,7 +275,7 @@ public class OverviewMenu implements MenuInterface{
             if (tycoonIndex >= allTycoons.size()) break;
 
             TycoonBlock block = allTycoons.get(tycoonIndex);
-            block.setActive(shouldActivate);
+            block.setActiveByPlayer(shouldActivate);
         }
 
         // Sound abspielen

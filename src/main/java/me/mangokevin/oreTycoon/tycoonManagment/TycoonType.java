@@ -3,10 +3,9 @@ package me.mangokevin.oreTycoon.tycoonManagment;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static javax.swing.UIManager.put;
 
 public enum TycoonType {
     WOOD(
@@ -25,8 +24,29 @@ public enum TycoonType {
                 Material.DARK_OAK_LOG, 10,
                 Material.OAK_LOG, 10,
                 Material.SPRUCE_LOG, 10
-    ), Arrays.asList(Material.OAK_LEAVES,
-                    Material.JUNGLE_LEAVES)),
+    ),      Arrays.asList(
+                    Material.OAK_LEAVES,
+                    Material.JUNGLE_LEAVES
+    )),
+    JUNGLE(
+            Material.BAMBOO_BLOCK,
+            ChatColor.DARK_GREEN + "Jungle Tycoon",
+            15.0,
+            5*20,
+            6*20,
+            1.0,
+            35,
+            Map.of(
+                    Material.MOSS_BLOCK, 30,
+                    Material.MOSS_CARPET, 25,
+                    Material.MUDDY_MANGROVE_ROOTS, 15,
+                    Material.MANGROVE_ROOTS, 10,
+                    Material.MUD, 10,
+                    Material.ROOTED_DIRT, 20,
+                    Material.PODZOL, 5
+            ), List.of(
+            Material.BARRIER
+    )),
     NETHER(
             Material.NETHERRACK,
             ChatColor.RED + "Nether Tycoon",
@@ -53,6 +73,124 @@ public enum TycoonType {
                     Material.AIR
             )
     ),
+    OCEAN(
+            Material.TUBE_CORAL_BLOCK,
+            ChatColor.AQUA + "Ocean Tycoon",
+            30.0,
+            20*4,
+            20*5,
+            1.0,
+            45,
+            new  HashMap<Material, Integer>() {{
+                put(Material.PRISMARINE, 30);
+                put(Material.PRISMARINE_BRICKS, 30);
+                put(Material.SEA_LANTERN, 10);
+                put(Material.DARK_PRISMARINE, 10);
+                put(Material.DRIED_KELP_BLOCK, 15);
+                put(Material.SPONGE, 5);
+                put(Material.SAND, 30);
+                put(Material.GRAVEL, 20);
+                put(Material.CLAY, 20);
+            }},
+            List.of(Material.BARRIER)
+    ),
+    ICE(Material.BLUE_ICE,
+            ChatColor.AQUA + "Ice Tycoon",
+            45.0,
+            4*20,
+            5*20,
+            1.0,
+            50,
+            new HashMap<>() {{
+                put(Material.ICE, 40);
+                put(Material.PACKED_ICE, 30);
+                put(Material.BLUE_ICE, 15);
+                put(Material.SNOW_BLOCK, 30);
+                put(Material.SPRUCE_LOG, 15);
+            }},
+            List.of(Material.BARRIER)
+    ),
+    MESA(Material.TERRACOTTA,
+            ChatColor.GOLD + "Mesa Tycoon",
+            40.0,
+            5*20,
+            6*20,
+            1.0,
+            60,
+            new HashMap<>() {{
+                put(Material.TERRACOTTA, 30);
+                put(Material.RED_TERRACOTTA, 20);
+                put(Material.ORANGE_TERRACOTTA, 20);
+                put(Material.YELLOW_TERRACOTTA, 15);
+                put(Material.WHITE_TERRACOTTA, 15);
+                put(Material.BROWN_TERRACOTTA, 15);
+                put(Material.GRAY_TERRACOTTA, 15);
+                put(Material.LIGHT_BLUE_TERRACOTTA, 15);
+                put(Material.BLACK_TERRACOTTA, 15);
+                put(Material.PINK_TERRACOTTA, 15);
+                put(Material.PURPLE_TERRACOTTA, 15);
+                put(Material.CYAN_TERRACOTTA, 15);
+                put(Material.MAGENTA_TERRACOTTA, 15);
+                put(Material.LIGHT_GRAY_TERRACOTTA, 15);
+                put(Material.GREEN_TERRACOTTA, 15);
+                put(Material.LIME_TERRACOTTA, 15);
+                put(Material.BLUE_TERRACOTTA, 15);
+
+                put(Material.RED_SANDSTONE, 25);
+                put(Material.RED_SAND, 25);
+            }},
+            List.of(Material.BARRIER)
+    ),
+    CONCRETE(Material.WHITE_CONCRETE,
+            ChatColor.WHITE + "Concrete Tycoon",
+            35.0,
+            4*20,
+            5*20,
+            1.0,
+            50,
+
+            new HashMap<>() {{
+        put(Material.WHITE_CONCRETE, 10);
+        put(Material.ORANGE_CONCRETE, 10);
+        put(Material.MAGENTA_CONCRETE, 10);
+        put(Material.LIGHT_BLUE_CONCRETE, 10);
+        put(Material.YELLOW_CONCRETE, 10);
+        put(Material.LIME_CONCRETE, 10);
+        put(Material.PINK_CONCRETE, 10);
+        put(Material.GRAY_CONCRETE, 10);
+        put(Material.LIGHT_GRAY_CONCRETE, 10);
+        put(Material.CYAN_CONCRETE, 10);
+        put(Material.PURPLE_CONCRETE, 10);
+        put(Material.BLUE_CONCRETE, 10);
+        put(Material.BROWN_CONCRETE, 10);
+        put(Material.GREEN_CONCRETE, 10);
+        put(Material.RED_CONCRETE, 10);
+        put(Material.BLACK_CONCRETE, 10);
+    }},
+            List.of(Material.BARRIER)
+    ),
+    WOOL(Material.WHITE_WOOL,
+            ChatColor.YELLOW + "Wool Tycoon", 20.0, 5*20, 7*20, 1.0, 40,
+            new HashMap<>() {{
+                put(Material.WHITE_WOOL, 10);
+                put(Material.ORANGE_WOOL, 10);
+                put(Material.MAGENTA_WOOL, 10);
+                put(Material.LIGHT_BLUE_WOOL, 10);
+                put(Material.YELLOW_WOOL, 10);
+                put(Material.LIME_WOOL, 10);
+                put(Material.PINK_WOOL, 10);
+                put(Material.GRAY_WOOL, 10);
+                put(Material.LIGHT_GRAY_WOOL, 10);
+                put(Material.CYAN_WOOL, 10);
+                put(Material.PURPLE_WOOL, 10);
+                put(Material.BLUE_WOOL, 10);
+                put(Material.BROWN_WOOL, 10);
+                put(Material.GREEN_WOOL, 10);
+                put(Material.RED_WOOL, 10);
+                put(Material.BLACK_WOOL, 10);
+            }},
+            List.of(Material.BARRIER)
+    ),
     STONE(Material.STONE,
             ChatColor.GRAY + "Stone Tycoon",
             20.0,
@@ -72,10 +210,30 @@ public enum TycoonType {
                     Material.CALCITE, 7,
                     Material.SMOOTH_BASALT, 5
                     ),
-            Arrays.asList(
+            List.of(
                     Material.FURNACE
             )),
-
+    DEEPSLATE(Material.DEEPSLATE,
+            ChatColor.GRAY + "Deepslate Tycoon",
+            30.0,
+            4*20,
+            5*20,
+            1.0,
+            50,
+            Map.of(
+                    Material.DEEPSLATE, 30,
+                    Material.COBBLED_DEEPSLATE, 25,
+                    Material.SCULK, 15,
+                    Material.AMETHYST_BLOCK, 15,
+                    Material.BUDDING_AMETHYST, 5,
+                    Material.SMALL_AMETHYST_BUD, 20,
+                    Material.MEDIUM_AMETHYST_BUD, 15,
+                    Material.LARGE_AMETHYST_BUD, 10,
+                    Material.AMETHYST_CLUSTER, 5
+            ),
+            List.of(
+                    Material.BARRIER
+            )),
     COAL(Material.COAL_BLOCK,
             "§8Coal Tycoon",
             30.0,
@@ -90,7 +248,8 @@ public enum TycoonType {
     ),
             Arrays.asList(
                             Material.COAL_ORE,
-                            Material.DEEPSLATE_COAL_ORE)),
+                            Material.DEEPSLATE_COAL_ORE
+            )),
 
     IRON(Material.IRON_BLOCK,
             "§fIron Tycoon",
@@ -106,7 +265,8 @@ public enum TycoonType {
     ),
             Arrays.asList(
                             Material.IRON_ORE,
-                            Material.DEEPSLATE_IRON_ORE)),
+                            Material.DEEPSLATE_IRON_ORE
+            )),
 
     DIAMOND(Material.DIAMOND_BLOCK,
             "§bDiamond Tycoon",
@@ -123,6 +283,25 @@ public enum TycoonType {
             Arrays.asList(
                             Material.DIAMOND_ORE,
                             Material.DEEPSLATE_DIAMOND_ORE)),
+    END(
+            Material.END_STONE,
+            ChatColor.LIGHT_PURPLE + "End Tycoon",
+            120.0,
+            20*4,
+            20*4,
+            1.0,
+            60,
+            new  HashMap<Material, Integer>() {{
+                put(Material.END_STONE, 30);
+                put(Material.END_STONE_BRICKS, 25);
+                put(Material.PURPUR_BLOCK, 15);
+                put(Material.CHORUS_PLANT, 10);
+                put(Material.OBSIDIAN, 10);
+                put(Material.CRYING_OBSIDIAN, 5);
+                put(Material.PURPUR_PILLAR, 20);
+            }},
+            List.of(Material.BARRIER)
+    ),
     ;
 
     private final Material material;

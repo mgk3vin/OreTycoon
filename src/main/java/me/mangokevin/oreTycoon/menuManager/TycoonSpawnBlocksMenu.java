@@ -57,7 +57,7 @@ public class TycoonSpawnBlocksMenu implements MenuInterface{
             Material material = entry.getKey();
             Integer chance = entry.getValue();
 
-            boolean isActive = activeRessourceMaterialsMap.get(material);
+            boolean isActive = activeRessourceMaterialsMap.getOrDefault(material, true);
 
             //effective Chance
             double effectiveChance = 0.0;
@@ -120,7 +120,7 @@ public class TycoonSpawnBlocksMenu implements MenuInterface{
                 Map<Material, Boolean> activeResources = tycoonBlock.getActiveRessourceMaterialsMap();
                 Material clickedMaterial = item.getType();
 
-                boolean isActive = activeResources.get(clickedMaterial);
+                boolean isActive = activeResources.getOrDefault(clickedMaterial, true);
                 activeResources.put(clickedMaterial, !isActive);
 
                 Console.debug("[TycoonSpawnBlocksMenu] Setting inventory item: " + !isActive + " Item -> " + item.getType().name());

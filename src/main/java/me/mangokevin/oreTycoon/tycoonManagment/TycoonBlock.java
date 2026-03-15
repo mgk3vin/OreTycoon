@@ -38,6 +38,7 @@ public class TycoonBlock {
     //<editor-fold desc="🪪Tycoon Variables">
 
     private final Location location;
+    private final World world;
     private final OfflinePlayer owner;
     private final UUID ownerUuid;
     private final Material material;
@@ -52,6 +53,7 @@ public class TycoonBlock {
     private double storedBalance;
 
     private boolean isActive;
+    private boolean shouldBeActive;
     private Material lastSpawnedMaterial;
 
 
@@ -133,10 +135,12 @@ public class TycoonBlock {
         this.isLoaded = false;
 
         this.location = location;
+        this.world = location.getWorld();
         this.block = location.getBlock();
         this.ownerUuid = ownerUuid;
         this.owner = Bukkit.getOfflinePlayer(ownerUuid);
         this.isActive = isActive;
+        this.shouldBeActive = isActive;
 
         this.plugin = plugin;
 
@@ -203,6 +207,15 @@ public class TycoonBlock {
 
     //<editor-fold desc="🔎 Increment and Check">
     public void incrementAndCheck() {
+        if (world.getPlayers().isEmpty()) {
+            if (isActive) {
+                setActive(false);
+                Console.debug(getClass(), "TycoonBlock shut down!");
+            }
+        } else if (!isActive && shouldBeActive) {
+            setActive(true);
+        }
+
         tickCounter++;
 
         if (tickCounter >= spawnRate) {
@@ -455,7 +468,7 @@ public class TycoonBlock {
     }
     public void upgradeMaxInventoryStorage(Player player) {
         int nextLevel = inventoryStorageLevel + 1;
-        double cost = TycoonUpgrades.getInventoryStorageUpgradeCost(this,nextLevel);
+        double cost = TycoonUpgrades.getInventoryStorageUpgradeCost(this, nextLevel);
 
         handleUpgrade(player, cost, () -> {
             upgrades.setInventoryStorageLevel(nextLevel);
@@ -655,7 +668,7 @@ public class TycoonBlock {
         int totalActiveWeight = 0;
         for (Map.Entry<Material, Integer> entry : map.entrySet()) {
             //Only when the Material is active it gets added to the total Weight
-            if (activeRessourceMaterialsMap.get(entry.getKey())) {
+            if (activeRessourceMaterialsMap.getOrDefault(entry.getKey(), true)) {
                 totalActiveWeight += entry.getValue();
             }
         }
@@ -670,9 +683,15 @@ public class TycoonBlock {
 
         for (Map.Entry<Material, Integer> entry : map.entrySet()) {
             //Only check for active Ressources
-            if (activeRessourceMaterialsMap.get(entry.getKey())) {
+            if (activeRessourceMaterialsMap.getOrDefault(entry.getKey(), true)) {
                 currentSum += entry.getValue();
                 if (randomValue < currentSum) {
+                    Material result = entry.getKey();
+
+                    if (!result.isBlock()) {
+                        Console.error(getClass(), result.name() + " is not a block! Remove it from TycoonType resources.");
+                        return null;
+                    }
                     return entry.getKey();
                 }
             }
@@ -709,7 +728,7 @@ public class TycoonBlock {
 
         int totalWeight = 0;
         for (Map.Entry<Material, Integer> entry : OriginalResources.entrySet()) {
-            if (activeRessourceMaterialsMap.get(entry.getKey())) {
+            if (activeRessourceMaterialsMap.getOrDefault(entry.getKey(), true)) {
                 totalWeight += entry.getValue();
             }
         }
@@ -1095,6 +1114,9 @@ public class TycoonBlock {
     public  boolean isActive() {
         return isActive;
     }
+    public boolean isActiveByPlayer(){
+        return shouldBeActive;
+    }
     public String isActiveFormatted(){
         if (isActive) {
             return ChatColor.GREEN + "spawning..." + ChatColor.RESET;
@@ -1200,6 +1222,10 @@ public class TycoonBlock {
     public void setActive(boolean isActive) {
         this.isActive = isActive;
         updateHologramPreset(location, "STATUS");
+    }
+    public void setActiveByPlayer(boolean activeByPlayer) {
+        this.shouldBeActive = activeByPlayer;
+        setActive(activeByPlayer);
     }
     public void setLastSpawnedMaterial(Material lastSpawnedMaterial) {
         this.lastSpawnedMaterial = lastSpawnedMaterial;

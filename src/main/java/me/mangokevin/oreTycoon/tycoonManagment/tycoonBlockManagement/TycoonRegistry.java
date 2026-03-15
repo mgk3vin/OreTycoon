@@ -92,6 +92,9 @@ public class TycoonRegistry {
         TycoonBlock tycoonBlock = getTycoonBlock(location);
         return tycoonBlock != null;
     }
+    public boolean isTycoonSpawnedBlock(Block block) {
+        return block.hasMetadata("tycoon_id");
+    }
     public int getTycoonAmountFromPlayer(UUID playerUUID) {
         return getAllTycoonsFromPlayer(playerUUID).size();
     }
