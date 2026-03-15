@@ -2,7 +2,7 @@ package me.mangokevin.oreTycoon.listener;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.*;
-import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.NewTycoonManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonManager;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import me.mangokevin.oreTycoon.utility.Console;
 import org.bukkit.ChatColor;
@@ -20,13 +20,13 @@ import org.bukkit.persistence.PersistentDataContainer;
 public class BlockPlacedListener implements Listener {
 
     private final OreTycoon plugin;
-    private final NewTycoonManager tycoonManager;
+    private final TycoonManager tycoonManager;
     private final TycoonRegistry tycoonRegistry;
 
 
     public BlockPlacedListener(OreTycoon oreTycoon) {
         this.plugin = oreTycoon;
-        this.tycoonManager = plugin.getNewTycoonManager();
+        this.tycoonManager = plugin.getTycoonManager();
         this.tycoonRegistry = plugin.getTycoonRegistry();
     }
 
@@ -38,25 +38,32 @@ public class BlockPlacedListener implements Listener {
         Player player = event.getPlayer();
 
         if (tycoonRegistry.isTycoonBlock(itemInHand)) {
-            //Tycoon block wird platziert
+            //Tycoon block is placed
             Console.debug(getClass(), "Item in hand is tycoon block");
             if (tycoonRegistry.getTycoonAmountFromPlayer(player.getUniqueId()) >= tycoonManager.getMaxTycoonsPerPlayer()){
-                //Tycoon block fällt unter das maximale Limit
+                //Tycoon block limit is already reached
                 player.sendMessage(ChatColor.RED + "Total amount of tycoons per player: " + tycoonManager.getMaxTycoonsPerPlayer());
                 event.setCancelled(true);
                 return;
             }
-            //Tycoon block fällt noch nicht unter das maximale Limit
+            //Tycoon block limit is not reached:
+
             if (tycoonManager.isObstructed(block.getLocation(), player)){
-                //Tycoon block ist nicht weit genug entfernt von einem anderen Tycoon block
+                //Tycoon block location is obstructed
                 event.setCancelled(true);
                 return;
             }
 
-            //Tycoon Block place Logik
-            assert meta != null;
-            PersistentDataContainer pdc = meta.getPersistentDataContainer();
-            TycoonBlock tycoonBlock = TycoonData.readFromItem(pdc, player, block, plugin);
+            //Tycoon Block place Logic
+            if (meta != null) {
+                PersistentDataContainer pdc = meta.getPersistentDataContainer();
+                TycoonBlock tycoonBlock = TycoonData.readFromItem(pdc, player, block, plugin);
+
+                //Register Tycoon
+                tycoonRegistry.addTycoon(tycoonBlock);
+                tycoonBlock.createHologram();
+
+            }
 
             block.getWorld().playSound(block.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_SET_SPAWN, 1.0f, 1.5f);
         }

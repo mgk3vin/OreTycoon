@@ -1,17 +1,14 @@
 package me.mangokevin.oreTycoon.tycoonManagment.booster;
 
 import me.mangokevin.oreTycoon.menuManager.MenuManager;
-import me.mangokevin.oreTycoon.menuManager.TycoonBoosterMenu;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
 import me.mangokevin.oreTycoon.utility.Console;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.checkerframework.checker.units.qual.N;
 
 import java.util.List;
 

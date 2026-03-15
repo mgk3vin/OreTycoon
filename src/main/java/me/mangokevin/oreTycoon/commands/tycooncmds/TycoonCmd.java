@@ -8,10 +8,9 @@ import me.mangokevin.oreTycoon.tycoonManagment.*;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.AutoMinerSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SellMultiplyBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.SpawnSpeedBooster;
-import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.NewTycoonManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonManager;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonWorlds.TycoonWorldManager;
-import me.mangokevin.oreTycoon.tycoonManagment.tycoonWorlds.WorldSettings;
 import me.mangokevin.oreTycoon.worth.WorthManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -25,14 +24,14 @@ import java.util.List;
 public class TycoonCmd implements CommandExecutor {
 
     private final OreTycoon plugin;
-    private final NewTycoonManager tycoonManager;
+    private final TycoonManager tycoonManager;
     private final TycoonRegistry tycoonRegistry;
     private final MenuManager menuManager;
     private final TycoonWorldManager tycoonWorldManager;
 
     public TycoonCmd(OreTycoon plugin) {
         this.plugin = plugin;
-        this.tycoonManager = plugin.getNewTycoonManager();
+        this.tycoonManager = plugin.getTycoonManager();
         tycoonRegistry = plugin.getTycoonRegistry();
         this.menuManager = plugin.getMenuManager();
         this.tycoonWorldManager = plugin.getTycoonWorldManager();
@@ -57,7 +56,7 @@ public class TycoonCmd implements CommandExecutor {
                 String worldName = p.getWorld().getName();
                 plugin.getMultiverseCoreApi().getWorldManager().getWorld(worldName)
                         .peek(world -> {
-                            List<String> worldsOfThisPlayer = tycoonWorldManager.getPlayerWorlds().get(p.getUniqueId());
+                            List<String> worldsOfThisPlayer = tycoonWorldManager.getPlayerWorlds().getOrDefault(p.getUniqueId(), List.of());
                             if (worldsOfThisPlayer.contains(worldName)) {
                                 //Owner of this world
                                 new WorldSettingsMenu(worldName).open(p);
@@ -143,9 +142,6 @@ public class TycoonCmd implements CommandExecutor {
                     }
                 }
 
-                break;
-            case "toggle_selected":
-                handleToggle(p);
                 break;
             case "toggle_all":
                 if (args.length < 2) {

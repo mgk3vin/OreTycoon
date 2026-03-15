@@ -24,11 +24,9 @@ import java.util.Map;
 import java.util.UUID;
 
 public class WorldsMenu implements MenuInterface {
-    private final OreTycoon plugin;
     private final TycoonWorldManager tycoonWorldManager;
 
     public WorldsMenu(OreTycoon plugin) {
-        this.plugin = plugin;
         this.tycoonWorldManager = plugin.getTycoonWorldManager();
     }
 
@@ -74,7 +72,6 @@ public class WorldsMenu implements MenuInterface {
 
     @Override
     public void handleAction(InventoryClickEvent event) {
-        Inventory inventory = event.getInventory();
         Player player = (Player) event.getWhoClicked();
         ItemStack item = event.getCurrentItem();
         if (item == null) {

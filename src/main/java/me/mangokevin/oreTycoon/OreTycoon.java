@@ -12,7 +12,7 @@ import me.mangokevin.oreTycoon.scoreboard.ScoreBoardManager;
 import me.mangokevin.oreTycoon.sqlite.DatabaseManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
-import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.NewTycoonManager;
+import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonManager;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonBlockFactory;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonWorlds.TycoonWorldManager;
@@ -34,10 +34,9 @@ import java.util.Objects;
 
 public final class OreTycoon extends JavaPlugin {
 
-    private NewTycoonManager newTycoonManager;
+    private TycoonManager tycoonManager;
     private TycoonRegistry tycoonRegistry;
     private TycoonBlockFactory tycoonFactory;
-    private TycoonData tdData;
     private MenuManager menuManager;
     private LevelManager levelManager;
     private WorthManager worthManager;
@@ -63,8 +62,8 @@ public final class OreTycoon extends JavaPlugin {
         saveDefaultConfig();
         this.tycoonRegistry = new TycoonRegistry(this);
 
-        this.tycoonFactory = new TycoonBlockFactory(this);
-        this.newTycoonManager = new NewTycoonManager(this);
+        this.tycoonFactory = new TycoonBlockFactory();
+        this.tycoonManager = new TycoonManager(this);
 
         //========= DatabaseManager setup =========
         databaseManager = new DatabaseManager(this);
@@ -95,7 +94,6 @@ public final class OreTycoon extends JavaPlugin {
         //========= WorthManager setup =========
 
         this.levelManager = new LevelManager();
-        this.tdData = new TycoonData();
         this.menuManager = new MenuManager(this);
         TycoonData.init(this);
 
@@ -137,7 +135,6 @@ public final class OreTycoon extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BlockBreakListener(this), this);
         getServer().getPluginManager().registerEvents(new BlockInteractListener(this), this);
         getServer().getPluginManager().registerEvents(new TycoonManipulationListener(this), this);
-        getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
         getServer().getPluginManager().registerEvents(new InventoryClickListener(),this);
         getServer().getPluginManager().registerEvents(new TycoonAutoMineListener(), this);
         getServer().getPluginManager().registerEvents(new StockMarketUpdatedListener(this), this);
@@ -236,7 +233,7 @@ public final class OreTycoon extends JavaPlugin {
     public TycoonBlockFactory getTycoonFactory() {
         return tycoonFactory;
     }
-    public NewTycoonManager getNewTycoonManager() {
-        return newTycoonManager;
+    public TycoonManager getTycoonManager() {
+        return tycoonManager;
     }
 }

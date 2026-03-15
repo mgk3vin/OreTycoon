@@ -1,6 +1,5 @@
 package me.mangokevin.oreTycoon.worth;
 
-import com.earth2me.essentials.Worth;
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
 import net.ess3.api.IEssentials;

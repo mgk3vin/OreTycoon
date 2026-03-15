@@ -9,14 +9,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public class NewTycoonManager {
-    private final OreTycoon plugin;
+public class TycoonManager {
     private final TycoonRegistry tycoonRegistry;
     private final TycoonBlockFactory tycoonFactory;
 
     private final int maxTycoonsPerPlayer;
-    public NewTycoonManager(OreTycoon plugin) {
-        this.plugin = plugin;
+    public TycoonManager(OreTycoon plugin) {
         this.tycoonRegistry = plugin.getTycoonRegistry();
         this.maxTycoonsPerPlayer = plugin.getConfig().getInt("maxBlocksPerPlayer");
         this.tycoonFactory = plugin.getTycoonFactory();

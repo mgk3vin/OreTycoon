@@ -2,9 +2,7 @@ package me.mangokevin.oreTycoon.listener;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.events.tycoonEvents.TycoonSpawnedBlockMinedEvent;
-import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
-import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.NewTycoonManager;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -31,19 +29,19 @@ public class BlockBreakListener implements Listener {
 
         TycoonBlock tycoonBlock = tycoonRegistry.getTycoonBlock(blockLocation);
 
-        Player p = event.getPlayer();
+        Player player = event.getPlayer();
 
 
         if (tycoonBlock != null) {
             //Broken block is tycoon Block
 
             event.setCancelled(true);
-            p.sendMessage(ChatColor.RED + "SHIFT + Right Click to pickup Tycoon Block!");
-            p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1, 1.5F);
+            player.sendMessage(ChatColor.RED + "SHIFT + Right Click to pickup Tycoon Block!");
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1, 1.5F);
 
             //Case when breaking someone else tycoon
-            if (!p.getUniqueId().equals(tycoonBlock.getOwnerUuid())) {
-                p.sendMessage("§cThis is not your tycoon. Owner: " + tycoonBlock.getOwnerName());
+            if (!player.getUniqueId().equals(tycoonBlock.getOwnerUuid())) {
+                player.sendMessage("§cThis is not your tycoon. Owner: " + tycoonBlock.getOwnerName());
                 event.setCancelled(true); // Cancel break event
                 return;
             }
@@ -52,7 +50,7 @@ public class BlockBreakListener implements Listener {
         TycoonBlock tycoonBlockInteracted = tycoonRegistry.getTycoonOfSpawnedBlock(block);
         if (tycoonBlockInteracted != null) {
             //call the tycoon spawned block is mined event to handle
-            Bukkit.getPluginManager().callEvent(new TycoonSpawnedBlockMinedEvent(tycoonBlockInteracted, event, block, p));
+            Bukkit.getPluginManager().callEvent(new TycoonSpawnedBlockMinedEvent(tycoonBlockInteracted, event, block, player));
         }
 
         Location checkLocation = block.getLocation().clone();
@@ -62,8 +60,8 @@ public class BlockBreakListener implements Listener {
             if (tycoon != null) {
                 if (tycoon.getTycoonType().getBuffMaterials().contains(block.getType())) {
                     tycoon.deactivateSellMultiplierBuff();
-                    p.sendMessage(ChatColor.RED + "Sell Multiplier Buff Deactivated!");
-                    p.playSound(p.getLocation(), Sound.BLOCK_LARGE_AMETHYST_BUD_BREAK, 1.0f, 0.8f);
+                    player.sendMessage(ChatColor.RED + "Sell Multiplier Buff Deactivated!");
+                    player.playSound(player.getLocation(), Sound.BLOCK_LARGE_AMETHYST_BUD_BREAK, 1.0f, 0.8f);
                 }
             }
         }

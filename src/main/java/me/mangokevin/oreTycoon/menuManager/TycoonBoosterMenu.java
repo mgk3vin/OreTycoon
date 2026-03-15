@@ -2,10 +2,8 @@ package me.mangokevin.oreTycoon.menuManager;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonBoosterManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonHolder;
-import me.mangokevin.oreTycoon.tycoonManagment.booster.AutoMinerSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.BoosterRegistry;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.TycoonBoosterAbstract;
 import me.mangokevin.oreTycoon.utility.Console;
@@ -19,8 +17,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-
-import java.util.Arrays;
 
 public class TycoonBoosterMenu implements MenuInterface{
     private final TycoonBlock tycoonBlock;

@@ -1,6 +1,5 @@
 package me.mangokevin.oreTycoon.menuManager;
 
-import com.google.gson.JsonParseException;
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.*;
 import me.mangokevin.oreTycoon.worth.PriceUtility;

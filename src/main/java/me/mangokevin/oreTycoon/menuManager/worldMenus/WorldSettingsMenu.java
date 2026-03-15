@@ -31,10 +31,9 @@ public class WorldSettingsMenu implements MenuInterface {
     private final OreTycoon plugin = OreTycoon.getInstance();
     private final TycoonWorldManager tycoonWorldManager = plugin.getTycoonWorldManager();
     private final WorldManager worldManager;
-    private final ParticleGenerator particleGenerator = plugin.getParticleGenerator();
     private final ParticleManager particleManager = plugin.getParticleManager();
 
-    private WorldSettings worldSettings;
+    private final WorldSettings worldSettings;
 
     private final String worldName;
 

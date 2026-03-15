@@ -195,9 +195,10 @@ public class TycoonLevelPath implements MenuInterface{
                             break;
                         case 5:
                             tycoonBlock.getTycoonUpgrades().setAutoMinerUnlocked(true);
-                            tycoonBlock.updateAttributes();
                             break;
                     }
+                    tycoonBlock.updateAttributes();
+                    tycoonBlock.updateHologram();
                     player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.2f);
                     refresh(player, inventory);
                     break;

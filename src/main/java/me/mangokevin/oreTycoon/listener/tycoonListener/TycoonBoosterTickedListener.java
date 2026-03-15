@@ -20,19 +20,10 @@ public class TycoonBoosterTickedListener implements Listener {
         }else{
             Console.log(getClass() ,"No booster found");
         }
-//        switch (tycoonBooster) {
-//            case :
-//                refreshInventory(tycoonBlock);
-//                break;
-//            default:
-//                Console.log(getClass() ,"No booster found");
-//                break;
-//        }
     }
     private void refreshInventory(TycoonBlock tycoonBlock) {
         for (Player player : Bukkit.getOnlinePlayers()) {
             MenuManager.refreshOpenInventory(player, tycoonBlock);
-            Console.log(getClass(), "refreshing Booster inventory");
         }
     }
 }
