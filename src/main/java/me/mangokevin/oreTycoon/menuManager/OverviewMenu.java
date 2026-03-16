@@ -205,18 +205,19 @@ public class OverviewMenu implements MenuInterface{
         List<Integer> usableSlots = getUsableSlots();
         int startIndex = this.page * usableSlots.size();
 
-        // Bestimmen, ob wir ein- oder ausschalten (basierend auf dem aktuellen Button)
-
 
         // Nur die Tycoons dieser Seite bearbeiten
+        double totalWorth = 0;
         for (int i = 0; i < usableSlots.size(); i++) {
             int tycoonIndex = startIndex + i;
             if (tycoonIndex >= allTycoons.size()) break;
 
             TycoonBlock tycoonBlock = allTycoons.get(tycoonIndex);
-            tycoonBlock.sellInventory(tycoonBlock.getInventory(), p);
+            totalWorth += tycoonBlock.sellInventory(tycoonBlock.getInventory(), p);
         }
-        // Das Menü komplett neu laden, um alle Items (Tycoons + Button) zu aktualisieren
+        p.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "--------------------------");
+        p.sendMessage(ChatColor.GREEN + "Total Amount: " + PriceUtility.formatMoney(totalWorth));
+        p.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "--------------------------");
         this.open(p);
     }
     private double getAllWorth(Player p){

@@ -262,16 +262,17 @@ public class TycoonBlock {
     }
 
     //<editor-fold desc="📦 Inventory Methods">
-    public void sellInventory(Inventory inventory, Player player) {
+    public double sellInventory(Inventory inventory, Player player) {
         Economy econ = OreTycoon.getEconomy();
         double worth = PriceUtility.calculateWorth(inventory) * sellMultiplier;
         System.out.println("TycoonBlock Calculate Worth: " + PriceUtility.formatMoney(worth));
-        if (worth <= 0) return;
+        if (worth <= 0) return 0.0;
         econ.depositPlayer(player, worth);
         player.sendMessage(ChatColor.GREEN + "Sold items worth: " + PriceUtility.formatMoney(worth) + " with " + sellMultiplier + "x Sell Multiplier");
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.3f, 1);
         cleanInventory(inventory);
-        updateHologramPreset(location, "WORTH");
+        updateHologram();
+        return worth;
     }
 
     public void dropItem(ItemStack droppedItem, Player player) {
@@ -438,11 +439,12 @@ public class TycoonBlock {
             return;
         }
         int nextLevel = spawnRateLevel + 1;
-        double cost = TycoonUpgrades.getSpawnRateUpgradeCost(this,nextLevel);
+        double cost = TycoonUpgrades.getSpawnRateUpgradeCost(this, nextLevel);
         handleUpgrade(player, cost, () -> {
             upgrades.setSpawnRateLevel(nextLevel);
-            player.sendMessage(ChatColor.GREEN + "You upgraded the Spawn rate to " + getSpawnRateFormatted() + "s for: " + PriceUtility.formatMoney(cost));
         });
+        player.sendMessage(ChatColor.GREEN + "You upgraded the Spawn rate to " + getSpawnRateFormatted() + "s for: " + PriceUtility.formatMoney(cost));
+
     }
 
     public void upgradeMiningRate(Player player) {
@@ -458,22 +460,25 @@ public class TycoonBlock {
         }
         handleUpgrade(player, cost, () -> {
             upgrades.setMiningRateLevel(nextLevel);
-            player.sendMessage(ChatColor.GREEN + "You upgraded the Mining rate to " + getMiningRateFormatted() + "s for: " + PriceUtility.formatMoney(cost));
         });
+        player.sendMessage(ChatColor.GREEN + "You upgraded the Mining rate to " + getMiningRateFormatted() + "s for: " + PriceUtility.formatMoney(cost));
+
     }
-    public void upgradeMaxInventoryStorageForce(Player player) {
-        upgrades.setInventoryStorageLevel(inventoryStorageLevel + 1);
-        updateAttributes();
-        player.sendMessage(ChatColor.GREEN + "Upgraded Storage to " + getStorageStatisticFormatted());
-    }
+
     public void upgradeMaxInventoryStorage(Player player) {
         int nextLevel = inventoryStorageLevel + 1;
         double cost = TycoonUpgrades.getInventoryStorageUpgradeCost(this, nextLevel);
 
         handleUpgrade(player, cost, () -> {
             upgrades.setInventoryStorageLevel(nextLevel);
-            player.sendMessage(ChatColor.GREEN + "You upgraded the Inventory Storage to " + getStorageStatisticFormatted() + ChatColor.GREEN + " for: " + PriceUtility.formatMoney(cost));
         });
+        player.sendMessage(ChatColor.GREEN + "You upgraded the Inventory Storage to " + getStorageStatisticFormatted() + ChatColor.GREEN + " for: " + PriceUtility.formatMoney(cost));
+
+    }
+    public void upgradeMaxInventoryStorageForce(Player player) {
+        upgrades.setInventoryStorageLevel(inventoryStorageLevel + 1);
+        updateAttributes();
+        player.sendMessage(ChatColor.GREEN + "Upgraded Storage to " + getStorageStatisticFormatted());
     }
 
     public void upgradeSellMultiplier(Player player) {
@@ -485,8 +490,9 @@ public class TycoonBlock {
         double cost = TycoonUpgrades.getSellMultiplierUpgradeCost(this,nextLevel);
         handleUpgrade(player, cost, () -> {
             upgrades.setSellMultiplierLevel(nextLevel);
-            player.sendMessage(ChatColor.GREEN + "You upgraded the Sell Multiplier to " + getSellMultiplier() + "x for: " + PriceUtility.formatMoney(cost));
         });
+        player.sendMessage(ChatColor.GREEN + "You upgraded the Sell Multiplier to " + getSellMultiplier() + "x for: " + PriceUtility.formatMoney(cost));
+
     }
     public void upgradeDoubleDropsChance(Player player) {
         if (doubleDropsChance >= maxDoubleDropsChance) {
@@ -497,20 +503,22 @@ public class TycoonBlock {
         double cost = TycoonUpgrades.getDoubleDropChanceUpgradeCost(this,nextLevel);
         handleUpgrade(player, cost, () -> {
             upgrades.setDoubleDropsLevel(nextLevel);
-            player.sendMessage(ChatColor.GREEN + "You upgrade Double Drops to " + getDoubleDropsChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
         });
+        player.sendMessage(ChatColor.GREEN + "You upgrade Double Drops Chance to " + getDoubleDropsChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
+
     }
     public void upgradeFortuneChance(Player player) {
         if (fortuneChance >= maxFortuneChance) {
             giveMaxLevelMSG(player);
             return;
         }
-        int nextLevel = fortuneChanceLevel + 1;
-        double cost = TycoonUpgrades.getFortuneUpgradeCost(this,nextLevel);
+        int nextLevel = upgrades.getFortuneLevel() + 1;
+        double cost = TycoonUpgrades.getFortuneUpgradeCost(this, nextLevel);
         handleUpgrade(player, cost, () -> {
             upgrades.setFortuneLevel(nextLevel);
-            player.sendMessage(ChatColor.GREEN + "You upgraded Fortune to " + getFortuneChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
         });
+        player.sendMessage(ChatColor.GREEN + "You upgraded Fortune Chance to " + getFortuneChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
+
     }
     private void handleUpgrade(Player player, double cost, Runnable onSuccess) {
         Economy economy = OreTycoon.getEconomy();
@@ -1059,7 +1067,7 @@ public class TycoonBlock {
     public boolean canFitItem(Inventory inv, ItemStack item) {
 
         if (getStoredItemsCount() + item.getAmount() > inventoryStorage) {
-            Console.debug("[Tycoon] Storage Full: " + getStoredItemsCount() + "/" + inventoryStorage);
+            //Storage is Full
             return false;
         }
         // 1. Gibt es überhaupt einen komplett leeren Slot?

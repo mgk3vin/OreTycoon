@@ -24,7 +24,8 @@ Scoreboard system for worlds‼ ✅
 Sell mode / drop mode in tycoon inventory ✅
 Format upgrade prices red if not affordable ✅
 FIX TYCOON INDEX ✅
-TODO: Inv storage formatting bug, is not synced with tycoon upgrade
+
+
 XP drops worth
 Stock price history showing previous price changes
 Show booster icon in stats menu if active
