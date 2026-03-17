@@ -295,7 +295,7 @@ public enum TycoonType {
                 put(Material.END_STONE, 30);
                 put(Material.END_STONE_BRICKS, 25);
                 put(Material.PURPUR_BLOCK, 15);
-                put(Material.CHORUS_PLANT, 10);
+                //put(Material.CHORUS_PLANT, 10); Causing issues with breaking
                 put(Material.OBSIDIAN, 10);
                 put(Material.CRYING_OBSIDIAN, 5);
                 put(Material.PURPUR_PILLAR, 20);

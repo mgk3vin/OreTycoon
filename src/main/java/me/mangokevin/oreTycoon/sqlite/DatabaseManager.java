@@ -18,6 +18,7 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -156,7 +157,7 @@ public class DatabaseManager {
         });
     }
 
-    public void saveTycoon(TycoonBlock tycoonBlock) {
+    public void saveTycoon(TycoonBlock tycoonBlock, Set<Block> activeBlocksSnapshot) {
         try{
             PreparedStatement statement = connection.prepareStatement(
                     //Insert or Replace overwrites entry for uid or creates new one
@@ -203,15 +204,17 @@ public class DatabaseManager {
             saveTycoonInventory(tycoonBlock);
             saveTycoonActiveMaterials(tycoonBlock);
             saveTycoonActiveBoosters(tycoonBlock);
-            saveTycoonSpawnedBlockLocations(tycoonBlock);
+            saveTycoonSpawnedBlockLocations(tycoonBlock, activeBlocksSnapshot);
             Console.debug(getClass(), "Tycoon " + tycoonBlock.getBlockUID() + "saved!");
         } catch (SQLException e) {
             Console.error(getClass(), "Database save failed! Reason: " + e.getMessage());
         }
     }
     public void saveTycoonAsync(TycoonBlock tycoonBlock) {
+        Set<Block> activeBlocksSnapshot = new HashSet<>(tycoonBlock.getActiveBlocks());
+
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            saveTycoon(tycoonBlock);
+            saveTycoon(tycoonBlock, activeBlocksSnapshot);
         });
     }
     private void saveTycoonUpgrades(TycoonBlock tycoonBlock) {
@@ -346,7 +349,7 @@ public class DatabaseManager {
             Console.error(getClass(), "Database active boosters save failed! Reason: " + e.getMessage());
         }
     }
-    private void saveTycoonSpawnedBlockLocations(TycoonBlock tycoonBlock) {
+    private void saveTycoonSpawnedBlockLocations(TycoonBlock tycoonBlock, Set<Block> activeBlocksSnapshot) {
         try{
             PreparedStatement delStatement = connection.prepareStatement(
                     "DELETE FROM tycoon_spawned_block_locations WHERE tycoon_uid = ?"
@@ -361,7 +364,7 @@ public class DatabaseManager {
                             "VALUES (?, ?, ?, ?, ?)"
             );
             statement.setString(1, tycoonBlock.getBlockUID());
-            for (Block block : tycoonBlock.getActiveBlocks()){
+            for (Block block : activeBlocksSnapshot) {
                 Location location = block.getLocation();
                 statement.setString(2, block.getWorld().getName());
                 statement.setDouble(3, location.getX());
@@ -586,6 +589,7 @@ public class DatabaseManager {
 
                 Location location = new Location(world, x, y, z);
                 Block block = world.getBlockAt(location);
+                block.setMetadata("tycoon_id", new FixedMetadataValue(plugin, tycoonBlock.getBlockUID()));
                 tycoonBlock.getActiveBlocks().add(block);
             }
         } catch (SQLException e) {

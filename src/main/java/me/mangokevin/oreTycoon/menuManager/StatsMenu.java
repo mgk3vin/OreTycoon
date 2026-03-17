@@ -47,10 +47,12 @@ public class StatsMenu implements MenuInterface {
         ItemMeta tycoonMeta = tycoonItem.getItemMeta();
         if (tycoonMeta != null) {
             List<String> lore = tycoonMeta.getLore();
-            lore.add(ChatColor.YELLOW + "[Left click to toggle status]");
-            lore.add(ChatColor.YELLOW + "[Right click to teleport]");
-            tycoonMeta.setLore(lore);
-            tycoonItem.setItemMeta(tycoonMeta);
+            if (lore != null) {
+                lore.add(ChatColor.YELLOW + "[Left click to toggle status]");
+                lore.add(ChatColor.YELLOW + "[Right click to teleport]");
+                tycoonMeta.setLore(lore);
+                tycoonItem.setItemMeta(tycoonMeta);
+            }
         }
         inventory.setItem(13, tycoonItem);
 
@@ -208,7 +210,14 @@ public class StatsMenu implements MenuInterface {
                 new OverviewMenu(plugin, page).open(player);
                 break;
             case "level_path":
-                new TycoonLevelPath(tycoonBlock, 0, plugin).open(player);
+                int tycoonLevel = tycoonBlock.getLevel();
+                int levelPage;
+                if (tycoonBlock.getIndex() >= 0){
+                    levelPage = tycoonLevel / 21; //21 Hardcode for 21 levels per page in levelsmenu
+                }else{
+                    levelPage = 0;
+                }
+                new TycoonLevelPath(tycoonBlock, levelPage, plugin).open(player);
                 break;
             case "upgrades":
                 new TycoonUpgradeMenu(tycoonBlock, plugin).open(player);

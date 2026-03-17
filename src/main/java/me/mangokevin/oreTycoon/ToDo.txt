@@ -25,11 +25,12 @@ Sell mode / drop mode in tycoon inventory ✅
 Format upgrade prices red if not affordable ✅
 FIX TYCOON INDEX ✅
 
+//TODO: save by loc or Metadata
 
 XP drops worth
 Stock price history showing previous price changes
 Show booster icon in stats menu if active
-fix overview menu autominer icon
+fix overview menu autoMiner icon
 more tycoon types
 
 
@@ -48,6 +49,8 @@ Hologram formatting
 Higher Levels unlock more spawnblocks (clickable in menu which blocks to spawn must atleast be 5 diff or sum)‼️
 Spawn blocks that drop 1 of its kind per mine and have 5 mines
 Clean up 🕛
+
+"§8§m-----------------------"
 
 //<editor-fold desc="Beschreibung">
 

@@ -85,9 +85,15 @@ public class MenuManager {
         new OverviewMenu(plugin, page).open(player);
     }
     public ItemStack createTycoonItem(TycoonBlock block){
+        String autoMinerStatus = (block.getTycoonUpgrades().isAutoMinerUnlocked() ?
+                (block.isAutoMinerEnabled() ? ChatColor.GREEN + "Enabled" : ChatColor.RED + "Disabled")
+                : ChatColor.RED + "" + ChatColor.BOLD + "LOCKED");
+
+
         Boolean glint = block.isActive();
         List<String> lore = Arrays.asList("§8§m-----------------------",
                 ChatColor.GRAY + "Status: " + ChatColor.RESET + block.isActiveFormatted(),
+                ChatColor.GRAY + "AutoMiner: " + ChatColor.RESET + autoMinerStatus,
                 ChatColor.GRAY + "Level: " + block.getLevel(),
                 block.getProgressBar(20) + " " + block.getProgressPercentage() + "%",
                 ChatColor.GRAY + "Spawn rate: " + block.getSpawnRateFormatted() + (block.getTycoonBoosterManager().isSpawnSpeedBoosterActive() ? ChatColor.GREEN + " [Boost -" + (block.getSpawnSpeedBooster().getBoostValue()/20) + "s]" : ""),

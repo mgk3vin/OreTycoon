@@ -573,17 +573,17 @@ public class TycoonBlock {
 
 
     //---------- AutoMiner ----------
-    public boolean tryAutoMining(TycoonBlock tycoonBlock, Location blockLocation) {
+    public void tryAutoMining(TycoonBlock tycoonBlock, Location blockLocation) {
         if (!isAutoMinerUnlocked){
-            return false;
+            return;
         }
         ItemStack item = new ItemStack(blockLocation.getBlock().getType());
         ItemMeta itemMeta = item.getItemMeta();
-        if (itemMeta == null) return false;
+        if (itemMeta == null) return;
         PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
         pdc.set(TycoonData.BLOCK_IS_AUTOMINED_KEY, PersistentDataType.STRING, "block_is_automined");
         if (!tycoonBlock.canFitItem(tycoonBlock.getInventory(), item)) {
-            return false;
+            return;
         }
 
         new BukkitRunnable() {
@@ -641,6 +641,9 @@ public class TycoonBlock {
 
                     tycoonBlock.handleReward(blockLocation.getBlock());
 
+                    activeBlocks.remove(blockLocation.getBlock());
+                    block.removeMetadata("tycoon_id", plugin);
+
                     blockLocation.getBlock().setType(Material.AIR);
                     pdc.remove(TycoonData.BLOCK_IS_AUTOMINED_KEY);
                     this.cancel();
@@ -648,7 +651,6 @@ public class TycoonBlock {
 
             }
         }.runTaskTimer(plugin, 0, 1L);
-        return true;
     }
     //---------- AutoMiner ----------
 
@@ -886,7 +888,12 @@ public class TycoonBlock {
         hologramLines.set(4, "xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + (int) levelManager.getProgressPercentage(levelXp, level + 1) + "%");
         hologramLines.set(5, ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
         currentWorth = PriceUtility.calculateWorth(inventory);
-        hologramLines.set(6, ChatColor.RESET + "Inventory: "+ ChatColor.GREEN + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
+        if (isInventoryFull()){
+            hologramLines.set(6, ChatColor.RED + "" + ChatColor.BOLD + "Inventory FULL: "+ ChatColor.GREEN + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
+        } else {
+            hologramLines.set(6, ChatColor.RESET + "Inventory: "+ ChatColor.GREEN + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
+
+        }
 
         //Calculate index/Order
         if (tycoonBlockList.contains(this)) {
@@ -1214,6 +1221,9 @@ public class TycoonBlock {
     public SpawnSpeedBooster getSpawnSpeedBooster() {return spawnSpeedBooster;}
     public boolean isLoaded() {
         return isLoaded;
+    }
+    public boolean isInventoryFull(){
+        return getStoredItemsCount() + 1 > inventoryStorage;
     }
     // ---------     Getter      ---------
 
