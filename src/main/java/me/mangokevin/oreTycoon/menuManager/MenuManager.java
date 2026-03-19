@@ -215,7 +215,52 @@ public class MenuManager {
         }
 
     }
+    public static void addFiller(Inventory inventory, Material material, boolean overwriteMenuItems){
+        ItemStack filler = createFiller(material);
+        ItemMeta meta = filler.getItemMeta();
+        if(meta != null){
+            PersistentDataContainer pdc = meta.getPersistentDataContainer();
+            pdc.set(TycoonData.MENU_ITEM_KEY, PersistentDataType.STRING, "menu_item");
+            filler.setItemMeta(meta);
+        }
+        int size = inventory.getSize();
+
+        for (int i = 0; i < 9; i++) {
+            if(!overwriteMenuItems){
+                PersistentDataContainer pdc = getItemPdc(inventory.getItem(i));
+                if(pdc == null) {
+                    inventory.setItem(i, filler);
+                };
+            }
+        }
+        for (int i = size - 9; i < size; i++) {
+            if(!overwriteMenuItems){
+                PersistentDataContainer pdc = getItemPdc(inventory.getItem(i));
+                if(pdc == null) {
+                    inventory.setItem(i, filler);
+                };
+            }
+        }
+        for (int i = 0; i < size; i+=9) {
+            if(!overwriteMenuItems){
+                PersistentDataContainer pdc = getItemPdc(inventory.getItem(i));
+                if(pdc == null) {
+                    inventory.setItem(i, filler);
+                };
+                PersistentDataContainer pdc2 = getItemPdc(inventory.getItem(i+8));
+                if(pdc2 == null) {
+                    inventory.setItem(i+8, filler);
+                };
+            }
+        }
+
+    }
+    private static PersistentDataContainer getItemPdc(ItemStack item){
+        if (item == null) return null;
+        if (item.getItemMeta() == null) return null;
+        return item.getItemMeta().getPersistentDataContainer();
+    }
     public static ItemStack createFiller(Material material){
-        return createItemstack(material, 1, " ", null, false, true);
+        return createItemstack(material, 1, " ", null, false, true, true, "filler_item");
     }
 }

@@ -4,8 +4,7 @@ import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonHolder;
-import me.mangokevin.oreTycoon.tycoonManagment.booster.BoosterRegistry;
-import me.mangokevin.oreTycoon.tycoonManagment.booster.TycoonBoosterAbstract;
+import me.mangokevin.oreTycoon.tycoonManagment.booster.*;
 import me.mangokevin.oreTycoon.utility.Console;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -17,10 +16,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TycoonBoosterMenu implements MenuInterface{
     private final TycoonBlock tycoonBlock;
     private final OreTycoon plugin;
+
+    private BukkitRunnable animationTask;
 
     public TycoonBoosterMenu(TycoonBlock tycoonBlock, OreTycoon plugin) {
         this.tycoonBlock = tycoonBlock;
@@ -36,7 +41,25 @@ public class TycoonBoosterMenu implements MenuInterface{
 
     @Override
     public void refresh(Player player, Inventory inventory) {
-        MenuManager.addFiller(inventory, Material.MAGENTA_STAINED_GLASS_PANE);
+        MenuManager.addFiller(inventory, Material.GRAY_STAINED_GLASS_PANE, false);
+        TycoonBoosterAbstract tycoonBoosterAbstract = tycoonBlock.isAnyBoosterActive();
+        switch (tycoonBoosterAbstract) {
+            case AutoMinerSpeedBooster autoMinerSpeedBooster -> {
+                //MenuManager.addFiller(inventory, Material.BLUE_STAINED_GLASS_PANE);
+                startAnimation(Material.BLUE_STAINED_GLASS_PANE, Material.LIGHT_BLUE_STAINED_GLASS_PANE, inventory);
+            }
+            case SellMultiplyBooster sellMultiplyBooster -> {
+                startAnimation(Material.GREEN_STAINED_GLASS_PANE, Material.LIME_STAINED_GLASS_PANE, inventory);
+            }
+            case SpawnSpeedBooster spawnSpeedBooster -> {
+                startAnimation(Material.MAGENTA_STAINED_GLASS_PANE, Material.PINK_STAINED_GLASS_PANE, inventory);
+            }
+            case null, default -> {
+                stopAnimation();
+                MenuManager.addFiller(inventory, Material.GRAY_STAINED_GLASS_PANE);
+            }
+        }
+
 
         if (tycoonBlock.getTycoonBoosterManager().isAutoMinerBoosterActive()) {
             ItemStack autoMinerBooster = tycoonBlock.getAutoMinerSpeedBooster().getItem();
@@ -91,7 +114,7 @@ public class TycoonBoosterMenu implements MenuInterface{
         switch (action) {
             //Clicked a tycoon Booster item
             case "tycoon_booster_item":
-                if (tycoonBlock.getTycoonBoosterManager().isAutoMinerBoosterActive() || tycoonBlock.getTycoonBoosterManager().isSellMultiplierBoosterActive()) {
+                if (tycoonBlock.isAnyBoosterActive() != null) {
                     player.sendMessage(ChatColor.DARK_PURPLE + "Booster is already active.");
                     return;
                 }
@@ -113,15 +136,6 @@ public class TycoonBoosterMenu implements MenuInterface{
                 } else {
                     Console.debug(getClass(), "Booster not created");
                 }
-//                ItemMeta boosterSlotMeta = menuBoosterItem.getItemMeta();
-//                if (boosterSlotMeta != null) {
-//                    boosterSlotMeta.setLore(Arrays.asList(
-//                            ChatColor.GRAY + "Booster: " + ChatColor.GREEN + "ACTIVE",
-//                            ChatColor.GRAY + "Boost: ???",
-//                            ChatColor.GRAY + "Duration: ???"
-//                    ));
-//                }
-                //menuBoosterItem.setItemMeta(boosterSlotMeta);
                 ItemStack menuBoosterItem = item.clone();
                 item.setAmount(item.getAmount() - 1);
 
@@ -129,24 +143,6 @@ public class TycoonBoosterMenu implements MenuInterface{
                 inventory.setItem(22, menuBoosterItem);
                 player.updateInventory();
                 break;
-//            case "empty_booster_slot":
-//                ItemMeta holdingItemMeta = holdingItem.getItemMeta();
-//                if (holdingItemMeta != null) {
-//                    PersistentDataContainer boosterPdc = holdingItemMeta.getPersistentDataContainer();
-//                    String boosterAction = boosterPdc.get(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING);
-//                    switch (boosterAction) {
-//                        case "tycoon_booster_item":
-//                            if (holdingItem.getAmount() > 1) {
-//                                Console.debug("[TycoonBoosterMenu] Setting booster amount from " + holdingItem.getAmount() + " to " + (holdingItem.getAmount() - 1));
-//                                holdingItem.setAmount(holdingItem.getAmount() - 1);
-//                            } else {
-//                                event.getWhoClicked().setItemOnCursor(null); // Cursor leeren
-//                                Console.debug("[TycoonBoosterMenu] Setting booster amount to 0");
-//                            }
-//                            break;
-//                        case null, default:
-//                            break;
-//                    }
             case "return":
                 new StatsMenu(tycoonBlock, plugin).open(player);
                 break;
@@ -154,6 +150,10 @@ public class TycoonBoosterMenu implements MenuInterface{
                 break;
 
         }
+    }
+    @Override
+    public void onClose(Player player) {
+        stopAnimation();
     }
     public TycoonBlock getTycoonBlock() {
         return tycoonBlock;
@@ -165,5 +165,48 @@ public class TycoonBoosterMenu implements MenuInterface{
         String action = pdc.get(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING);
         if (action == null) return false;
         return action.equals("tycoon_booster_item");
+    }
+
+    private void startAnimation(Material fillerItem, Material glowItem, Inventory inventory) {
+        if (animationTask != null && !animationTask.isCancelled()) return;
+        int size = inventory.getSize();
+        List<Integer> slots = new ArrayList<>();
+        for (int i = 0; i < 9; i++) {
+            slots.add(i);
+        }
+        for (int i = 8; i < size; i += 9) {
+            slots.add(i);
+        }
+        for (int i = size - 1; i > size - 9; i--) {
+            slots.add(i);
+        }
+        for (int i = size - 9; i > 0; i -= 9) {
+            slots.add(i);
+        }
+        slots.remove(Integer.valueOf(40));
+
+        animationTask = new BukkitRunnable() {
+            int step = 0;
+
+            @Override
+            public void run() {
+                // Reset previous slot
+                int prevSlot = slots.get((step - 1 + slots.size()) % slots.size());
+                inventory.setItem(prevSlot, new ItemStack(fillerItem));
+
+                // Let current slot glow
+                inventory.setItem(slots.get(step), new ItemStack(glowItem));
+
+                step = (step + 1) % slots.size(); // returns 0 when finished
+            }
+        };
+        animationTask.runTaskTimer(plugin, 0L, 2L);
+
+    }
+    private void stopAnimation() {
+        if (animationTask != null && !animationTask.isCancelled()) {
+            animationTask.cancel();
+            animationTask = null;
+        }
     }
 }

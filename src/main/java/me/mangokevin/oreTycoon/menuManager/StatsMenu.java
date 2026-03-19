@@ -42,6 +42,7 @@ public class StatsMenu implements MenuInterface {
     public void refresh(Player player, Inventory inventory) {
         MenuManager.addFiller(inventory, Material.GRAY_STAINED_GLASS_PANE);
 
+
         //Tycoon Icon slot 13
         ItemStack tycoonItem = menuManager.createTycoonItem(tycoonBlock);
         ItemMeta tycoonMeta = tycoonItem.getItemMeta();
@@ -72,6 +73,7 @@ public class StatsMenu implements MenuInterface {
                 true,
                 true,
                 "inventory"));
+
         //Return to Overviewmenu icon
         inventory.setItem(26, MenuManager.createItemstack(Material.OAK_DOOR,
                 1,
@@ -151,15 +153,38 @@ public class StatsMenu implements MenuInterface {
             inventory.setItem(22, autominerLocked);
         }
         //Booster Icon slot 23
-        ItemStack boosters = MenuManager.createItemstack(Material.AMETHYST_SHARD,
-                1,
-                ChatColor.DARK_PURPLE + "Tycoon Booster",
-                null,
-                true,
-                true,
-                true,
-                "tycoon_booster");
-        inventory.setItem(23, boosters);
+        if (tycoonBlock.getTycoonBoosterManager().isAutoMinerBoosterActive()) {
+            ItemStack autoMinerBooster = tycoonBlock.getAutoMinerSpeedBooster().getItem();
+            inventory.setItem(23, autoMinerBooster);
+        } else if (tycoonBlock.getTycoonBoosterManager().isSellMultiplierBoosterActive()) {
+            ItemStack sellMultiplierBooster = tycoonBlock.getSellMultiplierBooster().getItem();
+            inventory.setItem(23, sellMultiplierBooster);
+        }else if (tycoonBlock.getTycoonBoosterManager().isSpawnSpeedBoosterActive()){
+            ItemStack spawnSpeedBooster = tycoonBlock.getSpawnSpeedBooster().getItem();
+            inventory.setItem(23, spawnSpeedBooster);
+        }
+        else {
+            ItemStack autoMinerBooster = MenuManager.createItemstack(
+                    Material.NETHERITE_INGOT,
+                    1,
+                    ChatColor.GRAY + "No active Booster...",
+                    null,
+                    false,
+                    true,
+                    true,
+                    "tycoon_booster");
+            inventory.setItem(23, autoMinerBooster);
+        }
+//        ItemStack boosters = MenuManager.createItemstack(Material.AMETHYST_SHARD,
+//                1,
+//                ChatColor.DARK_PURPLE + "Tycoon Booster",
+//                null,
+//                true,
+//                true,
+//                true,
+//                "tycoon_booster");
+//        inventory.setItem(23, boosters);
+
         //Upgrades Icon slot 24
         ItemStack upgrades = MenuManager.createItemstack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE,
                 1,
@@ -222,7 +247,7 @@ public class StatsMenu implements MenuInterface {
             case "upgrades":
                 new TycoonUpgradeMenu(tycoonBlock, plugin).open(player);
                 break;
-            case "tycoon_booster":
+            case "tycoon_booster", "tycoon_booster_item":
                 new TycoonBoosterMenu(tycoonBlock, plugin).open(player);
                 break;
             case "inventory":

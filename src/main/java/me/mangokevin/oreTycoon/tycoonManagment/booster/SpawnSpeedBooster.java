@@ -4,6 +4,7 @@ import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.utility.Console;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 
 import java.util.List;
 
@@ -16,19 +17,19 @@ public class SpawnSpeedBooster extends TycoonBoosterAbstract {
 
     @Override
     public Material getMaterial() {
-        return Material.PRISMARINE_SHARD;
+        return Material.AMETHYST_SHARD;
     }
 
     @Override
     public String getDisplayName() {
-        return ChatColor.AQUA +  "" + ChatColor.ITALIC +  "Spawn Speed Booster";
+        return ChatColor.LIGHT_PURPLE +  "" + ChatColor.ITALIC +  "Spawn Speed Booster";
     }
 
     @Override
     public List<String> getLore() {
         return List.of("§8§m-----------------------",
-                ChatColor.GREEN + "-" + getBoostValue()/20 + "s spawn speed",
-                ChatColor.GREEN + "Duration: " + getRemainingTimeFormatted(getDuration()),
+                ChatColor.LIGHT_PURPLE + "-" + getBoostValue()/20 + "s spawn speed",
+                ChatColor.LIGHT_PURPLE + "Duration: " + getRemainingTimeFormatted(getDuration()),
                 "§8§m-----------------------");
     }
 
@@ -55,6 +56,6 @@ public class SpawnSpeedBooster extends TycoonBoosterAbstract {
     @Override
     public void onApply(TycoonBlock tycoonBlock) {
         tycoonBlock.getTycoonBoosterManager().activate(this);
-        Console.log(getClass(), " Activated Tycoon Booster");
+        tycoonBlock.getLocation().getWorld().playSound(tycoonBlock.getLocation() , Sound.ENTITY_ILLUSIONER_PREPARE_MIRROR, 1, 1);
     }
 }

@@ -10,4 +10,6 @@ public interface MenuInterface {
     void refresh(Player player, Inventory inventory);
 
     void handleAction(InventoryClickEvent event);
+
+    default void onClose(Player player) {}
 }

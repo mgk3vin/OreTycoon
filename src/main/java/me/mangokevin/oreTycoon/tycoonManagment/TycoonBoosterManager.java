@@ -11,6 +11,7 @@ import me.mangokevin.oreTycoon.utility.Console;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -153,8 +154,10 @@ public class TycoonBoosterManager {
                     this.cancel();
                     if (onFinish != null) {
                         onFinish.run();
+                        for (Player player : Bukkit.getOnlinePlayers()) {
+                            MenuManager.refreshOpenInventory(player, tycoonBlock);
+                        }
                     }
-                    return;
                 }
                 //Console.log("[TycoonBoosterManager] SellMultiplierBoostTask ticking");
             }

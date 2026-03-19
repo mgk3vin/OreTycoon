@@ -3,6 +3,8 @@ package me.mangokevin.oreTycoon.tycoonManagment.booster;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,15 +24,15 @@ public class AutoMinerSpeedBooster extends TycoonBoosterAbstract {
 
     @Override
     public String getDisplayName() {
-        return ChatColor.GOLD + "" + ChatColor.ITALIC + "Auto Miner Booster";
+        return ChatColor.BLUE + "" + ChatColor.ITALIC + "Auto Miner Booster";
     }
 
     @Override
     public List<String> getLore() {
         return Arrays.asList(
                 "§8§m-----------------------",
-                ChatColor.GREEN + "- " + getBoostValue()/20 + "s AutoMiner speed",
-                ChatColor.GREEN + "Duration: " + getRemainingTimeFormatted(getDuration()),
+                ChatColor.BLUE + "- " + getBoostValue()/20 + "s AutoMiner speed",
+                ChatColor.BLUE + "Duration: " + getRemainingTimeFormatted(getDuration()),
                 "§8§m-----------------------"
         );
     }
@@ -58,5 +60,6 @@ public class AutoMinerSpeedBooster extends TycoonBoosterAbstract {
     @Override
     public void onApply(TycoonBlock tycoonBlock) {
         tycoonBlock.getTycoonBoosterManager().activate(this);
+        tycoonBlock.getLocation().getWorld().playSound(tycoonBlock.getLocation() ,Sound.ENTITY_ILLUSIONER_PREPARE_MIRROR, 1, 1);
     }
 }
