@@ -42,15 +42,18 @@ public class StatsMenu implements MenuInterface {
     public void refresh(Player player, Inventory inventory) {
         MenuManager.addFiller(inventory, Material.GRAY_STAINED_GLASS_PANE);
 
+
         //Tycoon Icon slot 13
         ItemStack tycoonItem = menuManager.createTycoonItem(tycoonBlock);
         ItemMeta tycoonMeta = tycoonItem.getItemMeta();
         if (tycoonMeta != null) {
             List<String> lore = tycoonMeta.getLore();
-            lore.add(ChatColor.YELLOW + "[Left click to toggle status]");
-            lore.add(ChatColor.YELLOW + "[Right click to teleport]");
-            tycoonMeta.setLore(lore);
-            tycoonItem.setItemMeta(tycoonMeta);
+            if (lore != null) {
+                lore.add(ChatColor.YELLOW + "[Left click to toggle status]");
+                lore.add(ChatColor.YELLOW + "[Right click to teleport]");
+                tycoonMeta.setLore(lore);
+                tycoonItem.setItemMeta(tycoonMeta);
+            }
         }
         inventory.setItem(13, tycoonItem);
 
@@ -70,6 +73,7 @@ public class StatsMenu implements MenuInterface {
                 true,
                 true,
                 "inventory"));
+
         //Return to Overviewmenu icon
         inventory.setItem(26, MenuManager.createItemstack(Material.OAK_DOOR,
                 1,
@@ -149,15 +153,38 @@ public class StatsMenu implements MenuInterface {
             inventory.setItem(22, autominerLocked);
         }
         //Booster Icon slot 23
-        ItemStack boosters = MenuManager.createItemstack(Material.AMETHYST_SHARD,
-                1,
-                ChatColor.DARK_PURPLE + "Tycoon Booster",
-                null,
-                true,
-                true,
-                true,
-                "tycoon_booster");
-        inventory.setItem(23, boosters);
+        if (tycoonBlock.getTycoonBoosterManager().isAutoMinerBoosterActive()) {
+            ItemStack autoMinerBooster = tycoonBlock.getAutoMinerSpeedBooster().getItem();
+            inventory.setItem(23, autoMinerBooster);
+        } else if (tycoonBlock.getTycoonBoosterManager().isSellMultiplierBoosterActive()) {
+            ItemStack sellMultiplierBooster = tycoonBlock.getSellMultiplierBooster().getItem();
+            inventory.setItem(23, sellMultiplierBooster);
+        }else if (tycoonBlock.getTycoonBoosterManager().isSpawnSpeedBoosterActive()){
+            ItemStack spawnSpeedBooster = tycoonBlock.getSpawnSpeedBooster().getItem();
+            inventory.setItem(23, spawnSpeedBooster);
+        }
+        else {
+            ItemStack autoMinerBooster = MenuManager.createItemstack(
+                    Material.NETHERITE_INGOT,
+                    1,
+                    ChatColor.GRAY + "No active Booster...",
+                    null,
+                    false,
+                    true,
+                    true,
+                    "tycoon_booster");
+            inventory.setItem(23, autoMinerBooster);
+        }
+//        ItemStack boosters = MenuManager.createItemstack(Material.AMETHYST_SHARD,
+//                1,
+//                ChatColor.DARK_PURPLE + "Tycoon Booster",
+//                null,
+//                true,
+//                true,
+//                true,
+//                "tycoon_booster");
+//        inventory.setItem(23, boosters);
+
         //Upgrades Icon slot 24
         ItemStack upgrades = MenuManager.createItemstack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE,
                 1,
@@ -185,7 +212,7 @@ public class StatsMenu implements MenuInterface {
         switch (action) {
             case "tycoon_menu_item":
                 if (inventoryClick == ClickType.LEFT) {
-                    tycoonBlock.setActive(!tycoonBlock.isActive());
+                    tycoonBlock.setActiveByPlayer(!tycoonBlock.isActive());
                     refresh(player, inventory);
                     if (tycoonBlock.isActive()) {
                         player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 2f, 1.5f);
@@ -208,12 +235,19 @@ public class StatsMenu implements MenuInterface {
                 new OverviewMenu(plugin, page).open(player);
                 break;
             case "level_path":
-                new TycoonLevelPath(tycoonBlock, 0, plugin).open(player);
+                int tycoonLevel = tycoonBlock.getLevel();
+                int levelPage;
+                if (tycoonBlock.getIndex() >= 0){
+                    levelPage = tycoonLevel / 21; //21 Hardcode for 21 levels per page in levelsmenu
+                }else{
+                    levelPage = 0;
+                }
+                new TycoonLevelPath(tycoonBlock, levelPage, plugin).open(player);
                 break;
             case "upgrades":
                 new TycoonUpgradeMenu(tycoonBlock, plugin).open(player);
                 break;
-            case "tycoon_booster":
+            case "tycoon_booster", "tycoon_booster_item":
                 new TycoonBoosterMenu(tycoonBlock, plugin).open(player);
                 break;
             case "inventory":

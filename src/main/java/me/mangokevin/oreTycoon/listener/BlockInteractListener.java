@@ -45,10 +45,10 @@ public class BlockInteractListener implements Listener {
                 event.setCancelled(true);
                 if (!tycoonBlock.isActive()) {
                     player.sendMessage(ChatColor.GREEN + "Spawning...");
-                    tycoonBlock.setActive(true);
+                    tycoonBlock.setActiveByPlayer(true);
                 }else{
                     player.sendMessage(ChatColor.RED + "Stopped Spawning...");
-                    tycoonBlock.setActive(false);
+                    tycoonBlock.setActiveByPlayer(false);
                 }
             }
             case RIGHT_CLICK_BLOCK -> {

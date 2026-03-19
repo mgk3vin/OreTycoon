@@ -19,8 +19,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class OverviewMenu implements MenuInterface{
 
@@ -37,6 +39,7 @@ public class OverviewMenu implements MenuInterface{
         this.tycoonRegistry = plugin.getTycoonRegistry();
         this.menuManager = plugin.getMenuManager();
         this.page = page;
+
     }
 
     @Override
@@ -53,7 +56,7 @@ public class OverviewMenu implements MenuInterface{
 
         MenuManager.addFiller(inventory, Material.GRAY_STAINED_GLASS_PANE);
         boolean toggleAll = true;
-        boolean toggleAllAutoMiner = true;
+        boolean toggleAllAutoMiner;
         int startIndex = page * 14;
         for (int i = 0; i < 14; i++) {
             int idx = startIndex + i;
@@ -64,25 +67,24 @@ public class OverviewMenu implements MenuInterface{
                 }
             }
         }
-        for (int i = 0; i < 14; i++) {
+        int autoMinerEnabled = 0;
+        int autoMinerDisabled = 0;
+        for (int i = 0; i < getUsableSlots().size(); i++) {
             int idx = startIndex + i;
-            if (idx < tycoonBlockList.size()) {
-                if (!tycoonBlockList.get(idx).isAutoMinerEnabled()) {
-                    if (!tycoonBlockList.get(idx).getTycoonUpgrades().isAutoMinerUnlocked()) {
-                        continue;
-                    }
-                    toggleAllAutoMiner = false;
-                    break;
-                }
+            if (idx >= tycoonBlockList.size()) break;
+            if (tycoonBlockList.get(idx).isAutoMinerEnabled()) {
+                autoMinerEnabled++;
             } else {
-                toggleAllAutoMiner = false;
+                autoMinerDisabled++;
             }
         }
+        toggleAllAutoMiner = autoMinerEnabled >= autoMinerDisabled;
+
         List<Integer> usableSlots = getUsableSlots();
         int itemsPerPage = usableSlots.size(); // 14
         startIndex = page * itemsPerPage;
 
-        // Tycoons & Leere Slots füllen
+        // Fill tycoons and emtpy Slots
         for (int i = 0; i < itemsPerPage; i++) {
             int tycoonIndex = startIndex + i;
             int slot = usableSlots.get(i);
@@ -91,67 +93,133 @@ public class OverviewMenu implements MenuInterface{
                 TycoonBlock block = tycoonBlockList.get(tycoonIndex);
                 inventory.setItem(slot, menuManager.createTycoonItem(block));
             } else if (tycoonIndex < maxTycoonsPerPlayer) {
-                inventory.setItem(slot, MenuManager.createItemstack(Material.BLACK_STAINED_GLASS_PANE, 1, "§8Free Slot", null, false, true));
+                inventory.setItem(slot, MenuManager.createItemstack(
+                        Material.BLACK_STAINED_GLASS_PANE,
+                        1,
+                        "§8Free Slot",
+                        null,
+                        false,
+                        true));
             }
         }
 
         // Navigation (PDC-Keys nutzen)
         if (page > 0) {
-            inventory.setItem(45, createNavArrow("§e<- Page " + page, "page_prev"));
+            ItemStack prevPage = MenuManager.createItemstack(
+                    Material.ARROW,
+                    1,
+                    ChatColor.GOLD + "§e<- Page " + page,
+                    null,
+                    false,
+                    false,
+                    true,
+                    "page_prev");
+            inventory.setItem(45, prevPage);
         }
         if (startIndex + itemsPerPage < maxTycoonsPerPlayer) {
-            inventory.setItem(53, createNavArrow("§ePage " + (page + 2) + " ->", "page_next"));
+            ItemStack nextPage = MenuManager.createItemstack(
+                    Material.ARROW,
+                    1,
+                    ChatColor.GOLD + "§ePage " + (page + 2) + " ->" ,
+                    null,
+                    false,
+                    false,
+                    true,
+                    "page_next");
+            inventory.setItem(53, nextPage);
         }
         ItemStack item;
         if (toggleAll) {
-            item = MenuManager.createItemstack(Material.RED_CONCRETE, 1, ChatColor.RED + "Turn off #" + (startIndex + 1) + " - #" + (startIndex + itemsPerPage), null, false, true);
-            ItemMeta itemMeta = item.getItemMeta();
-            if (itemMeta == null) return;
-            PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
-            pdc.set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "toggle_all_off");
-            item.setItemMeta(itemMeta);
+            List<String> allTycoonSpawnsOffLore = Arrays.asList(
+                    "§8§m-----------------------",
+                    ChatColor.YELLOW + "Page: " + (page + 1),
+                    ChatColor.YELLOW + "[ Click to disable all Tycoons ]",
+                    "§8§m-----------------------");
+            item = MenuManager.createItemstack(
+                    Material.RED_STAINED_GLASS_PANE,
+                    1,
+                    ChatColor.RED + "Turn off #" + (startIndex + 1) + " - #" + (startIndex + itemsPerPage),
+                    allTycoonSpawnsOffLore,
+                    false,
+                    true,
+                    true,
+                    "toggle_all_off"
+            );
         } else {
-            item = MenuManager.createItemstack(Material.LIME_CONCRETE, 1, ChatColor.GREEN + "Turn on #" + (startIndex + 1) + " - #" + (startIndex + itemsPerPage), null, false, true);
-            ItemMeta itemMeta = item.getItemMeta();
-            if (itemMeta == null) return;
-            PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
-            pdc.set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "toggle_all_on");
-            item.setItemMeta(itemMeta);
+            List<String> allTycoonSpawnsOnLore = Arrays.asList(
+                    "§8§m-----------------------",
+                    ChatColor.YELLOW + "Page: " + (page + 1),
+                    ChatColor.YELLOW + "[ Click to enable all Tycoons ]",
+                    "§8§m-----------------------");
+            item = MenuManager.createItemstack(
+                    Material.LIME_STAINED_GLASS_PANE,
+                    1,
+                    ChatColor.GREEN + "Turn on #" + (startIndex + 1) + " - #" + (startIndex + itemsPerPage),
+                    allTycoonSpawnsOnLore,
+                    false,
+                    true,
+                    true,
+                    "toggle_all_on"
+            );
         }
-        ItemStack toggleAutoMiner;
+        ItemStack toggleAutoMinerItem;
         if (toggleAllAutoMiner) {
-            toggleAutoMiner = MenuManager.createItemstack(Material.IRON_PICKAXE, 1, ChatColor.GREEN + "Auto Miner Enabled", null, true, true);
-            ItemMeta itemMeta = toggleAutoMiner.getItemMeta();
-            if (itemMeta == null) return;
-            PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
-            pdc.set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "autominer_enabled");
-            toggleAutoMiner.setItemMeta(itemMeta);
-        }else{
-            toggleAutoMiner = MenuManager.createItemstack(Material.IRON_PICKAXE, 1, ChatColor.RED + "Auto Miner Disabled", null, false, true);
-            ItemMeta itemMeta = toggleAutoMiner.getItemMeta();
-            if (itemMeta == null) return;
-            PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
-            pdc.set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "autominer_disabled");
-            toggleAutoMiner.setItemMeta(itemMeta);
+            List<String> allAutoMinerEnabledLore = Arrays.asList(
+                    "§8§m-------------------------------------",
+                    ChatColor.YELLOW + "[ Click to disable All Auto Miners ]",
+                    "§8§m-------------------------------------");
+            toggleAutoMinerItem = MenuManager.createItemstack(
+                    Material.IRON_PICKAXE,
+                    1,
+                    ChatColor.GREEN + "Auto Miners #" + (startIndex + 1) + " - #" + (startIndex + itemsPerPage) + " enabled",
+                    allAutoMinerEnabledLore,
+                    true,
+                    true,
+                    true,
+                    "autoMiner_enabled"
+            );
+        } else {
+            List<String> allAutoMinerDisabledLore = Arrays.asList(
+                    "§8§m-----------------------",
+                    ChatColor.YELLOW + "[ Click to enable All Auto Miners ]",
+                    "§8§m-----------------------");
+            toggleAutoMinerItem = MenuManager.createItemstack(
+                    Material.IRON_PICKAXE,
+                    1,
+                    ChatColor.RED + "Auto Miners #" + (startIndex + 1) + " - #" + (startIndex + itemsPerPage) + " disabled",
+                    allAutoMinerDisabledLore,
+                    false,
+                    true,
+                    true,
+                    "autoMiner_disabled");
         }
-        ItemStack collectAllBalance = MenuManager.createItemstack(Material.GREEN_STAINED_GLASS_PANE, 1, ChatColor.GREEN + "Sell all blocks for: " + PriceUtility.formatMoney(getAllWorth(player)), null, false, true);
-        ItemMeta itemMeta = collectAllBalance.getItemMeta();
-        if (itemMeta == null) return;
-        PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
-        pdc.set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "sell_all");
-        collectAllBalance.setItemMeta(itemMeta);
-        inventory.setItem(47, toggleAutoMiner);
+        ItemStack collectAllBalance = MenuManager.createItemstack(
+                Material.LIME_BUNDLE,
+                1,
+                ChatColor.GREEN + "Sell all Tycoon inventories for: " + PriceUtility.formatMoney(getAllWorth(player)),
+                null,
+                false,
+                true,
+                true,
+                "sell_all"
+        );
+        inventory.setItem(47, toggleAutoMinerItem);
         inventory.setItem(49, item);
         inventory.setItem(51, collectAllBalance);
     }
 
     @Override
     public void handleAction(InventoryClickEvent event) {
+        Inventory inventory = event.getInventory();
         Player player = (Player) event.getWhoClicked();
         ItemStack item = event.getCurrentItem();
+        if (item == null) return;
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
+
+        List<TycoonBlock> allPlayerTycoons = tycoonRegistry.getAllTycoonsFromPlayer(player.getUniqueId());
+        int startIndex = page * getUsableSlots().size();
 
         if (pdc.has(TycoonData.TYCOON_MENU_ITEM_UID_KEY, PersistentDataType.STRING)) {
             String blockUIDStr = pdc.get(TycoonData.TYCOON_MENU_ITEM_UID_KEY, PersistentDataType.STRING);
@@ -164,14 +232,17 @@ public class OverviewMenu implements MenuInterface{
         if (pdc.has(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING)) {
             String action = pdc.get(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING);
             switch (action) {
-                case "toggle_all_off", "toggle_all_on":
-                    toggleTycoons(item.getType(), player);
+                case "toggle_all_on":
+                    doForTycoonsOnPage(allPlayerTycoons, tycoonBlock -> tycoonBlock.setActiveByPlayer(true));
                     break;
-                case "autominer_enabled":
-                    toggleTycoonsAutoMiner(false, player);
+                case "toggle_all_off":
+                    doForTycoonsOnPage(allPlayerTycoons, tycoonBlock -> tycoonBlock.setActiveByPlayer(false));
                     break;
-                case "autominer_disabled":
-                    toggleTycoonsAutoMiner(true, player);
+                case "autoMiner_enabled":
+                    doForTycoonsOnPage(allPlayerTycoons, tycoonBlock -> tycoonBlock.setAutoMinerEnabled(false));
+                    break;
+                case "autoMiner_disabled":
+                    doForTycoonsOnPage(allPlayerTycoons, tycoonBlock -> tycoonBlock.setAutoMinerEnabled(true));
                     break;
                 case "sell_all":
                     collectAllBalance(player);
@@ -188,36 +259,42 @@ public class OverviewMenu implements MenuInterface{
                     Console.log("[OverviewMenu] Invalid action");
                     break;
             }
+            refresh(player, inventory);
         }
 
     }
 
-    // Hilfsmethode für Navigation-Items
-    private ItemStack createNavArrow(String name, String action) {
-        ItemStack arrow = MenuManager.createItemstack(Material.ARROW, 1, name, null, false, true);
-        ItemMeta meta = arrow.getItemMeta();
-        meta.getPersistentDataContainer().set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, action);
-        arrow.setItemMeta(meta);
-        return arrow;
-    }
     private void collectAllBalance(Player p) {
         List<TycoonBlock> allTycoons = tycoonRegistry.getAllTycoonsFromPlayer(p.getUniqueId());
         List<Integer> usableSlots = getUsableSlots();
         int startIndex = this.page * usableSlots.size();
 
-        // Bestimmen, ob wir ein- oder ausschalten (basierend auf dem aktuellen Button)
-
 
         // Nur die Tycoons dieser Seite bearbeiten
+        double totalWorth = 0;
         for (int i = 0; i < usableSlots.size(); i++) {
             int tycoonIndex = startIndex + i;
             if (tycoonIndex >= allTycoons.size()) break;
 
             TycoonBlock tycoonBlock = allTycoons.get(tycoonIndex);
-            tycoonBlock.sellInventory(tycoonBlock.getInventory(), p);
+            totalWorth += tycoonBlock.sellInventory(tycoonBlock.getInventory(), p);
         }
-        // Das Menü komplett neu laden, um alle Items (Tycoons + Button) zu aktualisieren
+        p.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "--------------------------");
+        p.sendMessage(ChatColor.GREEN + "Total Amount: " + PriceUtility.formatMoney(totalWorth));
+        p.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "--------------------------");
         this.open(p);
+    }
+    private void doForTycoonsOnPage(List<TycoonBlock> playerTycoons, Consumer<TycoonBlock> consumer) {
+        List<Integer> usableSlots = getUsableSlots();
+        int startIndex = this.page * usableSlots.size();
+
+        for (int i = 0; i < getUsableSlots().size(); i++) {
+            int tycoonIndex = startIndex + i;
+            if (tycoonIndex >= playerTycoons.size()) break;
+
+            TycoonBlock tycoonBlock = playerTycoons.get(tycoonIndex);
+            consumer.accept(tycoonBlock);
+        }
     }
     private double getAllWorth(Player p){
         List<TycoonBlock> allTycoons = tycoonRegistry.getAllTycoonsFromPlayer(p.getUniqueId());
@@ -275,7 +352,7 @@ public class OverviewMenu implements MenuInterface{
             if (tycoonIndex >= allTycoons.size()) break;
 
             TycoonBlock block = allTycoons.get(tycoonIndex);
-            block.setActive(shouldActivate);
+            block.setActiveByPlayer(shouldActivate);
         }
 
         // Sound abspielen

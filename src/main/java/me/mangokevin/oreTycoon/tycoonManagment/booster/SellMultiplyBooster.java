@@ -4,6 +4,7 @@ import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.utility.Console;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,7 +20,7 @@ public class SellMultiplyBooster extends TycoonBoosterAbstract {
 
     @Override
     public Material getMaterial() {
-        return Material.AMETHYST_SHARD;
+        return Material.EMERALD;
     }
 
     @Override
@@ -58,7 +59,7 @@ public class SellMultiplyBooster extends TycoonBoosterAbstract {
     @Override
     public void onApply(TycoonBlock tycoonBlock) {
         tycoonBlock.getTycoonBoosterManager().activate(this);
-        Console.log("[SellMultiplierBooster] Activated Tycoon Booster");
+        tycoonBlock.getLocation().getWorld().playSound(tycoonBlock.getLocation() , Sound.ENTITY_ILLUSIONER_PREPARE_MIRROR, 1, 1);
     }
 
 

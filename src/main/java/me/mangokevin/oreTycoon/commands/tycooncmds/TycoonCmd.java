@@ -158,12 +158,12 @@ public class TycoonCmd implements CommandExecutor {
                 switch (state) {
                     case "on":
                         for (TycoonBlock tycoonBlock : tycoonBlockList) {
-                            tycoonBlock.setActive(true);
+                            tycoonBlock.setActiveByPlayer(true);
                         }
                         return true;
                     case "off":
                         for (TycoonBlock tycoonBlock : tycoonBlockList) {
-                            tycoonBlock.setActive(false);
+                            tycoonBlock.setActiveByPlayer(false);
                         }
                         return true;
                     default:
@@ -183,11 +183,32 @@ public class TycoonCmd implements CommandExecutor {
                     case "wood" -> {
                         tycoonManager.giveDefaultTycoonBlock(p, TycoonType.WOOD);
                     }
+                    case "jungle" -> {
+                        tycoonManager.giveDefaultTycoonBlock(p, TycoonType.JUNGLE);
+                    }
                     case "stone" -> {
                         tycoonManager.giveDefaultTycoonBlock(p, TycoonType.STONE);
                     }
+                    case "deepslate" -> {
+                        tycoonManager.giveDefaultTycoonBlock(p, TycoonType.DEEPSLATE);
+                    }
                     case "coal" -> {
                         tycoonManager.giveDefaultTycoonBlock(p, TycoonType.COAL);
+                    }
+                    case "ocean" -> {
+                        tycoonManager.giveDefaultTycoonBlock(p, TycoonType.OCEAN);
+                    }
+                    case "ice" -> {
+                        tycoonManager.giveDefaultTycoonBlock(p, TycoonType.ICE);
+                    }
+                    case "mesa" -> {
+                        tycoonManager.giveDefaultTycoonBlock(p, TycoonType.MESA);
+                    }
+                    case "wool" -> {
+                        tycoonManager.giveDefaultTycoonBlock(p, TycoonType.WOOL);
+                    }
+                    case "concrete" -> {
+                        tycoonManager.giveDefaultTycoonBlock(p, TycoonType.CONCRETE);
                     }
                     case "nether" -> {
                         tycoonManager.giveDefaultTycoonBlock(p, TycoonType.NETHER);
@@ -197,6 +218,9 @@ public class TycoonCmd implements CommandExecutor {
                     }
                     case "diamond" -> {
                         tycoonManager.giveDefaultTycoonBlock(p, TycoonType.DIAMOND);
+                    }
+                    case "end" -> {
+                        tycoonManager.giveDefaultTycoonBlock(p, TycoonType.END);
                     }
                     default -> {
                         p.sendMessage(ChatColor.RED + "Not a valid tycoon type!");
@@ -244,7 +268,7 @@ public class TycoonCmd implements CommandExecutor {
         if (tycoonBlock == null) return;
 
 
-        tycoonBlock.setActive(!tycoonBlock.isActive());
+        tycoonBlock.setActiveByPlayer(!tycoonBlock.isActive());
 
         // Soundeffekt für Feedback
         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1f, 1f);

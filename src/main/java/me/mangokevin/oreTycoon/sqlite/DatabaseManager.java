@@ -18,6 +18,7 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -156,7 +157,7 @@ public class DatabaseManager {
         });
     }
 
-    public void saveTycoon(TycoonBlock tycoonBlock) {
+    public void saveTycoon(TycoonBlock tycoonBlock, Set<Block> activeBlocksSnapshot) {
         try{
             PreparedStatement statement = connection.prepareStatement(
                     //Insert or Replace overwrites entry for uid or creates new one
@@ -189,7 +190,7 @@ public class DatabaseManager {
             statement.setDouble(6, tycoonLocation.getX());
             statement.setDouble(7, tycoonLocation.getY());
             statement.setDouble(8, tycoonLocation.getZ());
-            statement.setBoolean(9, tycoonBlock.isActive());
+            statement.setBoolean(9, tycoonBlock.isActiveByPlayer());
             statement.setBoolean(10, tycoonBlock.isAutoMinerEnabled());
             statement.setString(11, tycoonBlock.getTycoonType().name());
             statement.setLong(12, tycoonBlock.getCreationTime());
@@ -203,15 +204,17 @@ public class DatabaseManager {
             saveTycoonInventory(tycoonBlock);
             saveTycoonActiveMaterials(tycoonBlock);
             saveTycoonActiveBoosters(tycoonBlock);
-            saveTycoonSpawnedBlockLocations(tycoonBlock);
+            saveTycoonSpawnedBlockLocations(tycoonBlock, activeBlocksSnapshot);
             Console.debug(getClass(), "Tycoon " + tycoonBlock.getBlockUID() + "saved!");
         } catch (SQLException e) {
             Console.error(getClass(), "Database save failed! Reason: " + e.getMessage());
         }
     }
     public void saveTycoonAsync(TycoonBlock tycoonBlock) {
+        Set<Block> activeBlocksSnapshot = new HashSet<>(tycoonBlock.getActiveBlocks());
+
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            saveTycoon(tycoonBlock);
+            saveTycoon(tycoonBlock, activeBlocksSnapshot);
         });
     }
     private void saveTycoonUpgrades(TycoonBlock tycoonBlock) {
@@ -346,7 +349,7 @@ public class DatabaseManager {
             Console.error(getClass(), "Database active boosters save failed! Reason: " + e.getMessage());
         }
     }
-    private void saveTycoonSpawnedBlockLocations(TycoonBlock tycoonBlock) {
+    private void saveTycoonSpawnedBlockLocations(TycoonBlock tycoonBlock, Set<Block> activeBlocksSnapshot) {
         try{
             PreparedStatement delStatement = connection.prepareStatement(
                     "DELETE FROM tycoon_spawned_block_locations WHERE tycoon_uid = ?"
@@ -361,7 +364,7 @@ public class DatabaseManager {
                             "VALUES (?, ?, ?, ?, ?)"
             );
             statement.setString(1, tycoonBlock.getBlockUID());
-            for (Block block : tycoonBlock.getActiveBlocks()){
+            for (Block block : activeBlocksSnapshot) {
                 Location location = block.getLocation();
                 statement.setString(2, block.getWorld().getName());
                 statement.setDouble(3, location.getX());
@@ -514,6 +517,11 @@ public class DatabaseManager {
     private void loadTycoonActiveMaterials(TycoonBlock tycoonBlock) {
         Map<Material, Boolean> activeMaterials = new HashMap<>();
 
+        // Erst alle Materialien des TycoonType als aktiv initialisieren — Fallback für neue Materialien
+        for (Map.Entry<Material, Integer> entry : tycoonBlock.getTycoonType().getResources().entrySet()) {
+            activeMaterials.put(entry.getKey(), true);
+        }
+
         try {
             PreparedStatement statement = connection.prepareStatement(
                     "SELECT * FROM tycoon_active_materials WHERE tycoon_uid = ?"
@@ -522,17 +530,15 @@ public class DatabaseManager {
             ResultSet result = statement.executeQuery();
             while (result.next()) {
                 String materialName = result.getString("material");
-                Material material = Material.valueOf(materialName);
                 boolean isActive = result.getBoolean("is_active");
 
-                activeMaterials.put(material, isActive);
-            }
-            //Fallback if map returnes empty
-            if (activeMaterials.isEmpty()) {
-                //Default ressource map
-                for (Map.Entry<Material, Integer> entry : tycoonBlock.getTycoonType().getResources().entrySet()) {
-                    activeMaterials.put(entry.getKey(), true);
+                try {
+                    Material material = Material.valueOf(materialName);
+                    activeMaterials.put(material, isActive); // überschreibt den true-Default
+                } catch (IllegalArgumentException e) {
+                    Console.error(getClass(), "Unknown material in DB: " + materialName + " — skipping");
                 }
+
             }
 
             tycoonBlock.setActiveResourceMaterialsMap(activeMaterials);
@@ -583,6 +589,7 @@ public class DatabaseManager {
 
                 Location location = new Location(world, x, y, z);
                 Block block = world.getBlockAt(location);
+                block.setMetadata("tycoon_id", new FixedMetadataValue(plugin, tycoonBlock.getBlockUID()));
                 tycoonBlock.getActiveBlocks().add(block);
             }
         } catch (SQLException e) {
