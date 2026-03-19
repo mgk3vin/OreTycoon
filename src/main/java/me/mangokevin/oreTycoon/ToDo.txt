@@ -24,13 +24,15 @@ Scoreboard system for worlds‼ ✅
 Sell mode / drop mode in tycoon inventory ✅
 Format upgrade prices red if not affordable ✅
 FIX TYCOON INDEX ✅
-
 XP drops worth
 Stock price history showing previous price changes
 Show booster icon in stats menu if active
 fix overview menu autoMiner icon
 more tycoon types
 
+"Catalyst" Blocks, placed in spawn range, with unique buff for tycoon
+Skill tree for each tycoon
+Overall Tycoon Player Level
 
  Mining Combo System 🔥
  Guild / Clan System 👥
@@ -42,7 +44,7 @@ more tycoon types
 Das "Artifact-Hunting" (Archäologie)
 "Instabile Kristalle" (Seltener temporärer Boost)
 Random-Event startet alle 2-3 Stunden (z.B. "Die große Wirtschaftskrise" oder "Goldrausch").
-Multiple Tycoon Inventory pages.
+Multiple Tycoon Inventory pages.❗
 Hologram formatting
 Higher Levels unlock more spawnblocks (clickable in menu which blocks to spawn must atleast be 5 diff or sum)‼️
 Spawn blocks that drop 1 of its kind per mine and have 5 mines

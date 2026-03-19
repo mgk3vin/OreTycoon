@@ -25,4 +25,7 @@ public class CooldownManager {
         if (!cooldowns.containsKey(uuid)) {return  0L;}
         return Math.max(0L, (cooldowns.get(uuid) + durationMs) - System.currentTimeMillis());
     }
+    public long getRemainingCooldownSeconds(UUID uuid) {
+        return Math.max(0L, getRemainingCooldownMs(uuid) / 1000L);
+    }
 }

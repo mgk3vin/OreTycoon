@@ -196,7 +196,7 @@ public class OverviewMenu implements MenuInterface{
         ItemStack collectAllBalance = MenuManager.createItemstack(
                 Material.LIME_BUNDLE,
                 1,
-                ChatColor.GREEN + "Sell all Tycoon inventories for: " + PriceUtility.formatMoney(getAllWorth(player)),
+                ChatColor.GREEN + "Sell Tycoon inventories  #" + (startIndex + 1) + " - #" + (startIndex + itemsPerPage) + " for: " + PriceUtility.formatMoney(getAllWorth(player)),
                 null,
                 false,
                 true,

@@ -1,6 +1,7 @@
 package me.mangokevin.oreTycoon.menuManager;
 
 import me.mangokevin.oreTycoon.OreTycoon;
+import me.mangokevin.oreTycoon.utility.CooldownManager;
 import me.mangokevin.oreTycoon.worth.PriceUtility;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
@@ -15,6 +16,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.checkerframework.checker.units.qual.C;
 
 import java.util.*;
 
@@ -23,6 +25,9 @@ public class TycoonInventory implements MenuInterface {
     private final TycoonBlock tycoonBlock;
     private final OreTycoon plugin;
     private final WorthManager worthManager;
+
+    private static final CooldownManager sellCooldown = new CooldownManager(1000 * 3);
+    private static final CooldownManager changeModeCooldown = new CooldownManager(1000);
 
     private static final Map<UUID, InventoryMode> playerInventoryMode = new HashMap<>();
 
@@ -150,19 +155,41 @@ public class TycoonInventory implements MenuInterface {
             }
             case "drop_mode" -> {
                 if (shiftClick) {
-                    InventoryMode nextMode = mode.nextMode();
-                    playerInventoryMode.put(player.getUniqueId(), nextMode);
-                    player.sendMessage(ChatColor.GRAY + "Changing inventory mode to " + nextMode.getDisplayName());
+                    if (changeModeCooldown.isOnCooldown(player.getUniqueId())) {
+                        player.sendMessage(ChatColor.RED + "You have to wait "
+                                + sellCooldown.getRemainingCooldownSeconds(player.getUniqueId())
+                                + "s before you can change the mode again!");
+                    } else {
+                        InventoryMode nextMode = mode.nextMode();
+                        playerInventoryMode.put(player.getUniqueId(), nextMode);
+                        player.sendMessage(ChatColor.GRAY + "Changing inventory mode to " + nextMode.getDisplayName());
+                        changeModeCooldown.setCooldown(player.getUniqueId());
+                    }
+
                 }
                 refresh(player, inventory);
             }
             case "sell_item"-> {
                 if (shiftClick) {
-                    InventoryMode nextMode = mode.nextMode();
-                    playerInventoryMode.put(player.getUniqueId(), nextMode);
-                    player.sendMessage(ChatColor.GRAY + "Changing inventory mode to " + nextMode.getDisplayName());
+                    if (changeModeCooldown.isOnCooldown(player.getUniqueId())) {
+                        player.sendMessage(ChatColor.RED + "You have to wait "
+                                + sellCooldown.getRemainingCooldownSeconds(player.getUniqueId())
+                                + "s before you can change the mode again!");
+                    } else {
+                        InventoryMode nextMode = mode.nextMode();
+                        playerInventoryMode.put(player.getUniqueId(), nextMode);
+                        player.sendMessage(ChatColor.GRAY + "Changing inventory mode to " + nextMode.getDisplayName());
+                        changeModeCooldown.setCooldown(player.getUniqueId());
+                    }
                 } else {
-                    tycoonBlock.sellInventory(inventory, player);
+                    if (!sellCooldown.isOnCooldown(player.getUniqueId())) {
+                        tycoonBlock.sellInventory(inventory, player);
+                        sellCooldown.setCooldown(player.getUniqueId());
+                    } else {
+                        player.sendMessage(ChatColor.RED + "You have to wait "
+                                + sellCooldown.getRemainingCooldownSeconds(player.getUniqueId())
+                                + "s before you can sell again!");
+                    }
                 }
                 refresh(player, inventory);
             }

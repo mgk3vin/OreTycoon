@@ -52,7 +52,7 @@ public class TycoonRegistry {
     }
     public TycoonBlock getTycoonBlockFromIndex(UUID playerUUID, int index) {
         List<TycoonBlock> tycoonBlocks = getAllTycoonsFromPlayer(playerUUID);
-        if (index <= 1 || index > tycoonBlocks.size()) {
+        if (index < 0 || index >= tycoonBlocks.size()) {
             return null;
         }
         return tycoonBlocks.get(index); //0 based
