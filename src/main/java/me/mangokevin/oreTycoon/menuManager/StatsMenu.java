@@ -175,15 +175,6 @@ public class StatsMenu implements MenuInterface {
                     "tycoon_booster");
             inventory.setItem(23, autoMinerBooster);
         }
-//        ItemStack boosters = MenuManager.createItemstack(Material.AMETHYST_SHARD,
-//                1,
-//                ChatColor.DARK_PURPLE + "Tycoon Booster",
-//                null,
-//                true,
-//                true,
-//                true,
-//                "tycoon_booster");
-//        inventory.setItem(23, boosters);
 
         //Upgrades Icon slot 24
         ItemStack upgrades = MenuManager.createItemstack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE,

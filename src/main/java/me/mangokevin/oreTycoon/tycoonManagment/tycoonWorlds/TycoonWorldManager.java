@@ -299,7 +299,7 @@ public class TycoonWorldManager {
                                 Console.debug(getClass(), "Deleted Tycoon world!");
                                 player.sendMessage(ChatColor.GREEN + "Deleted Tycoon world: " + worldName);
 
-                                particleManager.spawnBeaconBeam(world.getSpawnLocation(), false);
+                                //particleManager.spawnBeaconBeam(world.getSpawnLocation(), false);
 
                                 worldSettings.remove(worldName);
 
@@ -315,27 +315,7 @@ public class TycoonWorldManager {
     }
     public void deleteTycoonWorld(Player player,int worldNumber) {
         String worldName = generateWorldName(player, worldNumber);
-        multiverseCoreApi.getWorldManager()
-                .getWorld(worldName)
-                .peek(world -> {
-                    multiverseCoreApi.getWorldManager()
-                            .deleteWorld(DeleteWorldOptions.world(world))
-                            .onFailure(reason -> {
-                                // send error message
-                                Console.error(getClass(), "Failed to delete world! Reason: " + reason.toString());
-                            })
-                            .onSuccess(name -> {
-                                // send success message
-                                Console.debug(getClass(), "Deleted Tycoon world!");
-                                player.sendMessage(ChatColor.GREEN + "Deleted Tycoon world: " + worldName);
-                                removePlayerWorld(player, worldName);
-                                listTycoonWorlds(player);
-                            });
-                })
-                .onEmpty(() -> {
-                    // world not found
-                    Console.debug(getClass(), "Failed to delete world! World not found! " + worldName);
-                });
+        deleteTycoonWorld(player, worldName);
     }
 
     public void listTycoonWorlds(Player player) {

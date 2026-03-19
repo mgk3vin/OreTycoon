@@ -171,8 +171,7 @@ public class WorldSettingsMenu implements MenuInterface {
                 player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_TELEPORT, 1, 1);
             }
             case "delete_world" -> {
-                tycoonWorldManager.deleteTycoonWorld(player ,worldName);
-                new WorldsMenu(plugin).open(player);
+                new WorldDeleteConfirmMenu(plugin, worldName).open(player);
             }
             case "set_world_spawn" -> {
                 tycoonWorldManager.setWorldSpawn(player, worldName);
