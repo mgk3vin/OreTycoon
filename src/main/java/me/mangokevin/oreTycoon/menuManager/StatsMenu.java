@@ -59,7 +59,7 @@ public class StatsMenu implements MenuInterface {
 
         //Inventory Icon slot 18
         List<String> inventoryLore = Arrays.asList("§8§m-----------------------",
-                ChatColor.WHITE + "Worth: "  + ChatColor.GREEN + PriceUtility.calculateWorthFormatted(tycoonBlock.getInventory()),
+                ChatColor.WHITE + "Worth: "  + ChatColor.GREEN + PriceUtility.formatMoney(PriceUtility.calculateWorth(tycoonBlock.getStoredItems())),
                 ChatColor.WHITE + "Storage: " + tycoonBlock.getStorageStatisticFormatted() + " items",
                 "§8§m-----------------------",
                 ChatColor.YELLOW + "[Left click to open]",
@@ -243,9 +243,10 @@ public class StatsMenu implements MenuInterface {
                 break;
             case "inventory":
                 if (inventoryClick == ClickType.LEFT) {
-                    new TycoonInventory(tycoonBlock, plugin).open(player);
+                    new TycoonInventory(plugin, tycoonBlock, 0).open(player);
                 }else if (inventoryClick == ClickType.RIGHT) {
-                    tycoonBlock.sellInventory(tycoonBlock.getInventory(), player);
+                    //tycoonBlock.sellInventory(tycoonBlock.getDisplayInventory(), player);
+                    tycoonBlock.sellTycoonInventory(player);
                     refresh(player, inventory);
                 }
                 break;

@@ -1,6 +1,7 @@
 package me.mangokevin.oreTycoon.listener.tycoonListener;
 
 import me.mangokevin.oreTycoon.events.tycoonEvents.TycoonSpawnedBlockMinedEvent;
+import me.mangokevin.oreTycoon.menuManager.MenuManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonUpgrades;
 import me.mangokevin.oreTycoon.utility.Console;
@@ -42,7 +43,8 @@ public class TycoonSpawnedBlockMinedListener implements Listener {
         if (TycoonUpgrades.shouldFortuneActivate(tycoonBlock)){
             item.setAmount(2);
         }
-        if (tycoonBlock.getTycoonInventory().addItem(item)) {
+        if (tycoonBlock.addItem(item)) {
+            MenuManager.refreshOpenInventory(player, tycoonBlock);
             blockBreakEvent.setCancelled(true);
             block.setType(Material.AIR);
             tycoonBlock.getLocation().getWorld().playSound(tycoonBlock.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1, 1.5F);

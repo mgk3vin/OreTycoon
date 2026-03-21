@@ -2,15 +2,16 @@ package me.mangokevin.oreTycoon.commands.tycooncmds.subcommands;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.menuManager.MenuManager;
+import me.mangokevin.oreTycoon.menuManager.OverviewMenu;
 import org.bukkit.entity.Player;
 
 public class OpenOverviewMenuSubcommand implements TycoonSubCommand{
-    private final MenuManager menuManager;
+    private final OreTycoon plugin;
     public OpenOverviewMenuSubcommand(OreTycoon plugin) {
-        this.menuManager = plugin.getMenuManager();
+        this.plugin = plugin;
     }
     @Override
     public void execute(Player player, String[] args) {
-        menuManager.openTycoonOverview(player, 0);
+        new OverviewMenu(plugin, 0).open(player);
     }
 }

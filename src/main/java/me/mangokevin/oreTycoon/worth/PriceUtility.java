@@ -11,7 +11,9 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class PriceUtility {
 
@@ -42,6 +44,13 @@ public class PriceUtility {
         double singleWorth = worthManager.getWorth(item.getType());
 
         return singleWorth * item.getAmount();
+    }
+    public static double calculateWorth(Map<Material, Integer> items){
+        double worth = 0;
+        for(Map.Entry<Material, Integer> entry : items.entrySet()){
+            worth += calculateWorth(new ItemStack(entry.getKey(), entry.getValue()));
+        }
+        return worth;
     }
     public static double calculateWorth(Inventory inventory){
         double totalWorth = 0.0;

@@ -1,11 +1,13 @@
 package me.mangokevin.oreTycoon.menuManager;
 
 import me.mangokevin.oreTycoon.OreTycoon;
+import me.mangokevin.oreTycoon.tycoonManagment.TycoonHolder;
 import me.mangokevin.oreTycoon.utility.CooldownManager;
 import me.mangokevin.oreTycoon.worth.PriceUtility;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
 import me.mangokevin.oreTycoon.worth.WorthManager;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -16,7 +18,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.checkerframework.checker.units.qual.C;
 
 import java.util.*;
 
@@ -26,20 +27,23 @@ public class TycoonInventory implements MenuInterface {
     private final OreTycoon plugin;
     private final WorthManager worthManager;
 
+    private final int page;
+
     private static final CooldownManager sellCooldown = new CooldownManager(1000 * 3);
     private static final CooldownManager changeModeCooldown = new CooldownManager(1000);
 
     private static final Map<UUID, InventoryMode> playerInventoryMode = new HashMap<>();
 
-    public TycoonInventory(TycoonBlock tycoonBlock, OreTycoon plugin) {
+    public TycoonInventory(OreTycoon plugin, TycoonBlock tycoonBlock, int page) {
         this.tycoonBlock = tycoonBlock;
         this.plugin = plugin;
         this.worthManager = plugin.getWorthManager();
+        this.page = page;
     }
 
     @Override
     public void open(Player player) {
-        Inventory inventory = tycoonBlock.getInventory();
+        Inventory inventory = Bukkit.createInventory(new TycoonHolder(this), 36, ChatColor.GOLD + "Inventory - Page " + (page + 1));
 
         playerInventoryMode.putIfAbsent(player.getUniqueId(), InventoryMode.SELL_MODE);
 
@@ -63,10 +67,49 @@ public class TycoonInventory implements MenuInterface {
             );
             inventory.setItem(i, item);
         }
-        //Inventory Mode Button 31
+
+        List<ItemStack> allInventoryStacks = getItemsAsStack();
+        int startIndex = page * 27;
+        int endIndex = Math.min(startIndex + 27, allInventoryStacks.size());
+
+        for (int i = startIndex; i < endIndex; i++) {
+            int slot = i - startIndex;
+            ItemStack item = allInventoryStacks.get(i);
+            setInventoryItemMeta(item);
+            inventory.setItem(slot, item);
+        }
+
+        if (page > 0) {
+            //previous page button
+            ItemStack prevPageIcon = MenuManager.createItemstack(
+                    Material.ARROW,
+                    1,
+                    ChatColor.GOLD + "<- Previous Page",
+                    null,
+                    false,
+                    true,
+                    true,
+                    "previous_page"
+            );
+            inventory.setItem(27, prevPageIcon);
+        }
+        ItemStack nextPageIcon = MenuManager.createItemstack(
+                Material.ARROW,
+                1,
+                ChatColor.GOLD + "Next Page ->",
+                null,
+                false,
+                true,
+                true,
+                "next_page"
+        );
+        inventory.setItem(35, nextPageIcon);
+
+
+        //Inventory Mode Button 30
         InventoryMode mode = playerInventoryMode.getOrDefault(player.getUniqueId(), InventoryMode.SELL_MODE);
         ItemStack invModeItem = getModeItem(mode, inventory);
-        inventory.setItem(31, invModeItem);
+        inventory.setItem(30, invModeItem);
 
         ItemStack backToMenuItem = MenuManager.createItemstack(
                 Material.BARRIER,
@@ -78,50 +121,25 @@ public class TycoonInventory implements MenuInterface {
                 true,
                 "return_item"
         );
-        inventory.setItem(35, backToMenuItem);
+        inventory.setItem(32, backToMenuItem);
 
     }
 
+    private List<ItemStack> getItemsAsStack(){
+        List<ItemStack> stacks = new ArrayList<>();
+        for (Map.Entry<Material, Integer> entry : tycoonBlock.getStoredItems().entrySet()) {
+            Material material = entry.getKey();
+            int remaining = entry.getValue();
 
-    public boolean addItem(ItemStack item){
-
-        Inventory inv = tycoonBlock.getInventory();
-        if (!(tycoonBlock.canFitItem(inv, item))) {return false;}
-
-        // --- Formatt the item Worth ---
-        setInventoryItemMeta(item);
-        // --- Formatt the item Worth ---
-
-        for (int i = 0; i < 27; i++){
-            ItemStack slotItem = inv.getItem(i);
-
-            // 1. Slot ist leer
-            if (slotItem == null || slotItem.getType() == Material.AIR) {
-                inv.setItem(i, item);
-                return true;
-            }
-
-            // 2. Slot hat das gleiche Item und noch Platz
-            if (slotItem.getType().equals(item.getType())) {
-                int canAdd = slotItem.getMaxStackSize() - slotItem.getAmount();
-                if (canAdd >= item.getAmount()) {
-                    // Es ist noch platz im stack
-                    slotItem.setAmount(slotItem.getAmount() + item.getAmount());
-
-                    // --- Formatt the item Worth and set pdc ---
-                    setInventoryItemMeta(item);
-                    // --- Formatt the item Worth and set pdc ---
-
-                    return true;
-                } else if (canAdd > 0) {
-                    // Teilweise füllen und Rest weitersuchen (optional)
-                    slotItem.setAmount(slotItem.getMaxStackSize());
-                    item.setAmount(item.getAmount() - canAdd);
-                }
+            while (remaining > 0) {
+                int stackSize = Math.min(remaining, 64);
+                stacks.add(new ItemStack(material, stackSize));
+                remaining -= stackSize;
             }
         }
-        return false;
+        return stacks;
     }
+
 
     @Override
     public void handleAction(InventoryClickEvent event) {
@@ -183,7 +201,8 @@ public class TycoonInventory implements MenuInterface {
                     }
                 } else {
                     if (!sellCooldown.isOnCooldown(player.getUniqueId())) {
-                        tycoonBlock.sellInventory(inventory, player);
+                        //tycoonBlock.sellInventory(inventory, player);
+                        tycoonBlock.sellTycoonInventory(player);
                         sellCooldown.setCooldown(player.getUniqueId());
                     } else {
                         player.sendMessage(ChatColor.RED + "You have to wait "
@@ -192,6 +211,12 @@ public class TycoonInventory implements MenuInterface {
                     }
                 }
                 refresh(player, inventory);
+            }
+            case "next_page" -> {
+                new TycoonInventory(plugin, tycoonBlock, page + 1).open(player);
+            }
+            case "previous_page" -> {
+                new TycoonInventory(plugin, tycoonBlock, page - 1).open(player);
             }
             case "return_item"-> {
                 new StatsMenu(tycoonBlock, plugin).open(player);

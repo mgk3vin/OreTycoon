@@ -7,6 +7,7 @@ import de.oliver.fancyholograms.api.data.TextHologramData;
 import de.oliver.fancyholograms.api.hologram.Hologram;
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.events.tycoonEvents.TycoonUpdateEvent;
+import me.mangokevin.oreTycoon.menuManager.MenuManager;
 import me.mangokevin.oreTycoon.menuManager.TycoonInventory;
 import me.mangokevin.oreTycoon.events.tycoonEvents.TycoonAutoMinedEvent;
 import me.mangokevin.oreTycoon.events.tycoonEvents.TycoonChangedAttributesEvent;
@@ -60,7 +61,7 @@ public class TycoonBlock {
     private int tickCounter = 0;
     private int miningTickCounter = 0;
 
-    private final Inventory inventory;
+    private final Inventory displayInventory;
     private final TycoonInventory tycoonInventory;
     private boolean autoMinerEnabled;
 
@@ -124,6 +125,8 @@ public class TycoonBlock {
 
     private final LevelManager levelManager;
     private final TycoonRegistry tycoonRegistry;
+
+    private final Map<Material, Integer> storedItems = new HashMap<>();
 
     private final Map<Material, Integer> ressourceMaterialsMap;
     private Map<Material, Boolean> activeRessourceMaterialsMap = new HashMap<>();
@@ -200,8 +203,8 @@ public class TycoonBlock {
                 this.location.getBlockZ();
 
 
-        this.tycoonInventory = new TycoonInventory(this, plugin);
-        this.inventory = Bukkit.createInventory(new TycoonHolder(this.tycoonInventory), 36, tycoonDisplayName);
+        this.tycoonInventory = new TycoonInventory(plugin, this, 0);
+        this.displayInventory = Bukkit.createInventory(new TycoonHolder(this.tycoonInventory), 36, tycoonDisplayName);
         checkIfBuffed();
     }
 
@@ -223,7 +226,6 @@ public class TycoonBlock {
             if (isActive) {
 
                 if (random.nextDouble() * 100.0 < doubleDropsChance) {
-                    Console.log(getClass(), "A double Drop has been spawned!");
                     trySpawnMultiplyResources(2);
                 }else {
                     trySpawnMultiplyResources(1);
@@ -262,6 +264,7 @@ public class TycoonBlock {
     }
 
     //<editor-fold desc="📦 Inventory Methods">
+    @Deprecated
     public double sellInventory(Inventory inventory, Player player) {
         Economy econ = OreTycoon.getEconomy();
         double worth = PriceUtility.calculateWorth(inventory) * sellMultiplier;
@@ -271,6 +274,22 @@ public class TycoonBlock {
         player.sendMessage(ChatColor.GREEN + "Sold items worth: " + PriceUtility.formatMoney(worth) + " with " + sellMultiplier + "x Sell Multiplier");
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.3f, 1);
         cleanInventory(inventory);
+        updateHologram();
+        return worth;
+    }
+    public double sellTycoonInventory(Player player) {
+        Economy econ = OreTycoon.getEconomy();
+        double worth = 0.0;
+        for (Map.Entry<Material, Integer> entry : storedItems.entrySet()) {
+            ItemStack storedItem = new ItemStack(entry.getKey(), entry.getValue());
+            worth += PriceUtility.calculateWorth(storedItem) * sellMultiplier;
+        }
+        System.out.println("TycoonBlock Calculate Worth: " + PriceUtility.formatMoney(worth));
+        if (worth <= 0) return 0.0;
+        econ.depositPlayer(player, worth);
+        player.sendMessage(ChatColor.GREEN + "Sold items worth: " + PriceUtility.formatMoney(worth) + " with " + sellMultiplier + "x Sell Multiplier");
+        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.3f, 1);
+        storedItems.clear();
         updateHologram();
         return worth;
     }
@@ -582,7 +601,10 @@ public class TycoonBlock {
         if (itemMeta == null) return;
         PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
         pdc.set(TycoonData.BLOCK_IS_AUTOMINED_KEY, PersistentDataType.STRING, "block_is_automined");
-        if (!tycoonBlock.canFitItem(tycoonBlock.getInventory(), item)) {
+//        if (!tycoonBlock.canFitItem(tycoonBlock.getDisplayInventory(), item)) {
+//            return;
+//        }
+        if (isStorageFull()){
             return;
         }
 
@@ -626,13 +648,12 @@ public class TycoonBlock {
                     blockLocation.getWorld().spawnParticle(Particle.WHITE_SMOKE, blockLocation, 3);
 
 
-                    //tycoonBlock.getTycoonInventory().addItem(item);
+
                     ItemStack item = new ItemStack(blockLocation.getBlock().getType());
 
                     //Fortune Multiplier
                     if (random.nextDouble() * 100.0 < fortuneChance) {
                         item.setAmount(2);
-                        Console.log(getClass(), "Fortune has doubled the drop!");
                     }
                     //Fortune Multiplier
 
@@ -832,7 +853,7 @@ public class TycoonBlock {
         hologramData.addLine("Level: " + level);
         hologramData.addLine("xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + (int) levelManager.getProgressPercentage(levelXp, level + 1) + "%");
         hologramData.addLine(ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
-        double currentWorth = PriceUtility.calculateWorth(inventory);
+        double currentWorth = PriceUtility.calculateWorth(displayInventory);
         hologramData.addLine(ChatColor.RESET + "Inventory: "+ ChatColor.GREEN + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
         hologramData.setBackground(Color.fromARGB(60, 80, 80, 80));
         hologramData.setPersistent(false);
@@ -879,7 +900,7 @@ public class TycoonBlock {
         HologramData data = hologram.getData();
         List<String> hologramLines = ((TextHologramData) data).getText();
 
-        double currentWorth;
+
         List<TycoonBlock> tycoonBlockList = plugin.getTycoonRegistry().getAllTycoons();
 
         hologramLines.set(1, tycoonDisplayName + ChatColor.RESET);
@@ -887,11 +908,11 @@ public class TycoonBlock {
         hologramLines.set(3, "Level: " + level);
         hologramLines.set(4, "xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + (int) levelManager.getProgressPercentage(levelXp, level + 1) + "%");
         hologramLines.set(5, ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
-        currentWorth = PriceUtility.calculateWorth(inventory);
+        String currentWorthFormatted = PriceUtility.formatMoney(PriceUtility.calculateWorth(getStoredItems()));
         if (isInventoryFull()){
-            hologramLines.set(6, ChatColor.RED + "" + ChatColor.BOLD + "Inventory FULL: "+ ChatColor.GREEN + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
+            hologramLines.set(6, ChatColor.RED + "" + ChatColor.BOLD + "Inventory FULL: "+ ChatColor.GREEN + currentWorthFormatted + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
         } else {
-            hologramLines.set(6, ChatColor.RESET + "Inventory: "+ ChatColor.GREEN + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
+            hologramLines.set(6, ChatColor.RESET + "Inventory: "+ ChatColor.GREEN + currentWorthFormatted + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
 
         }
 
@@ -907,6 +928,7 @@ public class TycoonBlock {
 
         queueHologramUpdate();
     }
+    @Deprecated
     public void updateHologramPreset(Location location, String preset) {
         if (!isLoaded) {
             Console.error(getClass(), "Cannot update hologram preset Tycoon is not loaded!");
@@ -922,7 +944,7 @@ public class TycoonBlock {
         //TextHologramData textHologramData = (TextHologramData) data;
         List<String> hologramLines = ((TextHologramData) data).getText();
 
-        double currentWorth;
+        String currentWorthFormatted = PriceUtility.formatMoney(PriceUtility.calculateWorth(getStoredItems()));
         List<TycoonBlock> tycoonBlockList = tycoonRegistry.getAllTycoonsFromPlayer(ownerUuid);
         switch (preset) {
             case "BLOCKNAME":
@@ -941,8 +963,7 @@ public class TycoonBlock {
                 hologramLines.set(5, ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
                 break;
             case "WORTH", "BALANCE", "STORAGE":
-                currentWorth = PriceUtility.calculateWorth(inventory);
-                hologramLines.set(6, ChatColor.RESET + "Inventory: "+ ChatColor.GREEN + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
+                hologramLines.set(6, ChatColor.RESET + "Inventory: "+ ChatColor.GREEN + currentWorthFormatted + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
                 break;
             case "ORDER":
 
@@ -961,8 +982,7 @@ public class TycoonBlock {
                 hologramLines.set(3, "Level: " + level);
                 hologramLines.set(4, "xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + (int) levelManager.getProgressPercentage(levelXp, level + 1) + "%");
                 hologramLines.set(5, ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
-                currentWorth = PriceUtility.calculateWorth(inventory);
-                hologramLines.set(6, ChatColor.RESET + "Inventory: "+ ChatColor.GREEN + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
+                hologramLines.set(6, ChatColor.RESET + "Inventory: "+ ChatColor.GREEN + currentWorthFormatted + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
 
                 index = -1;
                 for (int i = 0; i < tycoonBlockList.size(); i++) {
@@ -1040,7 +1060,7 @@ public class TycoonBlock {
         activeBlocks.add(block);
     }
     public String getStorageStatisticFormatted(){
-        int storedItems = getStoredItemsCount();
+        int storedItems = getStoredItemsAmount();
         double storagePercentage = (double)storedItems / (double)inventoryStorage;
         storagePercentage = Math.round(storagePercentage * 100.0);
         if (storagePercentage < 30.0) {
@@ -1056,24 +1076,26 @@ public class TycoonBlock {
         }
         return storagePercentage + "%";
     }
-    public int getStoredItemsCount(){
+
+    public int getStoredItemsAmount(){
         int storedItemsCount = 0;
-        for (ItemStack itemStack : inventory.getContents()) {
-            if (itemStack != null) {
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                if (itemMeta != null) {
-                    if (itemMeta.getPersistentDataContainer().has(TycoonData.MENU_ITEM_KEY, PersistentDataType.STRING)) {
-                        continue;
-                    }
-                }
-                storedItemsCount += itemStack.getAmount();
-            }
+        for (Material storedItem : storedItems.keySet()){
+            storedItemsCount += storedItems.get(storedItem);
         }
         return storedItemsCount;
     }
+    public boolean addItem(ItemStack itemStack){
+        if (isStorageFull()) return false;
+        storedItems.merge(itemStack.getType(), itemStack.getAmount(), Integer::sum);
+        return true;
+    }
+    public boolean isStorageFull(){
+        return getStoredItemsAmount() >= inventoryStorage;
+    }
+    @Deprecated
     public boolean canFitItem(Inventory inv, ItemStack item) {
 
-        if (getStoredItemsCount() + item.getAmount() > inventoryStorage) {
+        if (getStoredItemsAmount() + item.getAmount() > inventoryStorage) {
             //Storage is Full
             return false;
         }
@@ -1160,8 +1182,9 @@ public class TycoonBlock {
     public boolean isAutoMinerEnabled() {
         return autoMinerEnabled;
     }
-    public Inventory getInventory() {
-        return inventory;
+
+    public Inventory getDisplayInventory() {
+        return displayInventory;
     }
     public double getStoredBalance(){
         return storedBalance;
@@ -1223,7 +1246,10 @@ public class TycoonBlock {
         return isLoaded;
     }
     public boolean isInventoryFull(){
-        return getStoredItemsCount() + 1 > inventoryStorage;
+        return getStoredItemsAmount() >= inventoryStorage;
+    }
+    public Map<Material, Integer> getStoredItems(){
+        return storedItems;
     }
     // ---------     Getter      ---------
 

@@ -15,11 +15,11 @@ public class TycoonAutoMineListener implements Listener {
     @EventHandler
     public void onTycoonAutoMine(TycoonAutoMinedEvent event) {
         TycoonBlock tycoon = event.getTycoonBlock();
-        Inventory inventory = tycoon.getInventory();
+        Inventory inventory = tycoon.getDisplayInventory();
         Player owner = tycoon.getOfflineOwner().getPlayer();
 
         //add Item when Block is auto mined
-        boolean itemFits = tycoon.getTycoonInventory().addItem(event.getItemStack());
+        boolean itemFits = tycoon.addItem(event.getItemStack());
         if (itemFits) {
             for (org.bukkit.entity.HumanEntity entity : inventory.getViewers()) {
                 if (entity instanceof Player player) {

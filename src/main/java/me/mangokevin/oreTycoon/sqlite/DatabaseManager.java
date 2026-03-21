@@ -261,7 +261,7 @@ public class DatabaseManager {
         }
     }
     private void saveTycoonInventory(TycoonBlock tycoonBlock) {
-        Inventory inventory = tycoonBlock.getInventory();
+        //Inventory inventory = tycoonBlock.getDisplayInventory();
         try {
             //Delete previous entries
             PreparedStatement delStatement = connection.prepareStatement("DELETE FROM tycoon_inventories WHERE tycoon_uid = ?");
@@ -278,23 +278,30 @@ public class DatabaseManager {
             );
 
             statement.setString(1, tycoonBlock.getBlockUID());
-            for (int i = 0; i < inventory.getSize(); i++) {
-                ItemStack itemStack = inventory.getItem(i);
-                if (itemStack == null || itemStack.getType() == Material.AIR) {continue;}
-
-                //Check for inventory item pdc tag
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                if (itemMeta != null) {
-                    PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
-                    if (pdc.has(TycoonData.INVENTORY_ITEM_KEY, PersistentDataType.STRING)) {
-                        statement.setString(2, itemStack.getType().name());
-                        statement.setInt(3, itemStack.getAmount());
-                        statement.setInt(4, i);
-                        statement.executeUpdate();
-                    }
-                }
-
+            //New Map save
+            for (Map.Entry<Material, Integer> entry : tycoonBlock.getStoredItems().entrySet()) {
+                statement.setString(2, entry.getKey().name());
+                statement.setInt(3, entry.getValue());
+                statement.setInt(4, 0);
+                statement.executeUpdate();
             }
+//            for (int i = 0; i < inventory.getSize(); i++) {
+//                ItemStack itemStack = inventory.getItem(i);
+//                if (itemStack == null || itemStack.getType() == Material.AIR) {continue;}
+//
+//                //Check for inventory item pdc tag
+//                ItemMeta itemMeta = itemStack.getItemMeta();
+//                if (itemMeta != null) {
+//                    PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
+//                    if (pdc.has(TycoonData.INVENTORY_ITEM_KEY, PersistentDataType.STRING)) {
+//                        statement.setString(2, itemStack.getType().name());
+//                        statement.setInt(3, itemStack.getAmount());
+//                        statement.setInt(4, i);
+//                        statement.executeUpdate();
+//                    }
+//                }
+//
+//            }
 
         } catch (SQLException e) {
             Console.error(getClass(), "Database inventory save failed! Reason: " + e.getMessage());
@@ -508,7 +515,8 @@ public class DatabaseManager {
 
                 ItemStack itemStack = new  ItemStack(material, amount);
 
-                inventory.addItem(itemStack);
+                tycoonBlock.addItem(itemStack);
+//                inventory.addItem(itemStack);
             }
         } catch (SQLException e) {
             Console.error(getClass(), "Database inventory load failed! Reason: " + e.getMessage());

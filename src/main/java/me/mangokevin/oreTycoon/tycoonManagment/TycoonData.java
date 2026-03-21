@@ -103,7 +103,53 @@ public class TycoonData {
 
         INVENTORY_ITEM_KEY = new  NamespacedKey(plugin, "inventory_item");
     }
-    // Speichert die Daten eines Tycoons auf ein Item
+
+    public static void writeToItem(TycoonBlock tycoonBlock, ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return;
+
+        PersistentDataContainer pdc = meta.getPersistentDataContainer();
+        pdc.set(TYCOON_BLOCK, PersistentDataType.BYTE,  (byte) 1);
+        pdc.set(TYCOON_BLOCK_KEY, PersistentDataType.BYTE, (byte) 1);
+        pdc.set(TYPE_KEY, PersistentDataType.STRING, tycoonBlock.getTycoonType().name());
+        pdc.set(LEVEL, PersistentDataType.INTEGER, tycoonBlock.getLevel());
+        pdc.set(XP, PersistentDataType.INTEGER, tycoonBlock.getLevelXp());
+
+        // Wir bauen einen String: "world;x;y;z;yaw;pitch"
+        Location loc = tycoonBlock.getLocation();
+        String locString = String.format(Locale.US, "%s;%.2f;%.2f;%.2f;%.2f;%.2f",
+                loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
+        pdc.set(LOCATION_KEY, PersistentDataType.STRING, locString);
+
+        pdc.set(MATERIAL, PersistentDataType.STRING, tycoonBlock.getMaterial().toString());
+        pdc.set(SPAWN_INTERVAL, PersistentDataType.INTEGER, tycoonBlock.getSpawnRate());
+        pdc.set(CREATION_TIME, PersistentDataType.LONG, tycoonBlock.getCreationTime());
+
+        StringBuilder inventoryString = new StringBuilder();
+        for (Map.Entry<Material, Integer> entry : tycoonBlock.getStoredItems().entrySet()) {
+            inventoryString.append(entry.getKey().name())
+                    .append(":")
+                    .append(entry.getValue())
+                    .append(",");
+        }
+        pdc.set(INVENTORY_KEY, PersistentDataType.STRING, inventoryString.toString());
+
+        TycoonUpgrades upgrades = tycoonBlock.getTycoonUpgrades();
+        //========== Upgrade Keys ==========
+        pdc.set(TYCOON_IS_AUTO_MINER_UNLOCKED_KEY, PersistentDataType.BOOLEAN, upgrades.isAutoMinerUnlocked());
+        pdc.set(TYCOON_SPAWN_RATE_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getSpawnRateLevel());
+        pdc.set(TYCOON_MINING_RATE_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getMiningRateLevel());
+        pdc.set(TYCOON_SELL_MULTIPLIER_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getSellMultiplierLevel());
+        pdc.set(TYCOON_DOUBLE_DROPS_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getDoubleDropsLevel());
+        pdc.set(TYCOON_FORTUNE_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getFortuneLevel());
+        pdc.set(TYCOON_MAX_INVENTORY_STORAGE_KEY, PersistentDataType.INTEGER, upgrades.getInventoryStorageLevel());
+        //Save ClaimedLevels
+        String claimedLevels = upgrades.getClaimedLevels().stream().map(String::valueOf).collect(Collectors.joining(","));
+        pdc.set(TYCOON_CLAIMED_LEVELS_KEY, PersistentDataType.STRING, claimedLevels);
+        //========== Upgrade Keys ==========
+        item.setItemMeta(meta); // DAS speichert es wirklich auf das Item!
+    }
+    @Deprecated
     public static void writeToItem(ItemStack item, int level, int xp, Location loc, Material material, int spawnInterval, long creationTime, String type, Inventory inventory, TycoonUpgrades upgrades) {
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
@@ -184,10 +230,14 @@ public class TycoonData {
         tycoonBlock.setCreationTime(creationTime);
 
 
-        if (pdc.has(TycoonData.INVENTORY_KEY, PersistentDataType.BYTE_ARRAY)){
-            byte[] byteArray =  pdc.get(TycoonData.INVENTORY_KEY, PersistentDataType.BYTE_ARRAY);
-
-            StorageUtils.fromByteArray(byteArray, tycoonBlock.getInventory());
+        String inventoryData = pdc.get(TycoonData.INVENTORY_KEY, PersistentDataType.STRING);
+        if (inventoryData != null && !inventoryData.isEmpty()) {
+            for (String entry : inventoryData.split(",")) {
+                String[] parts = entry.split(":");
+                Material material = Material.valueOf(parts[0]);
+                int amount = Integer.parseInt(parts[1]);
+                tycoonBlock.addItem(new ItemStack(material, amount));
+            }
         }
 
         tycoonBlock.setLoaded(true);
