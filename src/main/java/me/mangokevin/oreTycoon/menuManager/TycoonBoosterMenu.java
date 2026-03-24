@@ -62,13 +62,13 @@ public class TycoonBoosterMenu implements MenuInterface{
 
 
         if (tycoonBlock.getTycoonBoosterManager().isAutoMinerBoosterActive()) {
-            ItemStack autoMinerBooster = tycoonBlock.getAutoMinerSpeedBooster().getItem();
+            ItemStack autoMinerBooster = tycoonBlock.getAutoMinerSpeedBooster().getItem(1);
             inventory.setItem(22, autoMinerBooster);
         } else if (tycoonBlock.getTycoonBoosterManager().isSellMultiplierBoosterActive()) {
-            ItemStack sellMultiplierBooster = tycoonBlock.getSellMultiplierBooster().getItem();
+            ItemStack sellMultiplierBooster = tycoonBlock.getSellMultiplierBooster().getItem(1);
             inventory.setItem(22, sellMultiplierBooster);
         }else if (tycoonBlock.getTycoonBoosterManager().isSpawnSpeedBoosterActive()){
-            ItemStack spawnSpeedBooster = tycoonBlock.getSpawnSpeedBooster().getItem();
+            ItemStack spawnSpeedBooster = tycoonBlock.getSpawnSpeedBooster().getItem(1);
             inventory.setItem(22, spawnSpeedBooster);
         }
         else {

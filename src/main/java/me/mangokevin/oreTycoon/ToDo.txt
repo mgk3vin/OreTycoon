@@ -28,8 +28,7 @@ Show booster icon in stats menu if active✅
 fix overview menu autoMiner icon✅
 more tycoon types✅
 
-//TODO: fix booster bug, boosters can make rates negative
-//TODO: fix inventory bug, with double drops filling up over limit
+fix inventory bug, with double drops filling up over limit~
 
 XP drops worth
 Stock price history showing previous price changes
@@ -37,6 +36,7 @@ Stock price history showing previous price changes
 
 "Catalyst" Blocks, placed in spawn range, with unique buff for tycoon
 Skill tree for each tycoon
+Tycoon Hopper/special items
 Overall Tycoon Player Level
 
  Mining Combo System 🔥

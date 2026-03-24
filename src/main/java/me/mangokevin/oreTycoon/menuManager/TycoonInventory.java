@@ -53,6 +53,10 @@ public class TycoonInventory implements MenuInterface {
 
     @Override
     public void refresh(Player player, Inventory inventory) {
+        //Clear inventory to refill it correctly
+        for (int i = 0; i < 27; i++) {
+            inventory.setItem(i, null);
+        }
         //Filler items for bottom row only
         for (int i = 27; i < 36; i++) {
             ItemStack item = MenuManager.createItemstack(
@@ -108,7 +112,7 @@ public class TycoonInventory implements MenuInterface {
 
         //Inventory Mode Button 30
         InventoryMode mode = playerInventoryMode.getOrDefault(player.getUniqueId(), InventoryMode.SELL_MODE);
-        ItemStack invModeItem = getModeItem(mode, inventory);
+        ItemStack invModeItem = getModeItem(mode);
         inventory.setItem(30, invModeItem);
 
         ItemStack backToMenuItem = MenuManager.createItemstack(
@@ -162,11 +166,9 @@ public class TycoonInventory implements MenuInterface {
                 if (mode.equals(InventoryMode.DROP_MODE)) {
                     if (shiftClick) {
                         tycoonBlock.dropItem(item, player);
-                        item.setAmount(0);
                     } else {
                         ItemStack droppedItem = new ItemStack(item.getType(), 1);
                         tycoonBlock.dropItem(droppedItem, player);
-                        item.setAmount(item.getAmount() - 1);
                     }
                 }
                 refresh(player, inventory);
@@ -175,7 +177,7 @@ public class TycoonInventory implements MenuInterface {
                 if (shiftClick) {
                     if (changeModeCooldown.isOnCooldown(player.getUniqueId())) {
                         player.sendMessage(ChatColor.RED + "You have to wait "
-                                + sellCooldown.getRemainingCooldownSeconds(player.getUniqueId())
+                                + changeModeCooldown.getRemainingCooldownSeconds(player.getUniqueId())
                                 + "s before you can change the mode again!");
                     } else {
                         InventoryMode nextMode = mode.nextMode();
@@ -191,7 +193,7 @@ public class TycoonInventory implements MenuInterface {
                 if (shiftClick) {
                     if (changeModeCooldown.isOnCooldown(player.getUniqueId())) {
                         player.sendMessage(ChatColor.RED + "You have to wait "
-                                + sellCooldown.getRemainingCooldownSeconds(player.getUniqueId())
+                                + changeModeCooldown.getRemainingCooldownSeconds(player.getUniqueId())
                                 + "s before you can change the mode again!");
                     } else {
                         InventoryMode nextMode = mode.nextMode();
@@ -242,17 +244,17 @@ public class TycoonInventory implements MenuInterface {
             item.setItemMeta(meta);
         } else plugin.getLogger().warning("Item meta is null");
     }
-    private ItemStack getModeItem(InventoryMode mode, Inventory inventory) {
+    private ItemStack getModeItem(InventoryMode mode) {
         return switch (mode) {
             case SELL_MODE -> {
-                double currentWorth = PriceUtility.calculateWorth(inventory);
+                String currentWorthFormatted = PriceUtility.formatMoney(PriceUtility.calculateWorth(tycoonBlock.getStoredItems()));
                 yield MenuManager.createItemstack(
                         Material.GREEN_STAINED_GLASS_PANE,
                         1,
                         mode.getDisplayName(),
                         Arrays.asList(
                                 "§8§m-----------------------",
-                                ChatColor.GREEN + "Sell all: " + PriceUtility.formatMoney(currentWorth),
+                                ChatColor.GREEN + "Sell all: " + currentWorthFormatted,
                                 "§8§m-----------------------",
                                 ChatColor.YELLOW + "[ Shift + Click to change Mode ]"
                         ),

@@ -15,19 +15,11 @@ public class TycoonAutoMineListener implements Listener {
     @EventHandler
     public void onTycoonAutoMine(TycoonAutoMinedEvent event) {
         TycoonBlock tycoon = event.getTycoonBlock();
-        Inventory inventory = tycoon.getDisplayInventory();
         Player owner = tycoon.getOfflineOwner().getPlayer();
 
         //add Item when Block is auto mined
         boolean itemFits = tycoon.addItem(event.getItemStack());
-        if (itemFits) {
-            for (org.bukkit.entity.HumanEntity entity : inventory.getViewers()) {
-                if (entity instanceof Player player) {
-                    //tycoon.getTycoonInventory().refresh(player, inventory);
-                    MenuManager.refreshOpenInventory(player, tycoon);
-                }
-            }
-        }else {
+        if (!itemFits) {
             if (owner != null) {
                 owner.sendMessage(ChatColor.RED + "Inventory full! Max size: " + tycoon.getInventoryStorage() + "-items");
             }
@@ -39,7 +31,5 @@ public class TycoonAutoMineListener implements Listener {
         for (Player player : Bukkit.getOnlinePlayers()) {
             MenuManager.refreshOpenInventory(player, tycoon);
         }
-
-
     }
 }

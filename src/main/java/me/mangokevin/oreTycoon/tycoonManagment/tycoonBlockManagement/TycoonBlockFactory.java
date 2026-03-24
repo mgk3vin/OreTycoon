@@ -29,9 +29,9 @@ public class TycoonBlockFactory {
 //    }
 
     //Creates a new Tycoon Block itemStack
-    public ItemStack createTycoonBlock(Player player, TycoonType type) {
+    public ItemStack createTycoonBlock(TycoonType type, int amount) {
 
-        ItemStack item = new ItemStack(type.getMaterial(), 1);
+        ItemStack item = new ItemStack(type.getMaterial(), amount);
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return null;
 

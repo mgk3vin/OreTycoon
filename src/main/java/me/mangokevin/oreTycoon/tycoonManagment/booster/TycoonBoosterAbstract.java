@@ -33,10 +33,10 @@ public abstract class TycoonBoosterAbstract {
         Console.log(getClass() ," Time Remaining: " + returnString);
         return returnString;
     }
-    public ItemStack getItem() {
+    public ItemStack getItem(int amount) {
         ItemStack boosterItem = MenuManager.createItemstack(
           getMaterial(),
-          1,
+          amount,
           getDisplayName(),
           getLore(),
           true,

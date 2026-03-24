@@ -76,8 +76,8 @@ public class TycoonManager {
 
     }
 
-    public void giveDefaultTycoonBlock(Player player, TycoonType type) {
-        ItemStack itemStack = tycoonFactory.createTycoonBlock(player, type);
+    public void giveDefaultTycoonBlock(Player player, TycoonType type, int amount) {
+        ItemStack itemStack = tycoonFactory.createTycoonBlock(type, amount);
         player.getInventory().addItem(itemStack);
     }
     public void giveSmartTycoonBlock(Player player, TycoonBlock smartTycoonBlock) {

@@ -108,31 +108,6 @@ public class TycoonBoosterManager {
         tycoonBlock.updateAttributes();
 
     }
-    @Deprecated
-    private void runSellMultiplierBoostTask(TycoonBoosterAbstract tycoonBooster) {
-        new BukkitRunnable() {
-            long tickCounter = 0L;
-            @Override
-            public void run() {
-                if (tycoonBlock == null || !plugin.isEnabled()) {
-                    Console.error("[TycoonBoosterManager] TycoonBlock is null or plugin is null");
-                    this.cancel();
-                    return;
-                }
-
-                tickCounter += 20L;
-                tycoonBooster.setDuration(sellMultiplierBoostTime - tickCounter);
-                Console.log("[TycoonBoosterManager] Time Remaining: " + (sellMultiplierBoostTime - tickCounter) + " ticks");
-                Bukkit.getPluginManager().callEvent(new TycoonBoosterTickedEvent(tycoonBlock, tycoonBooster));
-                if (tickCounter >= sellMultiplierBoostTime) {
-                    Console.log("[TycoonBoosterManager] Cancelling SellMultiplierBoostTask after " + tickCounter + " ticks.");
-                    isSellMultiplierBoosterActive = false;
-                    this.cancel();
-                }
-                Console.log("[TycoonBoosterManager] SellMultiplierBoostTask ticking");
-            }
-        }.runTaskTimer(plugin, 0L, 20L);
-    }
     private void runBoostTask(TycoonBoosterAbstract tycoonBooster, long boostTime, Runnable onFinish) {
         new BukkitRunnable() {
             long tickCounter = 0L;
@@ -146,8 +121,7 @@ public class TycoonBoosterManager {
 
                 tickCounter += 20L;
                 tycoonBooster.setDuration(boostTime - tickCounter);
-                //Console.log(getClass(), "Booster Duration: " + tycoonBooster.getDuration() + " ticks");
-                //Console.log("[TycoonBoosterManager] Time Remaining: " + (boostTime - tickCounter) + " ticks");
+
                 Bukkit.getPluginManager().callEvent(new TycoonBoosterTickedEvent(tycoonBlock, tycoonBooster));
                 if (tickCounter >= boostTime) {
                     //Console.log("[TycoonBoosterManager] Cancelling BoostTask after " + tickCounter + " ticks.");

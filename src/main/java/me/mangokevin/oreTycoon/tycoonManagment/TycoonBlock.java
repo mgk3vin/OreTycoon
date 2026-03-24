@@ -7,7 +7,6 @@ import de.oliver.fancyholograms.api.data.TextHologramData;
 import de.oliver.fancyholograms.api.hologram.Hologram;
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.events.tycoonEvents.TycoonUpdateEvent;
-import me.mangokevin.oreTycoon.menuManager.MenuManager;
 import me.mangokevin.oreTycoon.menuManager.TycoonInventory;
 import me.mangokevin.oreTycoon.events.tycoonEvents.TycoonAutoMinedEvent;
 import me.mangokevin.oreTycoon.events.tycoonEvents.TycoonChangedAttributesEvent;
@@ -51,17 +50,13 @@ public class TycoonBlock {
     private int level;
     private int levelXp;
 
-    private double storedBalance;
-
     private boolean isActive;
     private boolean shouldBeActive;
-    private Material lastSpawnedMaterial;
-
 
     private int tickCounter = 0;
     private int miningTickCounter = 0;
 
-    private final Inventory displayInventory;
+
     private final TycoonInventory tycoonInventory;
     private boolean autoMinerEnabled;
 
@@ -75,7 +70,6 @@ public class TycoonBlock {
 
     HologramManager manager = FancyHologramsPlugin.get().getHologramManager();
 
-    private final double basePrice;
     //<editor-fold desc="⚙️ Upgrade Variables">
     //⬇️========== Upgrade Attributes ==========⬇️
     private int spawnRate;
@@ -153,13 +147,11 @@ public class TycoonBlock {
         this.creationTime = System.currentTimeMillis();
         level = 1;
         levelXp = 0;
-        storedBalance = 0;
 
         this.autoMinerEnabled = false;
 
         this.type = type;
         this.material = type.getMaterial();
-        this.basePrice = type.getBasePrice();
         this.spawnRate = type.getSpawnInterval();
         this.miningRate = type.getMiningInterval();
         this.ressourceMaterialsMap = type.getResources();
@@ -204,7 +196,6 @@ public class TycoonBlock {
 
 
         this.tycoonInventory = new TycoonInventory(plugin, this, 0);
-        this.displayInventory = Bukkit.createInventory(new TycoonHolder(this.tycoonInventory), 36, tycoonDisplayName);
         checkIfBuffed();
     }
 
@@ -287,7 +278,7 @@ public class TycoonBlock {
         System.out.println("TycoonBlock Calculate Worth: " + PriceUtility.formatMoney(worth));
         if (worth <= 0) return 0.0;
         econ.depositPlayer(player, worth);
-        player.sendMessage(ChatColor.GREEN + "Sold items worth: " + PriceUtility.formatMoney(worth) + " with " + sellMultiplier + "x Sell Multiplier");
+        player.sendMessage(ChatColor.GREEN + "Sold items worth: " + PriceUtility.formatMoney(worth) + " with " + getSellMultiplierFormatted() + "x Sell Multiplier");
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.3f, 1);
         storedItems.clear();
         updateHologram();
@@ -295,12 +286,22 @@ public class TycoonBlock {
     }
 
     public void dropItem(ItemStack droppedItem, Player player) {
+        //Remove item from inventory map
+        int currentItems = storedItems.getOrDefault(droppedItem.getType(), 0);
+        int newAmount = currentItems - droppedItem.getAmount();
+
+        if (newAmount <= 0) {
+            storedItems.remove(droppedItem.getType());
+        } else {
+            storedItems.put(droppedItem.getType(), newAmount);
+        }
+
         Location dropLocation = location.clone();
         dropLocation.setY(dropLocation.getY() + 1);
         player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.3f, 1);
         ItemStack freshItem = new ItemStack(droppedItem.getType(), droppedItem.getAmount());
         player.getWorld().dropItem(dropLocation, freshItem);
-        updateHologramPreset(location, "WORTH");
+        updateHologram();
     }
 
     public void cleanInventory(Inventory inventory) {
@@ -346,14 +347,11 @@ public class TycoonBlock {
             Material material = getRandomMaterial(ressourceMaterialsMap);
             if (material == null) return;
             spawnBlock.setType(material);
-            //Gespawnten Block merken!
-            //spawnedBlocksMap.put(spawnBlock.getLocation(), spawnBlock);
             activeBlocks.add(spawnBlock);
 
             spawnBlock.setMetadata("tycoon_id", new FixedMetadataValue(plugin, blockUID));
 
-            //tycoonBlock.manipulateHologram(tycoonBlock.getLocation(), material.name());
-            setLastSpawnedMaterial(material);
+
             updateHologramPreset(getLocation(), "BLOCK");
             assert world != null;
             world.playSound(randomLocation, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.5f);
@@ -388,14 +386,11 @@ public class TycoonBlock {
                 Material material = getRandomMaterial(ressourceMaterialsMap);
                 if (material == null) return;
                 spawnBlock.setType(material);
-                //Gespawnten Block merken!
-                //spawnedBlocksMap.put(spawnBlock.getLocation(), spawnBlock);
+
                 activeBlocks.add(spawnBlock);
 
                 spawnBlock.setMetadata("tycoon_id", new FixedMetadataValue(plugin, blockUID));
 
-                //tycoonBlock.manipulateHologram(tycoonBlock.getLocation(), material.name());
-                setLastSpawnedMaterial(material);
                 updateHologramPreset(getLocation(), "BLOCK");
                 assert world != null;
                 world.playSound(randomLocation, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.5f);
@@ -412,20 +407,15 @@ public class TycoonBlock {
 
         spawnRateLevel = upgrades.getSpawnRateLevel();
         spawnRate = TycoonUpgrades.calculateNewSpawnRate(spawnRateLevel, type.getSpawnInterval());
+
         if (spawnSpeedBooster != null){
-            if (spawnRate >= minSpawnRate + spawnSpeedBooster.getBoostValue()){
-                spawnRate -= (int) spawnSpeedBooster.getBoostValue();
-            } else {
-                spawnRate = minSpawnRate;
-            }
+            spawnRate = Math.max(minSpawnRate, spawnRate  - (int) spawnSpeedBooster.getBoostValue());
         }
 
         miningRateLevel = upgrades.getMiningRateLevel();
         miningRate = TycoonUpgrades.calculateNewMiningRate(miningRateLevel, type.getMiningInterval());
         if (autoMinerSpeedBooster != null) {
-            Console.log(getClass(), "Miningrate before boost: " + miningRate);
-            miningRate -= (int) autoMinerSpeedBooster.getBoostValue();
-            Console.log(getClass(), "Auto Miner Speed with booster enabled: " + miningRate + " Booster Value: " + autoMinerSpeedBooster.getBoostValue());
+            miningRate = Math.max(min_mining_rate ,miningRate - (int) autoMinerSpeedBooster.getBoostValue());
         }
 
 
@@ -853,7 +843,7 @@ public class TycoonBlock {
         hologramData.addLine("Level: " + level);
         hologramData.addLine("xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + (int) levelManager.getProgressPercentage(levelXp, level + 1) + "%");
         hologramData.addLine(ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
-        double currentWorth = PriceUtility.calculateWorth(displayInventory);
+        double currentWorth = PriceUtility.calculateWorth(getStoredItems());
         hologramData.addLine(ChatColor.RESET + "Inventory: "+ ChatColor.GREEN + PriceUtility.formatMoney(currentWorth) + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
         hologramData.setBackground(Color.fromARGB(60, 80, 80, 80));
         hologramData.setPersistent(false);
@@ -1089,33 +1079,7 @@ public class TycoonBlock {
         storedItems.merge(itemStack.getType(), itemStack.getAmount(), Integer::sum);
         return true;
     }
-    public boolean isStorageFull(){
-        return getStoredItemsAmount() >= inventoryStorage;
-    }
-    @Deprecated
-    public boolean canFitItem(Inventory inv, ItemStack item) {
 
-        if (getStoredItemsAmount() + item.getAmount() > inventoryStorage) {
-            //Storage is Full
-            return false;
-        }
-        // 1. Gibt es überhaupt einen komplett leeren Slot?
-        if (inv.firstEmpty() != -1) return true;
-
-        // 2. Wenn kein leerer Slot da ist, prüfe, ob ein existierender Stack
-        // des gleichen Typs noch Platz für weitere Items hat.
-
-        for (ItemStack content : inv.getContents()) {
-            if (content != null && content.isSimilar(item)) {
-                if (content.getAmount() < content.getMaxStackSize()) {
-
-                    return true; // Es ist noch Platz in diesem Stack
-                }
-            }
-        }
-
-        return false; // Absolut kein Platz mehr
-    }
     // ---------     Adder      ---------
     // ---------     Getter      ---------
     public int getIndex() {
@@ -1161,9 +1125,6 @@ public class TycoonBlock {
             return ChatColor.RED + "offline..." + ChatColor.RESET;
         }
     }
-    public Material getLastSpawnedMaterial() {
-        return lastSpawnedMaterial;
-    }
     public int getSpawnRate() {
         return spawnRate;
     }
@@ -1182,21 +1143,11 @@ public class TycoonBlock {
     public boolean isAutoMinerEnabled() {
         return autoMinerEnabled;
     }
-
-    public Inventory getDisplayInventory() {
-        return displayInventory;
-    }
-    public double getStoredBalance(){
-        return storedBalance;
-    }
     public TycoonInventory getTycoonInventory() {
         return tycoonInventory;
     }
     public int getSpawnRateLevel() {
         return spawnRateLevel;
-    }
-    public int getMiningRate() {
-        return miningRate;
     }
     public int getMiningRateLevel() {
         return miningRateLevel;
@@ -1246,10 +1197,13 @@ public class TycoonBlock {
         return isLoaded;
     }
     public boolean isInventoryFull(){
-        return getStoredItemsAmount() >= inventoryStorage;
+        return isStorageFull();
     }
     public Map<Material, Integer> getStoredItems(){
         return storedItems;
+    }
+    public boolean isStorageFull(){
+        return getStoredItemsAmount() >= inventoryStorage;
     }
     // ---------     Getter      ---------
 
@@ -1270,12 +1224,6 @@ public class TycoonBlock {
     public void setActiveByPlayer(boolean activeByPlayer) {
         this.shouldBeActive = activeByPlayer;
         setActive(activeByPlayer);
-    }
-    public void setLastSpawnedMaterial(Material lastSpawnedMaterial) {
-        this.lastSpawnedMaterial = lastSpawnedMaterial;
-    }
-    public void setSpawnRate(int spawnRate) {
-        this.spawnRate = spawnRate;
     }
     public void setCreationTime(long creationTime) {
         this.creationTime = creationTime;

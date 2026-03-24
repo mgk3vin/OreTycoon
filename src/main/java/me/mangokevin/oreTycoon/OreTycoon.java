@@ -52,6 +52,8 @@ public final class OreTycoon extends JavaPlugin {
     private static Economy econ = null;
     private static IEssentials essentials;
 
+    private TycoonCmd tycoonCmd;
+
     private static OreTycoon instance;
 
     public OreTycoon() {}
@@ -146,8 +148,9 @@ public final class OreTycoon extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerLeaveListener(this), this);
         getServer().getPluginManager().registerEvents(new TycoonSpawnedBlockMinedListener(), this);
-        Objects.requireNonNull(getCommand("tycoon")).setExecutor(new TycoonCmd(this));
-        Objects.requireNonNull(getCommand("tycoon")).setTabCompleter(new TycoonTabCompleter());
+        tycoonCmd = new TycoonCmd(this);
+        Objects.requireNonNull(getCommand("tycoon")).setExecutor(tycoonCmd);
+        Objects.requireNonNull(getCommand("tycoon")).setTabCompleter(new TycoonTabCompleter(this));
         //-----------------------   Listeners & Commands    -----------------------
 
         //blockManager.loadTycoons();
@@ -239,5 +242,8 @@ public final class OreTycoon extends JavaPlugin {
     }
     public TycoonManager getTycoonManager() {
         return tycoonManager;
+    }
+    public TycoonCmd getTycoonCmd() {
+        return tycoonCmd;
     }
 }
