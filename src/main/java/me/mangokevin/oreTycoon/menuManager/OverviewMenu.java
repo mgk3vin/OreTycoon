@@ -19,7 +19,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
@@ -277,7 +276,8 @@ public class OverviewMenu implements MenuInterface{
             if (tycoonIndex >= allTycoons.size()) break;
 
             TycoonBlock tycoonBlock = allTycoons.get(tycoonIndex);
-            totalWorth += tycoonBlock.sellInventory(tycoonBlock.getInventory(), p);
+            //totalWorth += tycoonBlock.sellInventory(tycoonBlock.getDisplayInventory(), p);
+            totalWorth += tycoonBlock.sellTycoonInventory(p);
         }
         p.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "--------------------------");
         p.sendMessage(ChatColor.GREEN + "Total Amount: " + PriceUtility.formatMoney(totalWorth));
@@ -310,7 +310,7 @@ public class OverviewMenu implements MenuInterface{
             if (tycoonIndex >= allTycoons.size()) break;
 
             TycoonBlock tycoonBlock = allTycoons.get(tycoonIndex);
-            totalWorth += PriceUtility.calculateWorth(tycoonBlock.getInventory());
+            totalWorth += PriceUtility.calculateWorth(tycoonBlock.getStoredItems());
         }
         // Das Menü komplett neu laden, um alle Items (Tycoons + Button) zu aktualisieren
         return totalWorth;

@@ -29,9 +29,9 @@ public class TycoonBlockFactory {
 //    }
 
     //Creates a new Tycoon Block itemStack
-    public ItemStack createTycoonBlock(Player player, TycoonType type) {
+    public ItemStack createTycoonBlock(TycoonType type, int amount) {
 
-        ItemStack item = new ItemStack(type.getMaterial(), 1);
+        ItemStack item = new ItemStack(type.getMaterial(), amount);
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return null;
 
@@ -61,16 +61,7 @@ public class TycoonBlockFactory {
         TycoonType tycoonType = smartTycoonBlock.getTycoonType();
         ItemStack tycoonItem = new ItemStack(tycoonType.getMaterial(), 1);
 
-        TycoonData.writeToItem(tycoonItem,
-                smartTycoonBlock.getLevel(),
-                smartTycoonBlock.getLevelXp(),
-                smartTycoonBlock.getLocation(),
-                smartTycoonBlock.getMaterial(),
-                smartTycoonBlock.getSpawnRate(),
-                smartTycoonBlock.getCreationTime(),
-                smartTycoonBlock.getTycoonType().name(),
-                smartTycoonBlock.getInventory(),
-                smartTycoonBlock.getTycoonUpgrades());
+        TycoonData.writeToItem(smartTycoonBlock, tycoonItem);
 
         ItemMeta tycoonMeta = tycoonItem.getItemMeta();
 
@@ -86,7 +77,7 @@ public class TycoonBlockFactory {
         lore.add("§7Progress: §f" + smartTycoonBlock.getProgressBar(20));
         lore.add("§7Spawnrate: §f" + smartTycoonBlock.getSpawnRateFormatted() + "s");
         lore.add("§8§m-------§r§8Inventory§m--------");
-        lore.add("§7Size: " + smartTycoonBlock.getStorageStatisticFormatted() + ChatColor.WHITE + " | " + ChatColor.GREEN + PriceUtility.calculateWorthFormatted(smartTycoonBlock.getInventory()));
+        lore.add("§7Size: " + smartTycoonBlock.getStorageStatisticFormatted() + ChatColor.WHITE + " | " + ChatColor.GREEN + PriceUtility.formatMoney(PriceUtility.calculateWorth(smartTycoonBlock.getStoredItems())));
         lore.add("§8§m-----------------------");
         tycoonMeta.setLore(lore);
         tycoonMeta.setDisplayName(smartTycoonBlock.getTycoonType().getName());

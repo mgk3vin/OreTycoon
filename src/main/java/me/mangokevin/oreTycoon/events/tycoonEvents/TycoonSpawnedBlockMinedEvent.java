@@ -1,6 +1,7 @@
 package me.mangokevin.oreTycoon.events.tycoonEvents;
 
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
+import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.SpawnBlock;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -16,12 +17,14 @@ public class TycoonSpawnedBlockMinedEvent extends Event {
     private final Block block;
     private final BlockBreakEvent blockBreakEvent;
     private final Player player;
+    private final SpawnBlock spawnBlock;
 
-    public TycoonSpawnedBlockMinedEvent(TycoonBlock tycoonBlock, BlockBreakEvent blockBreakEvent, Block block, Player player) {
+    public TycoonSpawnedBlockMinedEvent(TycoonBlock tycoonBlock, BlockBreakEvent blockBreakEvent, Block block, Player player, SpawnBlock spawnBlock) {
         this.tycoonBlock = tycoonBlock;
         this.block = block;
         this.blockBreakEvent = blockBreakEvent;
         this.player = player;
+        this.spawnBlock = spawnBlock;
     }
 
     public TycoonBlock getTycoonBlock() {
@@ -36,7 +39,9 @@ public class TycoonSpawnedBlockMinedEvent extends Event {
     public Player getPlayer() {
         return player;
     }
-
+    public SpawnBlock getSpawnBlock() {
+        return spawnBlock;
+    }
     @Override
     public @NotNull HandlerList getHandlers() {
         return HANDLERS;

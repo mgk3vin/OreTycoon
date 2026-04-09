@@ -43,4 +43,10 @@ public class ToggleAllTycoonsSubcommand implements TycoonSubCommand{
                 player.sendMessage(ChatColor.RED + "Incorrect Usage. Use /tycoon toggle_all <on/off>");
         }
     }
+    public List<String> getTabCompletions(String[] args, Player player) {
+        if (args.length == 2) {
+            return List.of("on", "off");
+        }
+        return List.of();
+    }
 }

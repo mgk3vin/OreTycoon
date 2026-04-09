@@ -346,6 +346,9 @@ public class TycoonWorldManager {
         }
         return -1;
     }
+    public List<String> getWorldsFromPlayer(UUID uuid) {
+        return playerWorlds.getOrDefault(uuid, new ArrayList<>());
+    }
 
     private String generateWorldName(Player player, int worldNumber) {
         return "tycoon_" + player.getName() + "_" + worldNumber;

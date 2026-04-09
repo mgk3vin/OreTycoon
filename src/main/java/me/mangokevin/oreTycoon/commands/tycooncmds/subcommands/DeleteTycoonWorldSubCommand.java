@@ -6,6 +6,8 @@ import me.mangokevin.oreTycoon.tycoonManagment.tycoonWorlds.TycoonWorldManager;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+
 public class DeleteTycoonWorldSubCommand implements TycoonSubCommand {
     private final OreTycoon plugin;
     private final TycoonWorldManager worldManager;
@@ -31,5 +33,17 @@ public class DeleteTycoonWorldSubCommand implements TycoonSubCommand {
         }catch (NumberFormatException e) {
             player.sendMessage(ChatColor.RED + "Invalid world name");
         }
+    }
+    @Override
+    public List<String> getTabCompletions(String[] args, Player player) {
+        if (args.length == 2) {
+            List<String> worldNames = worldManager.getWorldsFromPlayer(player.getUniqueId());
+            if (worldNames.isEmpty()) {
+                return List.of("No world found!");
+            } else {
+                return worldNames;
+            }
+        }
+        return List.of();
     }
 }

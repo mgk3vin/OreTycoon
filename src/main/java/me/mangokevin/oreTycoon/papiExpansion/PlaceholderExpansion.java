@@ -69,7 +69,7 @@ public class PlaceholderExpansion extends me.clip.placeholderapi.expansion.Place
                     case "level" -> String.valueOf(t.getLevel());
                     case "status" -> t.isActive() ? "true" : "false";
                     case "location" -> t.getLocation().getBlockX() + ", " + t.getLocation().getBlockZ();
-                    case "material" -> t.getMaterial().name();
+                    case "material" -> t.getTycoonMaterial().name();
                     case "spawninterval" -> String.valueOf(t.getSpawnRate());
                     case "spawnrate" -> String.valueOf(t.getSpawnRate());
                     case "exists" -> "true";
@@ -101,7 +101,7 @@ public class PlaceholderExpansion extends me.clip.placeholderapi.expansion.Place
             case "progress_bar" -> String.valueOf(tycoonBlock.getProgressBar(20));
             case "status" -> String.valueOf(tycoonBlock.isActive());
             case "owner" -> String.valueOf(tycoonBlock.getOfflineOwner().getName());
-            case "material" -> tycoonBlock.getMaterial().name();
+            case "material" -> tycoonBlock.getTycoonMaterial().name();
             case "index" -> String.valueOf(tycoonBlock.getIndex());
             default -> null;
         };

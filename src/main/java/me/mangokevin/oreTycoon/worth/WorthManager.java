@@ -2,6 +2,8 @@ package me.mangokevin.oreTycoon.worth;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.events.tycoonEvents.StockMarketUpdatedEvent;
+import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.StoredItemKey;
+import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.SpawnBlock;
 import me.mangokevin.oreTycoon.utility.Console;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -31,7 +33,7 @@ public class WorthManager {
     private final Map<Material, Double> baseWorthCache = new HashMap<>();
     private final Map<Material, Double> multiplierCache = new HashMap<>();
 
-    private final double maxPriceChange = 0.2;
+    private static final double maxPriceChange = 0.2;
 
     Random rand = new Random();
 
@@ -141,6 +143,29 @@ public class WorthManager {
 
         return Math.round(result * 100.0) / 100.0;
     }
+    public double getWorth(StoredItemKey key){
+        if (!baseWorthCache.containsKey(key.material())) {
+            return 0.0;
+        }
+        double baseWorth = baseWorthCache.get(key.material());
+        double rarityMultiplier = key.rarity().getWorthMulti();
+        double stockMultiplier = multiplierCache.get(key.material());
+
+        double result = baseWorth * rarityMultiplier * stockMultiplier;
+
+        return Math.round(result * 100.0) / 100.0;
+    }
+    public double getWorth(Map<StoredItemKey, Integer> items) {
+        double totalWorth = 0.0;
+        for (Map.Entry<StoredItemKey, Integer> entry : items.entrySet()) {
+            double worth = getWorth(entry.getKey()) * entry.getValue();
+            totalWorth += worth;
+        }
+        return Math.round(totalWorth * 100.0) / 100.0;
+    }
+    public double getWorth(SpawnBlock spawnBlock) {
+        return getWorth(new StoredItemKey(spawnBlock.getMaterial(), spawnBlock.getSpawnMaterialRarity()));
+    }
 
     public void updateStockMarket() {
         Console.log(getClass(), "Updating prices...");
@@ -181,7 +206,7 @@ public class WorthManager {
             }
 
             for (Material material : multiplierCache.keySet()) {
-                stockConfig.set("trends." + material.name(), getTrendEmoji(material));
+                stockConfig.set("trends." + material, getTrendEmoji(material));
             }
 
             stockConfig.save(stockMarketFile);

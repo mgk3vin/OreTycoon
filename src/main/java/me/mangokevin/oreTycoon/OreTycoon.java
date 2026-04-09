@@ -10,6 +10,7 @@ import me.mangokevin.oreTycoon.listener.*;
 import me.mangokevin.oreTycoon.papiExpansion.PlaceholderExpansion;
 import me.mangokevin.oreTycoon.scoreboard.ScoreBoardManager;
 import me.mangokevin.oreTycoon.sqlite.DatabaseManager;
+import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.SpawnBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonManager;
@@ -23,7 +24,6 @@ import me.mangokevin.oreTycoon.worth.WorthManager;
 import net.ess3.api.IEssentials;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -31,9 +31,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.mvplugins.multiverse.core.MultiverseCoreApi;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public final class OreTycoon extends JavaPlugin {
 
@@ -51,6 +49,8 @@ public final class OreTycoon extends JavaPlugin {
     private DatabaseManager databaseManager;
     private static Economy econ = null;
     private static IEssentials essentials;
+
+    private TycoonCmd tycoonCmd;
 
     private static OreTycoon instance;
 
@@ -85,15 +85,6 @@ public final class OreTycoon extends JavaPlugin {
 
         //========= WorthManager setup =========
         this.worthManager = new WorthManager(this);
-
-//        new BukkitRunnable() {
-//
-//            @Override
-//            public void run() {
-//                worthManager.updateStockMarket();
-//                Bukkit.broadcastMessage(ChatColor.GOLD + "📊 Stock Market updated!");
-//            }
-//        }.runTaskTimer(this, 0, 20L * 60 * 10);
         //========= WorthManager setup =========
 
         this.levelManager = new LevelManager();
@@ -146,8 +137,9 @@ public final class OreTycoon extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerLeaveListener(this), this);
         getServer().getPluginManager().registerEvents(new TycoonSpawnedBlockMinedListener(), this);
-        Objects.requireNonNull(getCommand("tycoon")).setExecutor(new TycoonCmd(this));
-        Objects.requireNonNull(getCommand("tycoon")).setTabCompleter(new TycoonTabCompleter());
+        tycoonCmd = new TycoonCmd(this);
+        Objects.requireNonNull(getCommand("tycoon")).setExecutor(tycoonCmd);
+        Objects.requireNonNull(getCommand("tycoon")).setTabCompleter(new TycoonTabCompleter(this));
         //-----------------------   Listeners & Commands    -----------------------
 
         //blockManager.loadTycoons();
@@ -182,7 +174,7 @@ public final class OreTycoon extends JavaPlugin {
     @Override
     public void onDisable() {
         for (TycoonBlock tycoonBlock : tycoonRegistry.getAllTycoons()){
-            Set<Block> snapshot = new HashSet<>(tycoonBlock.getActiveBlocks());
+            List<SpawnBlock> snapshot = new ArrayList<>(tycoonBlock.getActiveBlocks());
             databaseManager.saveTycoon(tycoonBlock, snapshot);
         }
 //        if (blockManager != null) {
@@ -239,5 +231,8 @@ public final class OreTycoon extends JavaPlugin {
     }
     public TycoonManager getTycoonManager() {
         return tycoonManager;
+    }
+    public TycoonCmd getTycoonCmd() {
+        return tycoonCmd;
     }
 }

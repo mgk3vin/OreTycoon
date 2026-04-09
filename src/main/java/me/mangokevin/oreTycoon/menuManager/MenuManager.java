@@ -10,6 +10,7 @@ import me.mangokevin.oreTycoon.utility.Console;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
@@ -80,10 +81,21 @@ public class MenuManager {
             menu.refresh(player, openInventory);
         }
     }
-
-    public void openTycoonOverview(Player player, int page) {
-        new OverviewMenu(plugin, page).open(player);
+    public static void addNameSpacedKey(NamespacedKey key, ItemStack itemStack, String name) {
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        if (itemMeta == null) {return;}
+        PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
+        pdc.set(key, PersistentDataType.STRING, name);
+        itemStack.setItemMeta(itemMeta);
     }
+    public static void addNameSpacedKey(NamespacedKey key, ItemStack itemStack, int index) {
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        if (itemMeta == null) {return;}
+        PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
+        pdc.set(key, PersistentDataType.INTEGER, index);
+        itemStack.setItemMeta(itemMeta);
+    }
+
     public ItemStack createTycoonItem(TycoonBlock block){
         String autoMinerStatus = (block.getTycoonUpgrades().isAutoMinerUnlocked() ?
                 (block.isAutoMinerEnabled() ? ChatColor.GREEN + "Enabled" : ChatColor.RED + "Disabled")
@@ -96,13 +108,14 @@ public class MenuManager {
                 ChatColor.GRAY + "AutoMiner: " + ChatColor.RESET + autoMinerStatus,
                 ChatColor.GRAY + "Level: " + block.getLevel(),
                 block.getProgressBar(20) + " " + block.getProgressPercentage() + "%",
+                ChatColor.GRAY + "Inventory: " + block.getStorageStatisticFormatted(),
                 ChatColor.GRAY + "Spawn rate: " + block.getSpawnRateFormatted() + (block.getTycoonBoosterManager().isSpawnSpeedBoosterActive() ? ChatColor.GREEN + " [Boost -" + (block.getSpawnSpeedBooster().getBoostValue()/20) + "s]" : ""),
                 ChatColor.GRAY + "Mining rate: " + (block.getTycoonUpgrades().isAutoMinerUnlocked() ? getMiningRateDisplay(block ): ChatColor.RED + "[LOCKED]"),
                 ChatColor.GRAY + "Sell Multiplier: " + block.getSellMultiplierFormatted() + (block.getTycoonBoosterManager().isSellMultiplierBoosterActive() ? ChatColor.GREEN + " [Boost +" + block.getSellMultiplierBooster().getBoostValue() + "x]" : ""),
                 "§8§m-----------------------");
 
         ItemStack stats = createItemstack(
-                block.getMaterial(),
+                block.getTycoonMaterial(),
                 1,
                 block.getTycoonType().getName() + " #" + block.getIndex(),
                 lore,

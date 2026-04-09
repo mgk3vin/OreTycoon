@@ -59,7 +59,7 @@ public class StatsMenu implements MenuInterface {
 
         //Inventory Icon slot 18
         List<String> inventoryLore = Arrays.asList("§8§m-----------------------",
-                ChatColor.WHITE + "Worth: "  + ChatColor.GREEN + PriceUtility.calculateWorthFormatted(tycoonBlock.getInventory()),
+                ChatColor.WHITE + "Worth: "  + ChatColor.GREEN + PriceUtility.formatMoney(PriceUtility.calculateWorth(tycoonBlock.getStoredItems())),
                 ChatColor.WHITE + "Storage: " + tycoonBlock.getStorageStatisticFormatted() + " items",
                 "§8§m-----------------------",
                 ChatColor.YELLOW + "[Left click to open]",
@@ -154,13 +154,13 @@ public class StatsMenu implements MenuInterface {
         }
         //Booster Icon slot 23
         if (tycoonBlock.getTycoonBoosterManager().isAutoMinerBoosterActive()) {
-            ItemStack autoMinerBooster = tycoonBlock.getAutoMinerSpeedBooster().getItem();
+            ItemStack autoMinerBooster = tycoonBlock.getAutoMinerSpeedBooster().getItem(1);
             inventory.setItem(23, autoMinerBooster);
         } else if (tycoonBlock.getTycoonBoosterManager().isSellMultiplierBoosterActive()) {
-            ItemStack sellMultiplierBooster = tycoonBlock.getSellMultiplierBooster().getItem();
+            ItemStack sellMultiplierBooster = tycoonBlock.getSellMultiplierBooster().getItem(1);
             inventory.setItem(23, sellMultiplierBooster);
         }else if (tycoonBlock.getTycoonBoosterManager().isSpawnSpeedBoosterActive()){
-            ItemStack spawnSpeedBooster = tycoonBlock.getSpawnSpeedBooster().getItem();
+            ItemStack spawnSpeedBooster = tycoonBlock.getSpawnSpeedBooster().getItem(1);
             inventory.setItem(23, spawnSpeedBooster);
         }
         else {
@@ -233,7 +233,7 @@ public class StatsMenu implements MenuInterface {
                 }else{
                     levelPage = 0;
                 }
-                new TycoonLevelPath(tycoonBlock, levelPage, plugin).open(player);
+                new TycoonLevelPathMenu(tycoonBlock, levelPage, plugin).open(player);
                 break;
             case "upgrades":
                 new TycoonUpgradeMenu(tycoonBlock, plugin).open(player);
@@ -243,9 +243,10 @@ public class StatsMenu implements MenuInterface {
                 break;
             case "inventory":
                 if (inventoryClick == ClickType.LEFT) {
-                    new TycoonInventory(tycoonBlock, plugin).open(player);
+                    new TycoonInventory(plugin, tycoonBlock, 0).open(player);
                 }else if (inventoryClick == ClickType.RIGHT) {
-                    tycoonBlock.sellInventory(tycoonBlock.getInventory(), player);
+                    //tycoonBlock.sellInventory(tycoonBlock.getDisplayInventory(), player);
+                    tycoonBlock.sellTycoonInventory(player);
                     refresh(player, inventory);
                 }
                 break;

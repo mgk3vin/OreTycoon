@@ -21,7 +21,7 @@ public abstract class TycoonBoosterAbstract {
         this.duration = duration;
     }
 
-    protected String getRemainingTimeFormatted(long duration) {
+    public String getRemainingTimeFormatted(long duration) {
         long totalSeconds = duration / 20; // Ticks in Sekunden umwandeln
         long minutes = totalSeconds / 60;
         long seconds = totalSeconds % 60;
@@ -33,10 +33,10 @@ public abstract class TycoonBoosterAbstract {
         Console.log(getClass() ," Time Remaining: " + returnString);
         return returnString;
     }
-    public ItemStack getItem() {
+    public ItemStack getItem(int amount) {
         ItemStack boosterItem = MenuManager.createItemstack(
           getMaterial(),
-          1,
+          amount,
           getDisplayName(),
           getLore(),
           true,

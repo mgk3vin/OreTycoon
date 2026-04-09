@@ -3,44 +3,27 @@ package me.mangokevin.oreTycoon.commands.tycooncmds;
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.commands.tycooncmds.subcommands.*;
 import me.mangokevin.oreTycoon.menuManager.*;
-import me.mangokevin.oreTycoon.menuManager.worldMenus.WorldSettingsMenu;
-import me.mangokevin.oreTycoon.menuManager.worldMenus.WorldsMenu;
 import me.mangokevin.oreTycoon.tycoonManagment.*;
-import me.mangokevin.oreTycoon.tycoonManagment.booster.AutoMinerSpeedBooster;
-import me.mangokevin.oreTycoon.tycoonManagment.booster.SellMultiplyBooster;
-import me.mangokevin.oreTycoon.tycoonManagment.booster.SpawnSpeedBooster;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonManager;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonWorlds.TycoonWorldManager;
-import me.mangokevin.oreTycoon.worth.WorthManager;
 import org.bukkit.ChatColor;
-import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.lang.reflect.Array;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class TycoonCmd implements CommandExecutor {
 
     private final OreTycoon plugin;
-    private final TycoonManager tycoonManager;
-    private final TycoonRegistry tycoonRegistry;
-    private final MenuManager menuManager;
-    private final TycoonWorldManager tycoonWorldManager;
 
     private final Map<String, TycoonSubCommand> subCommands = new HashMap<>();
 
     public TycoonCmd(OreTycoon plugin) {
         this.plugin = plugin;
-        this.tycoonManager = plugin.getTycoonManager();
-        tycoonRegistry = plugin.getTycoonRegistry();
-        this.menuManager = plugin.getMenuManager();
-        this.tycoonWorldManager = plugin.getTycoonWorldManager();
 
         register(new WorldsSubCommand(plugin), "worlds", "world", "island");
         register(new CreateTycoonWorldSubCommand(plugin), "create", "new");
@@ -82,6 +65,10 @@ public class TycoonCmd implements CommandExecutor {
             p.sendMessage(ChatColor.RED + "Unknown Command!");
         }
         return true;
+    }
+
+    public Map<String, TycoonSubCommand> getSubCommands() {
+        return subCommands;
     }
 }
 

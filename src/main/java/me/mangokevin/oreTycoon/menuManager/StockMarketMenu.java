@@ -4,6 +4,8 @@ import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonHolder;
+import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.SpawnMaterialRarity;
+import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.StoredItemKey;
 import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.worth.PriceUtility;
 import me.mangokevin.oreTycoon.worth.WorthManager;
@@ -170,7 +172,6 @@ public class StockMarketMenu implements MenuInterface {
 
     }
 
-
     private List<Material> sortMaterials(Map<Material, Double> allWorths, SortMode sortMode) {
         List<Material> materials = new ArrayList<>(allWorths.keySet());
 
@@ -263,19 +264,31 @@ public class StockMarketMenu implements MenuInterface {
         double worthMultiplier = worthManager.getMultiplier(material);
         worthMultiplier = Math.round(worthMultiplier*100.0)/100.0;
         double worthMultiplierFormatted = Math.round(worthMultiplier * 100.0 - 100.0);
-        String worthFormatted = PriceUtility.formatMoney(worthManager.getWorth(material));
+
+
+        String stockMultiFormatted = (worthMultiplier >= 1.0 ? ChatColor.GREEN + " +"  + worthMultiplierFormatted + "%" : ChatColor.RED + " " + worthMultiplierFormatted + "%");
 
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         List<String> lore = Arrays.asList(
                 "§8§m-----------------------",
-                ChatColor.GRAY + "Worth: " + worthFormatted + (worthMultiplier >= 1.0 ? ChatColor.GREEN + " ( +" + worthMultiplierFormatted + "% )" : ChatColor.RED + " ( " + worthMultiplierFormatted + "% )"),
-                ChatColor.GRAY + "Trend: " + (worthManager.getMultiplier(material) >= 1.0 ? ChatColor.GREEN + worthManager.getTrend(material) : ChatColor.RED + worthManager.getTrend(material)),
+                SpawnMaterialRarity.COMMON.getDisplayName() + ":     "  + getWorthFormatted(material, SpawnMaterialRarity.COMMON),
+                SpawnMaterialRarity.UNCOMMON.getDisplayName() + ":  "  + getWorthFormatted(material, SpawnMaterialRarity.UNCOMMON),
+                SpawnMaterialRarity.RARE.getDisplayName() + ":        "  + getWorthFormatted(material, SpawnMaterialRarity.RARE),
+                SpawnMaterialRarity.EPIC.getDisplayName() + ":         "  + getWorthFormatted(material, SpawnMaterialRarity.EPIC),
+                SpawnMaterialRarity.LEGENDARY.getDisplayName() + ": "  + getWorthFormatted(material, SpawnMaterialRarity.LEGENDARY),
+                "§8§m-----------------------",
+                ChatColor.GRAY + "Trend: " + stockMultiFormatted + " | " + (worthManager.getMultiplier(material) >= 1.0 ? ChatColor.GREEN + worthManager.getTrend(material) : ChatColor.RED + worthManager.getTrend(material)),
                 "§8§m-----------------------");
         assert meta != null;
         meta.setLore(lore);
         item.setItemMeta(meta);
 
         return item;
+    }
+
+    private String getWorthFormatted(Material material, SpawnMaterialRarity rarity) {
+        double worth = worthManager.getWorth(new StoredItemKey(material, rarity));
+        return PriceUtility.formatMoney(worth);
     }
 }

@@ -48,9 +48,6 @@ public class TycoonUpgrades {
     public static int getMaxInventoryStorage(int level, int defaultMaxStorage){
         return  defaultMaxStorage + (5 * level);
     }
-    public static int calculateMaxInventoryStorage(int level, int defaultMaxStorage){
-        return  defaultMaxStorage + (5 * level);
-    }
 
     public static double getSpawnRateUpgradeCost(TycoonBlock tycoonBlock, int level){
         double base = tycoonBlock.getTycoonType().getBasePrice();

@@ -4,6 +4,9 @@ import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonHolder;
+import me.mangokevin.oreTycoon.tycoonManagment.levelManagement.LevelReward;
+import me.mangokevin.oreTycoon.tycoonManagment.levelManagement.LevelRewardRegistry;
+import me.mangokevin.oreTycoon.utility.Console;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -18,15 +21,16 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
-public class TycoonLevelPath implements MenuInterface{
+public class TycoonLevelPathMenu implements MenuInterface{
 
     private final List<Integer> usableSlots = Arrays.asList(9, 10, 19, 28, 37, 38, 39, 30, 21, 12, 13, 14, 23, 32, 41, 42, 43, 34, 25, 16, 17);
     private final TycoonBlock tycoonBlock;
     private final int page;
     private final OreTycoon plugin;
 
-    public TycoonLevelPath(TycoonBlock tycoonBlock, int page, OreTycoon plugin) {
+    public TycoonLevelPathMenu(TycoonBlock tycoonBlock, int page, OreTycoon plugin) {
         this.tycoonBlock = tycoonBlock;
         this.page = page;
         this.plugin = plugin;
@@ -50,8 +54,10 @@ public class TycoonLevelPath implements MenuInterface{
         for (int i = 0; i < usableSlots.size(); i++) {
             int slot = usableSlots.get(i);
             int level = i + 1 + startIndex;
+            int index = i + startIndex;
             int currentTycoonLevel = tycoonBlock.getLevel();
             boolean isClaimed = tycoonBlock.getTycoonUpgrades().hasClaimedLevel(level);
+
 
             ItemStack levelItem;
             if(isClaimed){
@@ -65,54 +71,8 @@ public class TycoonLevelPath implements MenuInterface{
                         true,
                          true,
                         "level_item_claimed");
-            }else if(currentTycoonLevel >= level){
-                switch (level) {
-                    case 1, 2, 3, 4:
-                        levelItem = MenuManager.createItemstack(Material.CHEST_MINECART,
-                                1,
-                                ChatColor.AQUA + "Level " + level,
-                                Arrays.asList("§8§m-----------------------",
-                                        ChatColor.GREEN + "+5 MaxStorage",
-                                        ChatColor.GREEN + "+ 1 Sell Multiplier Level",
-                                        "",
-                                        ChatColor.GRAY + "[Click to claim Reward]",
-                                        "§8§m-----------------------"),
-                                true,
-                                true,
-                                true,
-                                "level_item_claim");
-                        break;
-                    case 5:
-                        levelItem = MenuManager.createItemstack(Material.CHEST_MINECART,
-                                1,
-                                ChatColor.AQUA + "Level " + level,
-                                Arrays.asList("§8§m-----------------------",
-                                        ChatColor.GREEN + "+ Auto Miner",
-                                        ChatColor.GREEN + "+ 1 Sell Multiplier Level",
-                                        "",
-                                        ChatColor.GRAY + "[Click to claim Reward]",
-                                        "§8§m-----------------------"),
-                                true,
-                                true,
-                                true,
-                                "level_item_claim");
-                        break;
-                    default:
-                        levelItem = MenuManager.createItemstack(Material.CHEST_MINECART,
-                                1,
-                                ChatColor.AQUA + "Level " + level,
-                                Arrays.asList("§8§m-----------------------",
-                                        ChatColor.GREEN + "+ test",
-                                        ChatColor.GREEN + "+ 1 Sell Multiplier Level",
-                                        "",
-                                        ChatColor.GRAY + "[Click to claim Reward]",
-                                        "§8§m-----------------------"),
-                                true,
-                                true,
-                                true,
-                                "level_item_claim");
-                        break;
-                }
+            } else if (currentTycoonLevel >= level){
+                levelItem = Objects.requireNonNull(LevelRewardRegistry.getLevelReward(level, tycoonBlock)).getDisplayItem();
             } else {
                 levelItem = MenuManager.createItemstack(Material.RED_STAINED_GLASS_PANE,
                         1,
@@ -124,6 +84,10 @@ public class TycoonLevelPath implements MenuInterface{
                         true,
                         true,
                         "level_item_locked");
+            }
+
+            if (level > LevelRewardRegistry.getSize()){
+                levelItem = new ItemStack(Material.AIR);
             }
 
             ItemMeta levelItemMeta = levelItem.getItemMeta();
@@ -147,15 +111,18 @@ public class TycoonLevelPath implements MenuInterface{
                     "prev_page");
             inventory.setItem(45, prev_page);
         }
-        ItemStack next_page = MenuManager.createItemstack(Material.ARROW,
-                1,
-                "Next Page ->",
-                null,
-                false,
-                true,
-                true,
-                "next_page");
-        inventory.setItem(53, next_page);
+        if (page < (LevelRewardRegistry.getSize() / usableSlots.size())) {
+            Console.debug(getClass(), "TycoonLevelPathMenu page " + page + " < " + LevelRewardRegistry.LEVEL_REWARDS.size() + "/" + usableSlots.size());
+            ItemStack next_page = MenuManager.createItemstack(Material.ARROW,
+                    1,
+                    "Next Page ->",
+                    null,
+                    false,
+                    true,
+                    true,
+                    "next_page");
+            inventory.setItem(53, next_page);
+        }
 
         //Return button
         ItemStack returnItem = MenuManager.createItemstack(Material.BARRIER,
@@ -179,27 +146,20 @@ public class TycoonLevelPath implements MenuInterface{
         if (meta != null) {
             PersistentDataContainer pdc = meta.getPersistentDataContainer();
             String action = pdc.get(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING);
-            int level = pdc.getOrDefault(TycoonData.MENU_ACTION_TYCOON_LEVEL_KEY, PersistentDataType.INTEGER, 1);
+            int level = pdc.getOrDefault(TycoonData.LEVEL_REWARD_ID_KEY, PersistentDataType.INTEGER, 0);
 
 
             switch (action) {
-                case "level_item_claim":
-                    //tycoonBlock.upgradeMaxInventoryStorage(player);
-                    tycoonBlock.getTycoonUpgrades().claimLevel(level);
-                    int sellMultiplierLevel = tycoonBlock.getTycoonUpgrades().getSellMultiplierLevel();
-                    tycoonBlock.getTycoonUpgrades().setSellMultiplierLevel(sellMultiplierLevel + 1);
-                    tycoonBlock.updateAttributes();
-                    switch (level) {
-                        case 1, 2, 3, 4:
-                            tycoonBlock.upgradeMaxInventoryStorageForce(player);
-                            break;
-                        case 5:
-                            tycoonBlock.getTycoonUpgrades().setAutoMinerUnlocked(true);
-                            break;
+                case "level_reward_item":
+                    if (level == 0 || level > LevelRewardRegistry.getSize()){
+                        Console.error(getClass(), "Invalid level reward!");
+                        break;
                     }
-                    tycoonBlock.updateAttributes();
+                    LevelReward levelReward = LevelRewardRegistry.getLevelReward(level, tycoonBlock);
+                    levelReward.apply(player);
+                    tycoonBlock.getTycoonUpgrades().claimLevel(level);
+                    Console.log(getClass(), "Level reward " + level + " has been claimed!");
                     tycoonBlock.updateHologram();
-                    player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.2f);
                     refresh(player, inventory);
                     break;
                 case "level_item_locked":
@@ -212,10 +172,10 @@ public class TycoonLevelPath implements MenuInterface{
                     new StatsMenu(tycoonBlock, plugin).open(player);
                     break;
                 case "next_page":
-                    new TycoonLevelPath(tycoonBlock, page + 1, plugin).open(player);
+                    new TycoonLevelPathMenu(tycoonBlock, page + 1, plugin).open(player);
                     break;
                 case "prev_page":
-                    new TycoonLevelPath(tycoonBlock, page - 1, plugin).open(player);
+                    new TycoonLevelPathMenu(tycoonBlock, page - 1, plugin).open(player);
                 case null, default:
                     break;
             }

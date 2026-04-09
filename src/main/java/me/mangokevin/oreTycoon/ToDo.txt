@@ -24,14 +24,24 @@ Scoreboard system for worlds‼ ✅
 Sell mode / drop mode in tycoon inventory ✅
 Format upgrade prices red if not affordable ✅
 FIX TYCOON INDEX ✅
-XP drops worth
+Show booster icon in stats menu if active✅
+fix overview menu autoMiner icon✅
+more tycoon types✅
+
+fix inventory bug, with double drops filling up over limit~
+
+//TODO: change xp progression to be easier -> XP drops worth?
+
 Stock price history showing previous price changes
-Show booster icon in stats menu if active
-fix overview menu autoMiner icon
-more tycoon types
+
+Upgrades:
+-Xp multi
+-Multi Mine
+-Make fortune/double drops go over 100%
 
 "Catalyst" Blocks, placed in spawn range, with unique buff for tycoon
 Skill tree for each tycoon
+Tycoon Hopper/special items
 Overall Tycoon Player Level
 
  Mining Combo System 🔥
