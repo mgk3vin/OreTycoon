@@ -233,7 +233,7 @@ public class StatsMenu implements MenuInterface {
                 }else{
                     levelPage = 0;
                 }
-                new TycoonLevelPath(tycoonBlock, levelPage, plugin).open(player);
+                new TycoonLevelPathMenu(tycoonBlock, levelPage, plugin).open(player);
                 break;
             case "upgrades":
                 new TycoonUpgradeMenu(tycoonBlock, plugin).open(player);

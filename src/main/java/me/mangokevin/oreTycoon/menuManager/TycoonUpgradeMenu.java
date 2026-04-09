@@ -40,15 +40,17 @@ public class TycoonUpgradeMenu implements MenuInterface{
         Economy eco = OreTycoon.getEconomy();
         TycoonUpgrades tycoonUpgrades = tycoonBlock.getTycoonUpgrades();
         MenuManager.addFiller(inventory, Material.ORANGE_STAINED_GLASS_PANE);
+
         //  20 | 22 | 24
         //<editor-fold desc="⚒️ Spawn rate Upgrade">
         double spawnRateUpgradeCost = TycoonUpgrades.getSpawnRateUpgradeCost(tycoonBlock,tycoonBlock.getSpawnRateLevel() + 1);
         String spawnRateUpgradeString = PriceUtility.formatMoney(spawnRateUpgradeCost) + ChatColor.GRAY +  " -> " + (tycoonBlock.getSpawnRateLevel() + 1) +" ]";
         List<String> spawnLore = Arrays.asList("§8§m-----------------------",
                 ChatColor.GRAY + "[ Level: " + tycoonBlock.getSpawnRateLevel() + " ]",
-                ChatColor.GRAY + "[ Spawnrate: " + tycoonBlock.getSpawnRateFormatted() + "s ]",
+                ChatColor.GRAY + "[ Current spawn rate: " + tycoonBlock.getSpawnRateFormatted() + "s]",
                 ChatColor.GRAY + "[ Upgrade cost: " + (eco.has(player, spawnRateUpgradeCost) ? ChatColor.GREEN : ChatColor.RED) + spawnRateUpgradeString,
                 "§8§m-----------------------");
+
         ItemStack spawnRate = MenuManager.createItemstack(Material.SPAWNER,
                 1,
                 ChatColor.DARK_PURPLE + "Upgrade Spawn rate",
@@ -65,7 +67,7 @@ public class TycoonUpgradeMenu implements MenuInterface{
         String doubleDropsUpgradeString = PriceUtility.formatMoney(doubleDropsUpgradeCost) +  ChatColor.GRAY +  " -> " + (tycoonBlock.getTycoonUpgrades().getDoubleDropsLevel() + 1) +" ]";
         List<String> doubleDropsLore = Arrays.asList("§8§m-----------------------",
                 ChatColor.GRAY + "[ Level: " + tycoonBlock.getTycoonUpgrades().getDoubleDropsLevel() + " ]",
-                ChatColor.GRAY + "[ Chance: " + tycoonBlock.getDoubleDropsChanceFormatted() + " ]",
+                ChatColor.GRAY + "[ Current Chance: " + tycoonBlock.getDoubleDropsChanceFormatted() + " ]",
                 ChatColor.GRAY + "[ Upgrade cost: " + (eco.has(player, doubleDropsUpgradeCost) ? ChatColor.GREEN : ChatColor.RED) + doubleDropsUpgradeString ,
                 "§8§m-----------------------");
         ItemStack doubleDrops = MenuManager.createItemstack(
@@ -87,7 +89,7 @@ public class TycoonUpgradeMenu implements MenuInterface{
             String minerUpgradeString = PriceUtility.formatMoney(minerUpgradeCost) + ChatColor.GRAY +  " -> " + (tycoonBlock.getMiningRateLevel() + 1) +" ]";
             List<String> minerLore = Arrays.asList("§8§m-----------------------",
                     ChatColor.GRAY + "[ Level: " + tycoonBlock.getMiningRateLevel() + " ]",
-                    ChatColor.GRAY + "[ Minerate: " + tycoonBlock.getMiningRateFormatted() + "s ]",
+                    ChatColor.GRAY + "[ Current mine rate: " + tycoonBlock.getMiningRateFormatted() + "s ]",
                     ChatColor.GRAY + "[ Upgrade Cost: " + (eco.has(player, minerUpgradeCost) ? ChatColor.GREEN : ChatColor.RED) + minerUpgradeString,
                     "§8§m-----------------------");
             ItemStack autoMinerSpeed = MenuManager.createItemstack(Material.IRON_PICKAXE,
@@ -117,7 +119,7 @@ public class TycoonUpgradeMenu implements MenuInterface{
         String fortuneUpgradeString = PriceUtility.formatMoney(fortuneUpgradeCost) + ChatColor.GRAY + " -> " + (tycoonBlock.getTycoonUpgrades().getFortuneLevel() + 1) +" ]";
         List<String> fortuneLore = Arrays.asList("§8§m-----------------------",
                 ChatColor.GRAY + "[ Level: " + tycoonBlock.getTycoonUpgrades().getFortuneLevel() + " ]",
-                ChatColor.GRAY + "[ Chance: " + tycoonBlock.getFortuneChanceFormatted() + " ]",
+                ChatColor.GRAY + "[ Current Chance: " + tycoonBlock.getFortuneChanceFormatted() + " ]",
                 ChatColor.GRAY + "[ Upgrade cost: " + (eco.has(player, fortuneUpgradeCost) ? ChatColor.GREEN : ChatColor.RED) + fortuneUpgradeString ,
                 "§8§m-----------------------");
         ItemStack fortune = MenuManager.createItemstack(
@@ -138,7 +140,7 @@ public class TycoonUpgradeMenu implements MenuInterface{
         String sellMultiplierUpgradeString =  PriceUtility.formatMoney(sellMultiplierUpgradeCost) + ChatColor.GRAY +  " -> " + (tycoonBlock.getSellMultiplierLevel() + 1) +" ]";
         List<String> multiplierLore = Arrays.asList("§8§m-----------------------",
                 ChatColor.GRAY + "[ Level: " + tycoonBlock.getSellMultiplierLevel() + " ]",
-                ChatColor.GRAY + "[ Sell Multiplier: " + tycoonBlock.getSellMultiplierFormatted() + "x ]",
+                ChatColor.GRAY + "[ Current sell multiplier: " + tycoonBlock.getSellMultiplierFormatted() + "x ]",
                 ChatColor.GRAY + "[ Upgrade Cost: " + (eco.has(player, sellMultiplierUpgradeCost) ? ChatColor.GREEN : ChatColor.RED) + sellMultiplierUpgradeString,
                 "§8§m-----------------------");
         ItemStack worthMultiplier = MenuManager.createItemstack(Material.LIME_BUNDLE,
@@ -157,7 +159,7 @@ public class TycoonUpgradeMenu implements MenuInterface{
         String storageUpgradeCostString = PriceUtility.formatMoney(storageUpgradeCost) + ChatColor.GRAY +  " -> " + (tycoonUpgrades.getInventoryStorageLevel() + 1) +" ]";
         List<String> inventoryLore = Arrays.asList("§8§m-----------------------",
                 ChatColor.GRAY + "[ Level: " + tycoonUpgrades.getInventoryStorageLevel()+ " ]",
-                ChatColor.GRAY + "[ Storage: " + tycoonBlock.getInventoryStorage() + " blocks ]",
+                ChatColor.GRAY + "[ Current storage: " + tycoonBlock.getInventoryStorage() + " blocks ]",
                 ChatColor.GRAY + "[ Upgrade Cost: " + (eco.has(player, storageUpgradeCost) ? ChatColor.GREEN : ChatColor.RED) + storageUpgradeCostString ,
                 "§8§m-----------------------");
         ItemStack inventoryUpgrade = MenuManager.createItemstack(Material.CHEST_MINECART,

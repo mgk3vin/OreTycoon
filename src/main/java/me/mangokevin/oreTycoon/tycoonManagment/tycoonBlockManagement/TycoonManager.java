@@ -1,6 +1,7 @@
 package me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement;
 
 import me.mangokevin.oreTycoon.OreTycoon;
+import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.SpawnBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonType;
 import org.bukkit.*;
@@ -58,10 +59,10 @@ public class TycoonManager {
             removedTycoonBlock.removeHologram();
             block.setType(Material.AIR);
             //Remove all spawned Blocks of the removed tycoon
-            for (Block activeBlock : removedTycoonBlock.getActiveBlocks()) {
-                if (activeBlock.getType() != Material.AIR) {
-                    activeBlock.setType(Material.AIR);
-                    activeBlock.getWorld().playEffect(activeBlock.getLocation(), Effect.SPONGE_DRY,0);
+            for (SpawnBlock spawnBlock : removedTycoonBlock.getActiveBlocks()) {
+                if (spawnBlock.getMaterial() != Material.AIR) {
+                    spawnBlock.getBlock().setType(Material.AIR);
+                    spawnBlock.getWorld().playEffect(spawnBlock.getSpawnLocation(), Effect.SPONGE_DRY,0);
                 }
             }
             for (TycoonBlock tycoonBlock : tycoonRegistry.getAllTycoons()) {
@@ -72,7 +73,6 @@ public class TycoonManager {
         } else {
             player.sendMessage(ChatColor.RED + "You can only pick up a tycoon with an empty hand!");
         }
-
 
     }
 

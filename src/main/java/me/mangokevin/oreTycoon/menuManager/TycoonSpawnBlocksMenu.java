@@ -1,6 +1,7 @@
 package me.mangokevin.oreTycoon.menuManager;
 
 import me.mangokevin.oreTycoon.OreTycoon;
+import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.SpawnMaterial;
 import me.mangokevin.oreTycoon.worth.PriceUtility;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonData;
@@ -19,6 +20,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 public class TycoonSpawnBlocksMenu implements MenuInterface{
@@ -46,16 +48,17 @@ public class TycoonSpawnBlocksMenu implements MenuInterface{
 
         Map<Material, Boolean> activeRessourceMaterialsMap = tycoonBlock.getActiveRessourceMaterialsMap();
 
-        Map<Material, Integer> spawnBlocksList = tycoonBlock.getTycoonType().getResources();
+        //Map<Material, Integer> spawnBlocksList = tycoonBlock.getTycoonType().getResources();
+        List<SpawnMaterial> spawnMaterials = tycoonBlock.getSpawnMaterials();
         int startIndex = 10;
         int itemPerRow = 1;
 
         int totalWeight = tycoonBlock.getTotalActiveWeight();
 
-        for (Map.Entry<Material, Integer> entry : spawnBlocksList.entrySet()) {
+        for (SpawnMaterial spawnMaterial : spawnMaterials) {
             //for every Material
-            Material material = entry.getKey();
-            Integer chance = entry.getValue();
+            Material material = spawnMaterial.getMaterial();
+            int chance = spawnMaterial.getWeight();
 
             boolean isActive = activeRessourceMaterialsMap.getOrDefault(material, true);
 
@@ -68,7 +71,7 @@ public class TycoonSpawnBlocksMenu implements MenuInterface{
             double worthMultiplier = worthManager.getMultiplier(material);
             worthMultiplier = Math.round(worthMultiplier*100.0)/100.0;
             double worthMultiplierFormatted = Math.round(worthMultiplier * 100.0 - 100.0);
-            String worthFormatted = (worthMultiplier >= 1.0 ? ChatColor.GREEN + " ( +" + worthMultiplierFormatted + "% )" : ChatColor.RED + " ( " + worthMultiplierFormatted + "% )");
+            String worthFormatted = (worthMultiplier >= 1.0 ? ChatColor.GREEN + " +" + worthMultiplierFormatted + "%" : ChatColor.RED + " " + worthMultiplierFormatted + "%");
 
             ItemStack spawnBlock = MenuManager.createItemstack(material,
                     1,
@@ -76,6 +79,8 @@ public class TycoonSpawnBlocksMenu implements MenuInterface{
                     Arrays.asList("§8§m-----------------------",
                             ChatColor.GRAY + "Spawn Chance: " + ChatColor.YELLOW + effectiveChance + "%",
                             ChatColor.GRAY + "Worth: " + ChatColor.GREEN + PriceUtility.calculateWorthFormatted(new ItemStack(material)) + worthFormatted,
+                            ChatColor.GRAY + "Xp: " + ChatColor.AQUA + spawnMaterial.getRarity().getXpAmount(),
+                            ChatColor.GRAY + "Rarity: " + spawnMaterial.getRarity().getDisplayName(),
                             "§8§m-----------------------"),
                     isActive,
                     true,
@@ -124,7 +129,7 @@ public class TycoonSpawnBlocksMenu implements MenuInterface{
                 activeResources.put(clickedMaterial, !isActive);
 
                 Console.debug("[TycoonSpawnBlocksMenu] Setting inventory item: " + !isActive + " Item -> " + item.getType().name());
-                tycoonBlock.setActiveResourceMaterialsMap(activeResources);
+                //tycoonBlock.setActiveResourceMaterialsMap(activeResources);
 
                 refresh(player, inventory);
                 break;

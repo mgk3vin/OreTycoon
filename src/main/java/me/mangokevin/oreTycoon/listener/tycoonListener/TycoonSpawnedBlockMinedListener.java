@@ -4,6 +4,8 @@ import me.mangokevin.oreTycoon.events.tycoonEvents.TycoonSpawnedBlockMinedEvent;
 import me.mangokevin.oreTycoon.menuManager.MenuManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonUpgrades;
+import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.StoredItemKey;
+import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.SpawnBlock;
 import me.mangokevin.oreTycoon.utility.Console;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -24,6 +26,7 @@ public class TycoonSpawnedBlockMinedListener implements Listener {
         Block block = event.getBlock();
         Player player = event.getPlayer();
         BlockBreakEvent blockBreakEvent = event.getBlockBreakEvent();
+        SpawnBlock spawnBlock = event.getSpawnBlock();
 
         if (tycoonBlock == null) {
             Console.error(getClass(),"TYCOON BLOCK IS NULL!");
@@ -39,13 +42,17 @@ public class TycoonSpawnedBlockMinedListener implements Listener {
         //Add item to inv when manually mined
         ItemStack item = new ItemStack(block.getType());
 
+        StoredItemKey key = new StoredItemKey(spawnBlock.getMaterial(), spawnBlock.getSpawnMaterialRarity());
+
         //should Fortune Multiplier activate
         if (TycoonUpgrades.shouldFortuneActivate(tycoonBlock)){
             item.setAmount(2);
         }
-        if (tycoonBlock.addItem(item)) {
+        if (tycoonBlock.addItem(key, 1)) {
             MenuManager.refreshOpenInventory(player, tycoonBlock);
             blockBreakEvent.setCancelled(true);
+
+            tycoonBlock.handleReward(spawnBlock);
             block.setType(Material.AIR);
             tycoonBlock.getLocation().getWorld().playSound(tycoonBlock.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1, 1.5F);
         }else {
@@ -54,6 +61,6 @@ public class TycoonSpawnedBlockMinedListener implements Listener {
         //Refresh Tycoon Hologram Worth
         tycoonBlock.updateHologram();
 
-        tycoonBlock.handleReward(block);
+
     }
 }

@@ -10,6 +10,7 @@ import me.mangokevin.oreTycoon.utility.Console;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
@@ -80,6 +81,20 @@ public class MenuManager {
             menu.refresh(player, openInventory);
         }
     }
+    public static void addNameSpacedKey(NamespacedKey key, ItemStack itemStack, String name) {
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        if (itemMeta == null) {return;}
+        PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
+        pdc.set(key, PersistentDataType.STRING, name);
+        itemStack.setItemMeta(itemMeta);
+    }
+    public static void addNameSpacedKey(NamespacedKey key, ItemStack itemStack, int index) {
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        if (itemMeta == null) {return;}
+        PersistentDataContainer pdc = itemMeta.getPersistentDataContainer();
+        pdc.set(key, PersistentDataType.INTEGER, index);
+        itemStack.setItemMeta(itemMeta);
+    }
 
     public ItemStack createTycoonItem(TycoonBlock block){
         String autoMinerStatus = (block.getTycoonUpgrades().isAutoMinerUnlocked() ?
@@ -100,7 +115,7 @@ public class MenuManager {
                 "§8§m-----------------------");
 
         ItemStack stats = createItemstack(
-                block.getMaterial(),
+                block.getTycoonMaterial(),
                 1,
                 block.getTycoonType().getName() + " #" + block.getIndex(),
                 lore,

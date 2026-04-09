@@ -1,11 +1,11 @@
 package me.mangokevin.oreTycoon.tycoonManagment;
 
+import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.SpawnMaterial;
+import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.SpawnMaterialRarity;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 
 import java.util.*;
-
-import static javax.swing.UIManager.put;
 
 public enum TycoonType {
     WOOD(
@@ -16,15 +16,16 @@ public enum TycoonType {
             7*20,
             1.0,
             30,
-            Map.of(
-                Material.ACACIA_LOG, 10,
-                Material.BIRCH_LOG, 10,
-                Material.CHERRY_LOG, 10,
-                Material.JUNGLE_LOG, 10,
-                Material.DARK_OAK_LOG, 10,
-                Material.OAK_LOG, 10,
-                Material.SPRUCE_LOG, 10
-    ),      Arrays.asList(
+            List.of(
+                    new SpawnMaterial(Material.ACACIA_LOG, 10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.BIRCH_LOG, 10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.CHERRY_LOG, 10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.JUNGLE_LOG, 10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.DARK_OAK_LOG, 10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.OAK_LOG, 10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.SPRUCE_LOG, 10, SpawnMaterialRarity.COMMON)
+                    ),
+          Arrays.asList(
                     Material.OAK_LEAVES,
                     Material.JUNGLE_LEAVES
     )),
@@ -36,14 +37,14 @@ public enum TycoonType {
             6*20,
             1.0,
             35,
-            Map.of(
-                    Material.MOSS_BLOCK, 30,
-                    Material.MOSS_CARPET, 25,
-                    Material.MUDDY_MANGROVE_ROOTS, 15,
-                    Material.MANGROVE_ROOTS, 10,
-                    Material.MUD, 10,
-                    Material.ROOTED_DIRT, 20,
-                    Material.PODZOL, 5
+            List.of(
+                    new SpawnMaterial(Material.MOSS_BLOCK,           30, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.MOSS_CARPET,          25, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.MUDDY_MANGROVE_ROOTS, 15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.MANGROVE_ROOTS,       10, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.MUD,                  10, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.ROOTED_DIRT,          20, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.PODZOL,                5, SpawnMaterialRarity.RARE)
             ), List.of(
             Material.BARRIER
     )),
@@ -55,20 +56,20 @@ public enum TycoonType {
             20 * 5,
             1.0,
             50,
-            new HashMap<Material, Integer>() {{
-                put(Material.NETHERRACK, 30);
-                put(Material.NETHER_BRICKS, 20);
-                put(Material.NETHER_QUARTZ_ORE, 10);
-                put(Material.SOUL_SAND, 30);
-                put(Material.SOUL_SOIL, 30);
-                put(Material.BASALT, 20);
-                put(Material.BLACKSTONE, 15);
-                put(Material.GLOWSTONE, 15);
-                put(Material.MAGMA_BLOCK, 20);
-                put(Material.NETHER_GOLD_ORE, 10);
-                put(Material.ANCIENT_DEBRIS, 5);
-                put(Material.GILDED_BLACKSTONE, 15);
-            }},
+            List.of(
+                    new SpawnMaterial(Material.NETHERRACK,       30, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.NETHER_BRICKS,    20, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.NETHER_QUARTZ_ORE,10, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.SOUL_SAND,        30, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.SOUL_SOIL,        30, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.BASALT,           20, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.BLACKSTONE,       15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.GLOWSTONE,        15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.MAGMA_BLOCK,      20, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.NETHER_GOLD_ORE,  10, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.ANCIENT_DEBRIS,    5, SpawnMaterialRarity.LEGENDARY),
+                    new SpawnMaterial(Material.GILDED_BLACKSTONE,15, SpawnMaterialRarity.UNCOMMON)
+            ),
             List.of(
                     Material.AIR
             )
@@ -81,17 +82,17 @@ public enum TycoonType {
             20*5,
             1.0,
             45,
-            new  HashMap<Material, Integer>() {{
-                put(Material.PRISMARINE, 30);
-                put(Material.PRISMARINE_BRICKS, 30);
-                put(Material.SEA_LANTERN, 10);
-                put(Material.DARK_PRISMARINE, 10);
-                put(Material.DRIED_KELP_BLOCK, 15);
-                put(Material.SPONGE, 5);
-                put(Material.SAND, 30);
-                put(Material.GRAVEL, 20);
-                put(Material.CLAY, 20);
-            }},
+            List.of(
+                    new SpawnMaterial(Material.PRISMARINE,        30, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.PRISMARINE_BRICKS, 30, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.SEA_LANTERN,       10, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.DARK_PRISMARINE,   10, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.DRIED_KELP_BLOCK,  15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.SPONGE,             5, SpawnMaterialRarity.EPIC),
+                    new SpawnMaterial(Material.SAND,              30, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.GRAVEL,            20, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.CLAY,              20, SpawnMaterialRarity.COMMON)
+            ),
             List.of(Material.BARRIER)
     ),
     ICE(Material.BLUE_ICE,
@@ -101,13 +102,13 @@ public enum TycoonType {
             5*20,
             1.0,
             50,
-            new HashMap<>() {{
-                put(Material.ICE, 40);
-                put(Material.PACKED_ICE, 30);
-                put(Material.BLUE_ICE, 15);
-                put(Material.SNOW_BLOCK, 30);
-                put(Material.SPRUCE_LOG, 15);
-            }},
+            List.of(
+                    new SpawnMaterial(Material.ICE,        40, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.PACKED_ICE, 30, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.BLUE_ICE,   15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.SNOW_BLOCK, 30, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.SPRUCE_LOG, 15, SpawnMaterialRarity.UNCOMMON)
+            ),
             List.of(Material.BARRIER)
     ),
     MESA(Material.TERRACOTTA,
@@ -117,28 +118,27 @@ public enum TycoonType {
             6*20,
             1.0,
             60,
-            new HashMap<>() {{
-                put(Material.TERRACOTTA, 30);
-                put(Material.RED_TERRACOTTA, 20);
-                put(Material.ORANGE_TERRACOTTA, 20);
-                put(Material.YELLOW_TERRACOTTA, 15);
-                put(Material.WHITE_TERRACOTTA, 15);
-                put(Material.BROWN_TERRACOTTA, 15);
-                put(Material.GRAY_TERRACOTTA, 15);
-                put(Material.LIGHT_BLUE_TERRACOTTA, 15);
-                put(Material.BLACK_TERRACOTTA, 15);
-                put(Material.PINK_TERRACOTTA, 15);
-                put(Material.PURPLE_TERRACOTTA, 15);
-                put(Material.CYAN_TERRACOTTA, 15);
-                put(Material.MAGENTA_TERRACOTTA, 15);
-                put(Material.LIGHT_GRAY_TERRACOTTA, 15);
-                put(Material.GREEN_TERRACOTTA, 15);
-                put(Material.LIME_TERRACOTTA, 15);
-                put(Material.BLUE_TERRACOTTA, 15);
-
-                put(Material.RED_SANDSTONE, 25);
-                put(Material.RED_SAND, 25);
-            }},
+            List.of(
+                    new SpawnMaterial(Material.TERRACOTTA,            30, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.RED_TERRACOTTA,        20, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.ORANGE_TERRACOTTA,     20, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.YELLOW_TERRACOTTA,     15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.WHITE_TERRACOTTA,      15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.BROWN_TERRACOTTA,      15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.GRAY_TERRACOTTA,       15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.LIGHT_BLUE_TERRACOTTA, 15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.BLACK_TERRACOTTA,      15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.PINK_TERRACOTTA,       15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.PURPLE_TERRACOTTA,     15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.CYAN_TERRACOTTA,       15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.MAGENTA_TERRACOTTA,    15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.LIGHT_GRAY_TERRACOTTA, 15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.GREEN_TERRACOTTA,      15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.LIME_TERRACOTTA,       15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.BLUE_TERRACOTTA,       15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.RED_SANDSTONE,         25, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.RED_SAND,              25, SpawnMaterialRarity.COMMON)
+            ),
             List.of(Material.BARRIER)
     ),
     CONCRETE(Material.WHITE_CONCRETE,
@@ -149,46 +149,46 @@ public enum TycoonType {
             1.0,
             50,
 
-            new HashMap<>() {{
-        put(Material.WHITE_CONCRETE, 10);
-        put(Material.ORANGE_CONCRETE, 10);
-        put(Material.MAGENTA_CONCRETE, 10);
-        put(Material.LIGHT_BLUE_CONCRETE, 10);
-        put(Material.YELLOW_CONCRETE, 10);
-        put(Material.LIME_CONCRETE, 10);
-        put(Material.PINK_CONCRETE, 10);
-        put(Material.GRAY_CONCRETE, 10);
-        put(Material.LIGHT_GRAY_CONCRETE, 10);
-        put(Material.CYAN_CONCRETE, 10);
-        put(Material.PURPLE_CONCRETE, 10);
-        put(Material.BLUE_CONCRETE, 10);
-        put(Material.BROWN_CONCRETE, 10);
-        put(Material.GREEN_CONCRETE, 10);
-        put(Material.RED_CONCRETE, 10);
-        put(Material.BLACK_CONCRETE, 10);
-    }},
+            List.of(
+                    new SpawnMaterial(Material.WHITE_CONCRETE,      10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.ORANGE_CONCRETE,     10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.MAGENTA_CONCRETE,    10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.LIGHT_BLUE_CONCRETE, 10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.YELLOW_CONCRETE,     10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.LIME_CONCRETE,       10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.PINK_CONCRETE,       10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.GRAY_CONCRETE,       10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.LIGHT_GRAY_CONCRETE, 10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.CYAN_CONCRETE,       10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.PURPLE_CONCRETE,     10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.BLUE_CONCRETE,       10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.BROWN_CONCRETE,      10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.GREEN_CONCRETE,      10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.RED_CONCRETE,        10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.BLACK_CONCRETE,      10, SpawnMaterialRarity.COMMON)
+            ),
             List.of(Material.BARRIER)
     ),
     WOOL(Material.WHITE_WOOL,
             ChatColor.YELLOW + "Wool Tycoon", 20.0, 5*20, 7*20, 1.0, 40,
-            new HashMap<>() {{
-                put(Material.WHITE_WOOL, 10);
-                put(Material.ORANGE_WOOL, 10);
-                put(Material.MAGENTA_WOOL, 10);
-                put(Material.LIGHT_BLUE_WOOL, 10);
-                put(Material.YELLOW_WOOL, 10);
-                put(Material.LIME_WOOL, 10);
-                put(Material.PINK_WOOL, 10);
-                put(Material.GRAY_WOOL, 10);
-                put(Material.LIGHT_GRAY_WOOL, 10);
-                put(Material.CYAN_WOOL, 10);
-                put(Material.PURPLE_WOOL, 10);
-                put(Material.BLUE_WOOL, 10);
-                put(Material.BROWN_WOOL, 10);
-                put(Material.GREEN_WOOL, 10);
-                put(Material.RED_WOOL, 10);
-                put(Material.BLACK_WOOL, 10);
-            }},
+            List.of(
+                    new SpawnMaterial(Material.WHITE_WOOL,      10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.ORANGE_WOOL,     10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.MAGENTA_WOOL,    10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.LIGHT_BLUE_WOOL, 10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.YELLOW_WOOL,     10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.LIME_WOOL,       10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.PINK_WOOL,       10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.GRAY_WOOL,       10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.LIGHT_GRAY_WOOL, 10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.CYAN_WOOL,       10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.PURPLE_WOOL,     10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.BLUE_WOOL,       10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.BROWN_WOOL,      10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.GREEN_WOOL,      10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.RED_WOOL,        10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.BLACK_WOOL,      10, SpawnMaterialRarity.COMMON)
+            ),
             List.of(Material.BARRIER)
     ),
     STONE(Material.STONE,
@@ -198,18 +198,18 @@ public enum TycoonType {
             6*20,
             1.0,
             40,
-            Map.of(
-                    Material.STONE, 15,
-                    Material.COBBLESTONE, 15,
-                    Material.ANDESITE, 10,
-                    Material.DIORITE, 10,
-                    Material.GRANITE, 10,
-                    Material.COBBLED_DEEPSLATE, 5,
-                    Material.TUFF, 15,
-                    Material.DIRT, 20,
-                    Material.CALCITE, 7,
-                    Material.SMOOTH_BASALT, 5
-                    ),
+            List.of(
+                    new SpawnMaterial(Material.STONE,             15, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.COBBLESTONE,       15, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.ANDESITE,          10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.DIORITE,           10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.GRANITE,           10, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.COBBLED_DEEPSLATE,  5, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.TUFF,              15, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.DIRT,              20, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.CALCITE,            7, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.SMOOTH_BASALT,      5, SpawnMaterialRarity.RARE)
+            ),
             List.of(
                     Material.FURNACE
             )),
@@ -220,16 +220,16 @@ public enum TycoonType {
             5*20,
             1.0,
             50,
-            Map.of(
-                    Material.DEEPSLATE, 30,
-                    Material.COBBLED_DEEPSLATE, 25,
-                    Material.SCULK, 15,
-                    Material.AMETHYST_BLOCK, 15,
-                    Material.BUDDING_AMETHYST, 5,
-                    Material.SMALL_AMETHYST_BUD, 20,
-                    Material.MEDIUM_AMETHYST_BUD, 15,
-                    Material.LARGE_AMETHYST_BUD, 10,
-                    Material.AMETHYST_CLUSTER, 5
+            List.of(
+                    new SpawnMaterial(Material.DEEPSLATE,           30, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.COBBLED_DEEPSLATE,   25, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.SCULK,               15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.AMETHYST_BLOCK,      15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.BUDDING_AMETHYST,     5, SpawnMaterialRarity.EPIC),
+                    new SpawnMaterial(Material.SMALL_AMETHYST_BUD,  20, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.MEDIUM_AMETHYST_BUD, 15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.LARGE_AMETHYST_BUD,  10, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.AMETHYST_CLUSTER,     5, SpawnMaterialRarity.EPIC)
             ),
             List.of(
                     Material.BARRIER
@@ -241,11 +241,11 @@ public enum TycoonType {
             7*20,
             1.0,
             40,
-            Map.of(
-                Material.STONE, 60,
-                Material.COAL_ORE, 30,
-                Material.COBBLESTONE, 10
-    ),
+            List.of(
+                    new SpawnMaterial(Material.STONE,       60, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.COAL_ORE,    30, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.COBBLESTONE, 10, SpawnMaterialRarity.COMMON)
+            ),
             Arrays.asList(
                             Material.COAL_ORE,
                             Material.DEEPSLATE_COAL_ORE
@@ -258,11 +258,11 @@ public enum TycoonType {
             6*20,
             1.0,
             70,
-            Map.of(
-                Material.STONE, 40,
-                Material.IRON_ORE, 40,
-                Material.RAW_IRON_BLOCK, 20
-    ),
+            List.of(
+                    new SpawnMaterial(Material.STONE,         40, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.IRON_ORE,      40, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.RAW_IRON_BLOCK,20, SpawnMaterialRarity.RARE)
+            ),
             Arrays.asList(
                             Material.IRON_ORE,
                             Material.DEEPSLATE_IRON_ORE
@@ -275,11 +275,11 @@ public enum TycoonType {
             5*20,
             1.0,
             100,
-            Map.of(
-                    Material.DIAMOND_ORE, 50,
-                    Material.DEEPSLATE_DIAMOND_ORE, 40,
-                    Material.DIAMOND_BLOCK, 10
-    ),
+            List.of(
+                    new SpawnMaterial(Material.DIAMOND_ORE,           50, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.DEEPSLATE_DIAMOND_ORE, 40, SpawnMaterialRarity.EPIC),
+                    new SpawnMaterial(Material.DIAMOND_BLOCK,         10, SpawnMaterialRarity.LEGENDARY)
+            ),
             Arrays.asList(
                             Material.DIAMOND_ORE,
                             Material.DEEPSLATE_DIAMOND_ORE)),
@@ -291,15 +291,14 @@ public enum TycoonType {
             20*4,
             1.0,
             60,
-            new  HashMap<Material, Integer>() {{
-                put(Material.END_STONE, 30);
-                put(Material.END_STONE_BRICKS, 25);
-                put(Material.PURPUR_BLOCK, 15);
-                //put(Material.CHORUS_PLANT, 10); Causing issues with breaking
-                put(Material.OBSIDIAN, 10);
-                put(Material.CRYING_OBSIDIAN, 5);
-                put(Material.PURPUR_PILLAR, 20);
-            }},
+            List.of(
+                    new SpawnMaterial(Material.END_STONE,        30, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.END_STONE_BRICKS, 25, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.PURPUR_BLOCK,     15, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.OBSIDIAN,         10, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.CRYING_OBSIDIAN,   5, SpawnMaterialRarity.EPIC),
+                    new SpawnMaterial(Material.PURPUR_PILLAR,    20, SpawnMaterialRarity.COMMON)
+            ),
             List.of(Material.BARRIER)
     ),
     ;
@@ -311,10 +310,11 @@ public enum TycoonType {
     private final int miningInterval;
     private final double sellMultiplier;
     private final int defaultMaxInventoryStorage;
-    private final Map<Material, Integer> resources;
+    //private final Map<Material, Integer> resources;
+    private final List<SpawnMaterial> spawnMaterials;
     private final List<Material> buffMaterials;
 
-    TycoonType(Material material, String name, double basePrice, int spawnInterval, int miningInterval, double sellMultiplier, int defaultMaxInventoryStorage, Map<Material, Integer> resources, List<Material> buffMaterials) {
+    TycoonType(Material material, String name, double basePrice, int spawnInterval, int miningInterval, double sellMultiplier, int defaultMaxInventoryStorage, List<SpawnMaterial> spawnMaterials, List<Material> buffMaterials) {
         this.material = material;
         this.name = name;
         this.basePrice = basePrice;
@@ -322,7 +322,7 @@ public enum TycoonType {
         this.miningInterval = miningInterval;
         this.sellMultiplier = sellMultiplier;
         this.defaultMaxInventoryStorage = defaultMaxInventoryStorage;
-        this.resources = resources;
+        this.spawnMaterials = spawnMaterials;
         this.buffMaterials = buffMaterials;
     }
 
@@ -349,8 +349,8 @@ public enum TycoonType {
     public int getDefaultMaxInventoryStorage() {
         return defaultMaxInventoryStorage;
     }
-    public Map<Material, Integer> getResources() {
-        return resources;
+    public List<SpawnMaterial> getSpawnMaterials() {
+        return spawnMaterials;
     }
     public List<Material> getBuffMaterials() {
         return buffMaterials;

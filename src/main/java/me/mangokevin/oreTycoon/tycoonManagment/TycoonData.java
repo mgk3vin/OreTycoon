@@ -1,6 +1,8 @@
 package me.mangokevin.oreTycoon.tycoonManagment;
 
 import me.mangokevin.oreTycoon.OreTycoon;
+import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.SpawnMaterialRarity;
+import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.StoredItemKey;
 import me.mangokevin.oreTycoon.utility.StorageUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -11,6 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
+import org.checkerframework.checker.units.qual.N;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -55,8 +58,14 @@ public class TycoonData {
     public static NamespacedKey WORLD_UID_KEY;
     //========== Worlds Keys ==========
 
-    public static NamespacedKey INVENTORY_ITEM_KEY;
+    //========== Level reward id Keys ==========
+    public static NamespacedKey LEVEL_REWARD_ID_KEY;
+    //========== Level reward id Keys ==========
 
+    //========== Inventory Keys ==========
+    public static NamespacedKey INVENTORY_ITEM_RARITY_KEY;
+    public static NamespacedKey INVENTORY_ITEM_KEY;
+    //========== Inventory Keys ==========
 
     // Wird einmal in der onEnable deiner Main aufgerufen: TycoonData.init(this);
     public static void init(Plugin plugin) {
@@ -101,7 +110,12 @@ public class TycoonData {
         WORLD_UID_KEY = new  NamespacedKey(plugin, "world_uid");
         //========== Worlds Keys ==========
 
+        //========== Level reward id Keys ==========
+        LEVEL_REWARD_ID_KEY = new NamespacedKey(plugin, "level_reward_id");
+        //========== Level reward id Keys ==========
+
         INVENTORY_ITEM_KEY = new  NamespacedKey(plugin, "inventory_item");
+        INVENTORY_ITEM_RARITY_KEY = new NamespacedKey(plugin, "inventory_item_rarity");
     }
 
     public static void writeToItem(TycoonBlock tycoonBlock, ItemStack item) {
@@ -121,13 +135,15 @@ public class TycoonData {
                 loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
         pdc.set(LOCATION_KEY, PersistentDataType.STRING, locString);
 
-        pdc.set(MATERIAL, PersistentDataType.STRING, tycoonBlock.getMaterial().toString());
+        pdc.set(MATERIAL, PersistentDataType.STRING, tycoonBlock.getTycoonMaterial().toString());
         pdc.set(SPAWN_INTERVAL, PersistentDataType.INTEGER, tycoonBlock.getSpawnRate());
         pdc.set(CREATION_TIME, PersistentDataType.LONG, tycoonBlock.getCreationTime());
 
         StringBuilder inventoryString = new StringBuilder();
-        for (Map.Entry<Material, Integer> entry : tycoonBlock.getStoredItems().entrySet()) {
-            inventoryString.append(entry.getKey().name())
+        for (Map.Entry<StoredItemKey, Integer> entry : tycoonBlock.getStoredItems().entrySet()) {
+            inventoryString.append(entry.getKey().material().name())
+                    .append(":")
+                    .append(entry.getKey().rarity().name())
                     .append(":")
                     .append(entry.getValue())
                     .append(",");
@@ -135,45 +151,6 @@ public class TycoonData {
         pdc.set(INVENTORY_KEY, PersistentDataType.STRING, inventoryString.toString());
 
         TycoonUpgrades upgrades = tycoonBlock.getTycoonUpgrades();
-        //========== Upgrade Keys ==========
-        pdc.set(TYCOON_IS_AUTO_MINER_UNLOCKED_KEY, PersistentDataType.BOOLEAN, upgrades.isAutoMinerUnlocked());
-        pdc.set(TYCOON_SPAWN_RATE_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getSpawnRateLevel());
-        pdc.set(TYCOON_MINING_RATE_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getMiningRateLevel());
-        pdc.set(TYCOON_SELL_MULTIPLIER_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getSellMultiplierLevel());
-        pdc.set(TYCOON_DOUBLE_DROPS_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getDoubleDropsLevel());
-        pdc.set(TYCOON_FORTUNE_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getFortuneLevel());
-        pdc.set(TYCOON_MAX_INVENTORY_STORAGE_KEY, PersistentDataType.INTEGER, upgrades.getInventoryStorageLevel());
-        //Save ClaimedLevels
-        String claimedLevels = upgrades.getClaimedLevels().stream().map(String::valueOf).collect(Collectors.joining(","));
-        pdc.set(TYCOON_CLAIMED_LEVELS_KEY, PersistentDataType.STRING, claimedLevels);
-        //========== Upgrade Keys ==========
-        item.setItemMeta(meta); // DAS speichert es wirklich auf das Item!
-    }
-    @Deprecated
-    public static void writeToItem(ItemStack item, int level, int xp, Location loc, Material material, int spawnInterval, long creationTime, String type, Inventory inventory, TycoonUpgrades upgrades) {
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) return;
-
-        PersistentDataContainer pdc = meta.getPersistentDataContainer();
-        pdc.set(TYCOON_BLOCK, PersistentDataType.BYTE,  (byte) 1);
-        pdc.set(TYCOON_BLOCK_KEY, PersistentDataType.BYTE, (byte) 1);
-        pdc.set(TYPE_KEY, PersistentDataType.STRING, type);
-        pdc.set(LEVEL, PersistentDataType.INTEGER, level);
-        pdc.set(XP, PersistentDataType.INTEGER, xp);
-
-        // Wir bauen einen String: "world;x;y;z;yaw;pitch"
-        String locString = String.format(Locale.US, "%s;%.2f;%.2f;%.2f;%.2f;%.2f",
-                loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
-        pdc.set(LOCATION_KEY, PersistentDataType.STRING, locString);
-
-        pdc.set(MATERIAL, PersistentDataType.STRING, material.toString());
-        pdc.set(SPAWN_INTERVAL, PersistentDataType.INTEGER, spawnInterval);
-        pdc.set(CREATION_TIME, PersistentDataType.LONG, creationTime);
-
-        byte[] byteArray = StorageUtils.toByteArray(inventory);
-
-        pdc.set(INVENTORY_KEY, PersistentDataType.BYTE_ARRAY, byteArray);
-
         //========== Upgrade Keys ==========
         pdc.set(TYCOON_IS_AUTO_MINER_UNLOCKED_KEY, PersistentDataType.BOOLEAN, upgrades.isAutoMinerUnlocked());
         pdc.set(TYCOON_SPAWN_RATE_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getSpawnRateLevel());
@@ -233,10 +210,14 @@ public class TycoonData {
         String inventoryData = pdc.get(TycoonData.INVENTORY_KEY, PersistentDataType.STRING);
         if (inventoryData != null && !inventoryData.isEmpty()) {
             for (String entry : inventoryData.split(",")) {
+                if (entry.isEmpty()) continue;
                 String[] parts = entry.split(":");
+                if (parts.length != 3) continue;
                 Material material = Material.valueOf(parts[0]);
-                int amount = Integer.parseInt(parts[1]);
-                tycoonBlock.addItem(new ItemStack(material, amount));
+                SpawnMaterialRarity rarity = SpawnMaterialRarity.valueOf(parts[1]);
+                int amount = Integer.parseInt(parts[2]);
+
+                tycoonBlock.addItem(new StoredItemKey(material, rarity), amount);
             }
         }
 

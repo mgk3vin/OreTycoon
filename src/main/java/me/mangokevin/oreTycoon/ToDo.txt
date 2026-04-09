@@ -30,9 +30,14 @@ more tycoon types✅
 
 fix inventory bug, with double drops filling up over limit~
 
-XP drops worth
+//TODO: change xp progression to be easier -> XP drops worth?
+
 Stock price history showing previous price changes
 
+Upgrades:
+-Xp multi
+-Multi Mine
+-Make fortune/double drops go over 100%
 
 "Catalyst" Blocks, placed in spawn range, with unique buff for tycoon
 Skill tree for each tycoon

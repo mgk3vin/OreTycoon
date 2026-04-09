@@ -3,6 +3,7 @@ package me.mangokevin.oreTycoon.listener;
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.events.tycoonEvents.TycoonSpawnedBlockMinedEvent;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
+import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.SpawnBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -47,11 +48,12 @@ public class BlockBreakListener implements Listener {
             }
         }
 
+
         TycoonBlock tycoonBlockInteracted = tycoonRegistry.getTycoonOfSpawnedBlock(block);
-        if (tycoonBlockInteracted != null) {
-            //call the tycoon spawned block is mined event to handle
-            Bukkit.getPluginManager().callEvent(new TycoonSpawnedBlockMinedEvent(tycoonBlockInteracted, event, block, player));
-        }
+        if (tycoonBlockInteracted == null) return;
+        SpawnBlock spawnBlock = tycoonBlockInteracted.getSpawnBlockFromBlock(block);
+        //call the tycoon spawned block is mined event to handle
+        Bukkit.getPluginManager().callEvent(new TycoonSpawnedBlockMinedEvent(tycoonBlockInteracted, event, block, player, spawnBlock));
 
         Location checkLocation = block.getLocation().clone();
         checkLocation.add(0, 1, 0);

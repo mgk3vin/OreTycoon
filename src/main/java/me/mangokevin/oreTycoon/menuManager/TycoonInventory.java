@@ -2,6 +2,9 @@ package me.mangokevin.oreTycoon.menuManager;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonHolder;
+import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.InventoryStack;
+import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.StoredItemKey;
+import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.SpawnMaterialRarity;
 import me.mangokevin.oreTycoon.utility.CooldownManager;
 import me.mangokevin.oreTycoon.worth.PriceUtility;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
@@ -72,14 +75,15 @@ public class TycoonInventory implements MenuInterface {
             inventory.setItem(i, item);
         }
 
-        List<ItemStack> allInventoryStacks = getItemsAsStack();
+        List<InventoryStack> allInventoryStacks = getItemsAsStack();
         int startIndex = page * 27;
         int endIndex = Math.min(startIndex + 27, allInventoryStacks.size());
 
         for (int i = startIndex; i < endIndex; i++) {
             int slot = i - startIndex;
-            ItemStack item = allInventoryStacks.get(i);
-            setInventoryItemMeta(item);
+            InventoryStack stack = allInventoryStacks.get(i);
+            ItemStack item = new ItemStack(stack.key().material(), stack.amount());
+            setInventoryItemMeta(item, stack.key().rarity());
             inventory.setItem(slot, item);
         }
 
@@ -129,15 +133,15 @@ public class TycoonInventory implements MenuInterface {
 
     }
 
-    private List<ItemStack> getItemsAsStack(){
-        List<ItemStack> stacks = new ArrayList<>();
-        for (Map.Entry<Material, Integer> entry : tycoonBlock.getStoredItems().entrySet()) {
-            Material material = entry.getKey();
+    private List<InventoryStack> getItemsAsStack(){
+        List<InventoryStack> stacks = new ArrayList<>();
+        for (Map.Entry<StoredItemKey, Integer> entry : tycoonBlock.getStoredItems().entrySet()) {
+            StoredItemKey key = entry.getKey();
             int remaining = entry.getValue();
 
             while (remaining > 0) {
                 int stackSize = Math.min(remaining, 64);
-                stacks.add(new ItemStack(material, stackSize));
+                stacks.add(new InventoryStack(key, stackSize));
                 remaining -= stackSize;
             }
         }
@@ -151,10 +155,13 @@ public class TycoonInventory implements MenuInterface {
         Inventory inventory = event.getInventory();
         ItemStack item = event.getCurrentItem();
 
+        if (item == null|| item.getType() == Material.AIR) return;
+
+        Material clickedMaterial = item.getType();
+
         ClickType clickType = event.getClick();
         InventoryMode mode = playerInventoryMode.get(player.getUniqueId());
 
-        if (item == null|| item.getType() == Material.AIR) return;
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
@@ -163,12 +170,15 @@ public class TycoonInventory implements MenuInterface {
         final var shiftClick = clickType.equals(ClickType.SHIFT_RIGHT) || clickType.equals(ClickType.SHIFT_LEFT);
         switch (action) {
             case "inventory_item" -> {
+                String rarityString = pdc.get(TycoonData.INVENTORY_ITEM_RARITY_KEY, PersistentDataType.STRING);
+                SpawnMaterialRarity rarity = SpawnMaterialRarity.valueOf(rarityString);
+                StoredItemKey key = new StoredItemKey(clickedMaterial, rarity);
+
                 if (mode.equals(InventoryMode.DROP_MODE)) {
                     if (shiftClick) {
-                        tycoonBlock.dropItem(item, player);
+                        tycoonBlock.dropItem(key, item.getAmount(), player);
                     } else {
-                        ItemStack droppedItem = new ItemStack(item.getType(), 1);
-                        tycoonBlock.dropItem(droppedItem, player);
+                        tycoonBlock.dropItem(key, 1, player);
                     }
                 }
                 refresh(player, inventory);
@@ -230,15 +240,17 @@ public class TycoonInventory implements MenuInterface {
     public TycoonBlock getTycoonBlock() {
         return tycoonBlock;
     }
-    private void setInventoryItemMeta(ItemStack item) {
+    private void setInventoryItemMeta(ItemStack item, SpawnMaterialRarity rarity) {
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             PersistentDataContainer pdc = meta.getPersistentDataContainer();
             pdc.set(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING, "inventory_item");
             pdc.set(TycoonData.INVENTORY_ITEM_KEY, PersistentDataType.STRING, item.getType().name());
+            pdc.set(TycoonData.INVENTORY_ITEM_RARITY_KEY, PersistentDataType.STRING, rarity.name());
             meta.setLore(Arrays.asList(
                     "§8§m-----------------------",
                     ChatColor.GRAY + "Worth: " + PriceUtility.formatMoney(PriceUtility.calculateWorth(item)) + worthManager.getWorthMultiplierFormatted(item.getType()),
+                    ChatColor.GRAY + "Rarity: " + rarity.getDisplayName(),
                     "§8§m-----------------------"
             ));
             item.setItemMeta(meta);
