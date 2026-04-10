@@ -30,8 +30,7 @@ more tycoon types✅
 
 fix inventory bug, with double drops filling up over limit~
 
-//TODO: change xp progression to be easier -> XP drops worth?
-
+Upgrade Spawnblock rarity?
 Stock price history showing previous price changes
 
 Upgrades:

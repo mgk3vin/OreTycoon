@@ -211,6 +211,10 @@ public class TycoonBlock {
 
     //<editor-fold desc="🔎 Increment and Check">
     public void incrementAndCheck() {
+
+        tickCounter++;
+        verifyStats();
+
         if (tycoonWorld.getPlayers().isEmpty()) {
             if (isActive) {
                 setActive(false);
@@ -220,7 +224,7 @@ public class TycoonBlock {
             setActive(true);
         }
 
-        tickCounter++;
+
 
         if (tickCounter >= spawnRate) {
             tickCounter = 0;
@@ -262,6 +266,14 @@ public class TycoonBlock {
         }
     }
 
+    public void verifyStats() {
+        if (spawnRate <= minSpawnRate) {
+            spawnRate = minSpawnRate;
+        }
+        if (miningRate <= min_mining_rate) {
+            miningRate = min_mining_rate;
+        }
+    }
     //<editor-fold desc="📦 Inventory Methods">
     public double sellTycoonInventory(Player player) {
         WorthManager worthManager = OreTycoon.getInstance().getWorthManager();

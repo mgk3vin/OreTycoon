@@ -60,7 +60,9 @@ public class TycoonLevelPathMenu implements MenuInterface{
 
 
             ItemStack levelItem;
-            if(isClaimed){
+            if (level > LevelRewardRegistry.getSize()) {
+                levelItem = new ItemStack(Material.AIR);
+            } else if (isClaimed){
                  levelItem = MenuManager.createItemstack(Material.MINECART,
                         1,
                         ChatColor.AQUA + "Level " + level,
@@ -72,7 +74,13 @@ public class TycoonLevelPathMenu implements MenuInterface{
                          true,
                         "level_item_claimed");
             } else if (currentTycoonLevel >= level){
-                levelItem = Objects.requireNonNull(LevelRewardRegistry.getLevelReward(level, tycoonBlock)).getDisplayItem();
+                var reward = LevelRewardRegistry.getLevelReward(level, tycoonBlock).getDisplayItem();
+                if (reward == null) {
+                    levelItem = new ItemStack(Material.AIR); // Fallback
+                    Console.error(ChatColor.RED + "Level reward could not be found!");
+                } else {
+                    levelItem = reward;
+                }
             } else {
                 levelItem = MenuManager.createItemstack(Material.RED_STAINED_GLASS_PANE,
                         1,
