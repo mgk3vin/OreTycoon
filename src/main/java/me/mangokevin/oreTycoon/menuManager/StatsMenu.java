@@ -2,6 +2,7 @@ package me.mangokevin.oreTycoon.menuManager;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.*;
+import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.worth.PriceUtility;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -44,7 +45,11 @@ public class StatsMenu implements MenuInterface {
 
 
         //Tycoon Icon slot 13
-        ItemStack tycoonItem = menuManager.createTycoonItem(tycoonBlock);
+        ItemStack tycoonItem = MenuManager.createTycoonItem(tycoonBlock);
+        if (tycoonItem == null) {
+            Console.error(getClass(), "Tycoon Item is null");
+            return;
+        };
         ItemMeta tycoonMeta = tycoonItem.getItemMeta();
         if (tycoonMeta != null) {
             List<String> lore = tycoonMeta.getLore();

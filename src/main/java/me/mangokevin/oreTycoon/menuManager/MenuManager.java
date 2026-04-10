@@ -96,7 +96,7 @@ public class MenuManager {
         itemStack.setItemMeta(itemMeta);
     }
 
-    public ItemStack createTycoonItem(TycoonBlock block){
+    public static ItemStack createTycoonItem(TycoonBlock block){
         String autoMinerStatus = (block.getTycoonUpgrades().isAutoMinerUnlocked() ?
                 (block.isAutoMinerEnabled() ? ChatColor.GREEN + "Enabled" : ChatColor.RED + "Disabled")
                 : ChatColor.RED + "" + ChatColor.BOLD + "LOCKED");
@@ -165,7 +165,7 @@ public class MenuManager {
         worldItem.setItemMeta(worldItemMeta);
         return worldItem;
     }
-    private String getMiningRateDisplay(TycoonBlock block) {
+    private static String getMiningRateDisplay(TycoonBlock block) {
         return ChatColor.GRAY + "Mining rate: " + block.getMiningRateFormatted() + (block.getTycoonBoosterManager().isAutoMinerBoosterActive() ? ChatColor.GREEN + " [Boost -" + (block.getAutoMinerSpeedBooster().getBoostValue()/20) + "s]" : "");
     }
     public static ItemStack createItemstack(Material material, int amount, String name, List<String> lore, Boolean glint, Boolean hideAttributes, Boolean isMenuItem, String action){

@@ -90,7 +90,7 @@ public class OverviewMenu implements MenuInterface{
 
             if (tycoonIndex < tycoonBlockList.size()) {
                 TycoonBlock block = tycoonBlockList.get(tycoonIndex);
-                inventory.setItem(slot, menuManager.createTycoonItem(block));
+                inventory.setItem(slot, MenuManager.createTycoonItem(block));
             } else if (tycoonIndex < maxTycoonsPerPlayer) {
                 inventory.setItem(slot, MenuManager.createItemstack(
                         Material.BLACK_STAINED_GLASS_PANE,

@@ -28,7 +28,7 @@ public class TycoonCmd implements CommandExecutor {
         register(new WorldsSubCommand(plugin), "worlds", "world", "island");
         register(new CreateTycoonWorldSubCommand(plugin), "create", "new");
         register(new DeleteTycoonWorldSubCommand(plugin), "delete");
-        register(new ListWorldsSubCommand(plugin), "list");
+        register(new ListWorldsSubCommand(plugin), "listWorlds");
         register(new OpenStockMarketMenuSubCommand(), "stockmarket", "market", "worth");
         register(new UpdateStockMarketSubCommand(plugin), "updatestockmarket");
         register(new BoosterSubCommand(plugin), "booster", "boosters");
@@ -37,6 +37,7 @@ public class TycoonCmd implements CommandExecutor {
         register(new GiveTycoonSubCommand(plugin), "give", "block");
         register(new OpenOverviewMenuSubcommand(plugin), "menu", "overview", "all");
         register(new OpenStatsMenuSubCommand(plugin), "stats", "info", "open");
+        register(new TycoonListTypes(), "list", "types");
     }
 
     private void register(TycoonSubCommand subCommand, String... aliases) {
