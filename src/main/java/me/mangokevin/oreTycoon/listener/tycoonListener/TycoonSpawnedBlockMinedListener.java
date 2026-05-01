@@ -3,7 +3,6 @@ package me.mangokevin.oreTycoon.listener.tycoonListener;
 import me.mangokevin.oreTycoon.events.tycoonEvents.TycoonSpawnedBlockMinedEvent;
 import me.mangokevin.oreTycoon.menuManager.MenuManager;
 import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonUpgrades;
 import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.StoredItemKey;
 import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.SpawnBlock;
 import me.mangokevin.oreTycoon.utility.Console;
@@ -39,20 +38,15 @@ public class TycoonSpawnedBlockMinedListener implements Listener {
             return;
         }
 
-        //Add item to inv when manually mined
-        ItemStack item = new ItemStack(block.getType());
-
         StoredItemKey key = new StoredItemKey(spawnBlock.getMaterial(), spawnBlock.getSpawnMaterialRarity());
 
-        //should Fortune Multiplier activate
-        if (TycoonUpgrades.shouldFortuneActivate(tycoonBlock)){
-            item.setAmount(2);
-        }
-        if (tycoonBlock.addItem(key, 1)) {
+        int amount = tycoonBlock.applyFortune();
+
+        if (tycoonBlock.addItem(key, amount)) {
             MenuManager.refreshOpenInventory(player, tycoonBlock);
             blockBreakEvent.setCancelled(true);
 
-            tycoonBlock.handleReward(spawnBlock);
+            tycoonBlock.handleReward(spawnBlock, amount);
             block.setType(Material.AIR);
             tycoonBlock.getLocation().getWorld().playSound(tycoonBlock.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1, 1.5F);
         }else {

@@ -21,12 +21,16 @@ public class TycoonAutoMineListener implements Listener {
         StoredItemKey item = event.getItem();
 
         //add Item when Block is auto mined
-        boolean itemFits = tycoon.addItem(item, 1);
+        int amount = tycoon.applyFortune();
+
+        boolean itemFits = tycoon.addItem(item, amount);
         if (!itemFits) {
             if (owner != null) {
                 owner.sendMessage(ChatColor.RED + "Inventory full! Max size: " + tycoon.getInventoryStorage() + "-items");
             }
             tycoon.setAutoMinerEnabled(false);
+        } else {
+            tycoon.handleReward(spawnBlock, amount);
         }
         //Refresh Tycoon Hologram
         tycoon.updateHologram();

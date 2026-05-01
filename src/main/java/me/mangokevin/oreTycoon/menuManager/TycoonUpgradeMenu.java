@@ -41,7 +41,7 @@ public class TycoonUpgradeMenu implements MenuInterface{
         TycoonUpgrades tycoonUpgrades = tycoonBlock.getTycoonUpgrades();
         MenuManager.addFiller(inventory, Material.ORANGE_STAINED_GLASS_PANE);
 
-        //  20 | 22 | 24
+        //  10 | 12 | 14
         //<editor-fold desc="⚒️ Spawn rate Upgrade">
         double spawnRateUpgradeCost = TycoonUpgrades.getSpawnRateUpgradeCost(tycoonBlock,tycoonBlock.getSpawnRateLevel() + 1);
         String spawnRateUpgradeString = PriceUtility.formatMoney(spawnRateUpgradeCost) + ChatColor.GRAY +  " -> " + (tycoonBlock.getSpawnRateLevel() + 1) +" ]";
@@ -59,7 +59,7 @@ public class TycoonUpgradeMenu implements MenuInterface{
                 true,
                 true,
                 "upgradeSpawnRate");
-        inventory.setItem(11,spawnRate);
+        inventory.setItem(10 ,spawnRate);
         //</editor-fold>
 
         //<editor-fold desc="🎲Double Drops Upgrade">
@@ -67,6 +67,8 @@ public class TycoonUpgradeMenu implements MenuInterface{
         String doubleDropsUpgradeString = PriceUtility.formatMoney(doubleDropsUpgradeCost) +  ChatColor.GRAY +  " -> " + (tycoonBlock.getTycoonUpgrades().getDoubleDropsLevel() + 1) +" ]";
         List<String> doubleDropsLore = Arrays.asList("§8§m-----------------------",
                 ChatColor.GRAY + "[ Level: " + tycoonBlock.getTycoonUpgrades().getDoubleDropsLevel() + " ]",
+                ChatColor.GRAY + "[ Tier: " + tycoonBlock.getDoubleDropsTier() + " ]",
+                ChatColor.GRAY + "[ Multiplier: " + tycoonBlock.getDoubleDropsAmount() + "x ]",
                 ChatColor.GRAY + "[ Current Chance: " + tycoonBlock.getDoubleDropsChanceFormatted() + " ]",
                 ChatColor.GRAY + "[ Upgrade cost: " + (eco.has(player, doubleDropsUpgradeCost) ? ChatColor.GREEN : ChatColor.RED) + doubleDropsUpgradeString ,
                 "§8§m-----------------------");
@@ -80,7 +82,7 @@ public class TycoonUpgradeMenu implements MenuInterface{
                 true,
                 "upgradeDoubleDrops"
         );
-        inventory.setItem(13,doubleDrops);
+        inventory.setItem(12,doubleDrops);
 //</editor-fold>
 
         //<editor-fold desc="⛏️ Auto Miner Upgrade">
@@ -100,7 +102,7 @@ public class TycoonUpgradeMenu implements MenuInterface{
                     true,
                     true,
                     "upgradeAutoMinerSpeed");
-            inventory.setItem(15,autoMinerSpeed);
+            inventory.setItem(14,autoMinerSpeed);
         } else {
             ItemStack autoMinerLocked = MenuManager.createItemstack(Material.IRON_BARS,
                     1,
@@ -110,8 +112,31 @@ public class TycoonUpgradeMenu implements MenuInterface{
                     true,
                     true,
                     "autoMinerLocked");
-            inventory.setItem(15,autoMinerLocked);
+            inventory.setItem(14,autoMinerLocked);
         }
+        //</editor-fold>
+
+        //<editor-fold desc="🔨 Multiple Miner Upgrade">
+        double multiMinerUpgradeCost = TycoonUpgrades.getMultipleMinerUpgradeCost(tycoonBlock,tycoonBlock.getTycoonUpgrades().getMultipleMinerLevel() + 1);
+        String multiMinerUpgradeString = PriceUtility.formatMoney(multiMinerUpgradeCost) +  ChatColor.GRAY +  " -> " + (tycoonBlock.getTycoonUpgrades().getMultipleMinerLevel() + 1) +" ]";
+        List<String> multiMinerLore = Arrays.asList("§8§m-----------------------",
+                ChatColor.GRAY + "[ Level: " + tycoonBlock.getTycoonUpgrades().getMultipleMinerLevel() + " ]",
+                ChatColor.GRAY + "[ Tier: " + tycoonBlock.getMultiMinerTier() + " ]",
+                ChatColor.GRAY + "[ Multiplier: " + tycoonBlock.getMultiMinerAmount() + "x ]",
+                ChatColor.GRAY + "[ Current Chance: " + tycoonBlock.getMultiMinerChanceFormatted() + " ]",
+                ChatColor.GRAY + "[ Upgrade cost: " + (eco.has(player, multiMinerUpgradeCost) ? ChatColor.GREEN : ChatColor.RED) + multiMinerUpgradeString ,
+                "§8§m-----------------------");
+        ItemStack multiMiner = MenuManager.createItemstack(
+                Material.TNT,
+                1,
+                ChatColor.AQUA + "Upgrade Multi Miner",
+                multiMinerLore,
+                false,
+                true,
+                true,
+                "upgradeMultiMiner"
+        );
+        inventory.setItem(16, multiMiner);
         //</editor-fold>
 
         //<editor-fold desc="🍀 Fortune Upgrade">
@@ -119,6 +144,8 @@ public class TycoonUpgradeMenu implements MenuInterface{
         String fortuneUpgradeString = PriceUtility.formatMoney(fortuneUpgradeCost) + ChatColor.GRAY + " -> " + (tycoonBlock.getTycoonUpgrades().getFortuneLevel() + 1) +" ]";
         List<String> fortuneLore = Arrays.asList("§8§m-----------------------",
                 ChatColor.GRAY + "[ Level: " + tycoonBlock.getTycoonUpgrades().getFortuneLevel() + " ]",
+                ChatColor.GRAY + "[ Tier: " + tycoonBlock.getFortuneTier() + " ]",
+                ChatColor.GRAY + "[ Multiplier: " + tycoonBlock.getFortuneMultiplier() + "x ]",
                 ChatColor.GRAY + "[ Current Chance: " + tycoonBlock.getFortuneChanceFormatted() + " ]",
                 ChatColor.GRAY + "[ Upgrade cost: " + (eco.has(player, fortuneUpgradeCost) ? ChatColor.GREEN : ChatColor.RED) + fortuneUpgradeString ,
                 "§8§m-----------------------");
@@ -199,40 +226,36 @@ public class TycoonUpgradeMenu implements MenuInterface{
             switch (action) {
                 case "upgradeSpawnRate":
                     tycoonBlock.upgradeSpawnRate(player);
-                    refresh(player,inventory);
                     break;
                 case "upgradeAutoMinerSpeed":
                     tycoonBlock.upgradeMiningRate(player);
-                    refresh(player,inventory);
                     break;
                 case "autoMinerLocked":
                     player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_HIT, 1f, 1f);
                     break;
+                case "upgradeMultiMiner":
+                    tycoonBlock.upgradeMultiMinerChance(player, false);
+                    break;
                 case "upgradeWorthMultiplier":
                     tycoonBlock.upgradeSellMultiplier(player);
-                    refresh(player,inventory);
                     break;
                 case "upgradeDoubleDrops":
                     tycoonBlock.upgradeDoubleDropsChance(player);
-                    refresh(player,inventory);
                     break;
                 case "upgradeFortune":
                     tycoonBlock.upgradeFortuneChance(player);
-                    refresh(player,inventory);
                     break;
                 case "upgradeInventoryStorage":
                     tycoonBlock.upgradeMaxInventoryStorage(player);
-                    tycoonBlock.updateHologramPreset(tycoonBlock.getLocation(), "STORAGE");
-                    refresh(player,inventory);
+                    tycoonBlock.updateHologram();
                     break;
                 case "return":
                     new StatsMenu(tycoonBlock, plugin).open(player);
                     break;
-                case null:
-                    break;
-                default:
+                case null, default:
                     break;
             }
+            refresh(player,inventory);
         }
     }
 }

@@ -67,6 +67,7 @@ public class DatabaseManager {
                 "inventory_storage_level INT," +
                 "double_drops_level INT," +
                 "fortune_level INT," +
+                "multi_miner_level INT," +
                 "is_autominer_unlocked BOOLEAN)";
         String tycoonInventoriesCMD = "CREATE TABLE IF NOT EXISTS tycoon_inventories" +
                 "(tycoon_uid TEXT," +
@@ -221,8 +222,18 @@ public class DatabaseManager {
         TycoonUpgrades upgrades = tycoonBlock.getTycoonUpgrades();
         try{
             PreparedStatement statement = connection.prepareStatement(
-                    "INSERT OR REPLACE INTO tycoon_upgrades (tycoon_uid, spawn_rate_level, mining_rate_level, sell_multiplier_level, inventory_storage_level, double_drops_level, fortune_level, is_autominer_unlocked) " +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                    "INSERT OR REPLACE INTO tycoon_upgrades (" +
+                            "tycoon_uid," +
+                            " spawn_rate_level," +
+                            " mining_rate_level," +
+                            " sell_multiplier_level," +
+                            " inventory_storage_level," +
+                            " double_drops_level," +
+                            " fortune_level," +
+                            " is_autominer_unlocked," +
+                            "multi_miner_level" +
+                            ") " +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
             statement.setString(1, tycoonBlock.getBlockUID());
             statement.setInt(2, upgrades.getSpawnRateLevel());
             statement.setInt(3, upgrades.getMiningRateLevel());
@@ -231,6 +242,7 @@ public class DatabaseManager {
             statement.setInt(6, upgrades.getDoubleDropsLevel());
             statement.setInt(7, upgrades.getFortuneLevel());
             statement.setBoolean(8, upgrades.isAutoMinerUnlocked());
+            statement.setInt(9, upgrades.getMultipleMinerLevel());
 
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -483,6 +495,7 @@ public class DatabaseManager {
                 upgrades.setDoubleDropsLevel(result.getInt("double_drops_level"));
                 upgrades.setFortuneLevel(result.getInt("fortune_level"));
                 upgrades.setAutoMinerUnlocked(result.getBoolean("is_autominer_unlocked"));
+                upgrades.setMultipleMinerLevel(result.getInt("multi_miner_level"));
             }
         } catch (SQLException e) {
             Console.error(getClass(), "Database load for tycoon upgrades failed! Reason: " + e.getMessage());

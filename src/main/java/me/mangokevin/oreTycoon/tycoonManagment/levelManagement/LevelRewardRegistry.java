@@ -143,36 +143,21 @@ public class LevelRewardRegistry {
                 return new LevelReward(Material.CHEST, ChatColor.GRAY + "Level: " + level,
                     Arrays.asList(
                             "§8§m-----------------------",
-                            "§8Reward: " + ChatColor.GOLD + "+1 Storage Level",
+                            "§8Reward: " + ChatColor.GOLD + "+3 Storage Level",
                             "§8Tier: " + rewardTier.getDisplayName(),
                             "§8§m-----------------------"
                     ),
                     rewardTier,
                     (player) -> {
-                        tycoonBlock.upgradeMaxInventoryStorage(player, true);
+                        for (int i = 0; i < 3; i++) {
+                            tycoonBlock.upgradeMaxInventoryStorage(player, true);
+                        }
                         player.playSound(player.getLocation(), Sound.BLOCK_CHEST_LOCKED, 1.0f, 1.0f);
                     },
                         level
                 );
             }
             case RARE -> {
-                return new LevelReward(Material.CHEST, ChatColor.GRAY + "Level: " + level,
-                        Arrays.asList(
-                                "§8§m-----------------------",
-                                "§8Reward: " + ChatColor.GOLD + "+3 Storage Level",
-                                "§8Tier: " + rewardTier.getDisplayName(),
-                                "§8§m-----------------------"
-                        ),
-                        rewardTier,
-                        (player) -> {
-                            for (int i = 0; i < 3; i++) {
-                                tycoonBlock.upgradeMaxInventoryStorage(player, true);
-                            }
-                        },
-                        level
-                );
-            }
-            case EPIC -> {
                 return new LevelReward(Material.CHEST, ChatColor.GRAY + "Level: " + level,
                         Arrays.asList(
                                 "§8§m-----------------------",
@@ -185,11 +170,12 @@ public class LevelRewardRegistry {
                             for (int i = 0; i < 5; i++) {
                                 tycoonBlock.upgradeMaxInventoryStorage(player, true);
                             }
+                            player.playSound(player.getLocation(), Sound.BLOCK_CHEST_LOCKED, 1.0f, 1.0f);
                         },
                         level
                 );
             }
-            case LEGENDARY -> {
+            case EPIC -> {
                 return new LevelReward(Material.CHEST, ChatColor.GRAY + "Level: " + level,
                         Arrays.asList(
                                 "§8§m-----------------------",
@@ -202,6 +188,25 @@ public class LevelRewardRegistry {
                             for (int i = 0; i < 10; i++) {
                                 tycoonBlock.upgradeMaxInventoryStorage(player, true);
                             }
+                            player.playSound(player.getLocation(), Sound.BLOCK_CHEST_LOCKED, 1.0f, 1.0f);
+                        },
+                        level
+                );
+            }
+            case LEGENDARY -> {
+                return new LevelReward(Material.CHEST, ChatColor.GRAY + "Level: " + level,
+                        Arrays.asList(
+                                "§8§m-----------------------",
+                                "§8Reward: " + ChatColor.GOLD + "+20 Storage Level",
+                                "§8Tier: " + rewardTier.getDisplayName(),
+                                "§8§m-----------------------"
+                        ),
+                        rewardTier,
+                        (player) -> {
+                            for (int i = 0; i < 20; i++) {
+                                tycoonBlock.upgradeMaxInventoryStorage(player, true);
+                            }
+                            player.playSound(player.getLocation(), Sound.BLOCK_CHEST_LOCKED, 1.0f, 1.0f);
                         },
                         level
                 );

@@ -253,7 +253,7 @@ public enum TycoonType {
                             Material.COAL_ORE,
                             Material.DEEPSLATE_COAL_ORE
             )),
-    COPPER(Material.COPPER_BLOCK,
+    COPPER(Material.WAXED_COPPER_BLOCK,
             ChatColor.GOLD + "Copper Tycoon",
             40.0,
             5*20,
