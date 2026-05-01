@@ -70,6 +70,8 @@ public final class OreTycoon extends JavaPlugin {
 
         //========= DatabaseManager setup =========
         databaseManager = new DatabaseManager(this);
+
+        databaseManager.createBackup();
         //========= DatabaseManager setup =========
         //========= ScoreBoard setup =========
         scoreboardManager = new ScoreBoardManager();
@@ -148,6 +150,7 @@ public final class OreTycoon extends JavaPlugin {
         tycoonWorldManager.loadPlayerWorlds();
 
         databaseManager.startAutoSaveTimer();
+        databaseManager.startBackupTimer();
     }
 
 

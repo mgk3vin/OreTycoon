@@ -46,6 +46,7 @@ public class TycoonData {
     public static NamespacedKey TYCOON_CLAIMED_LEVELS_KEY;
     public static NamespacedKey TYCOON_DOUBLE_DROPS_LEVEL_KEY;
     public static NamespacedKey TYCOON_FORTUNE_LEVEL_KEY;
+    public static NamespacedKey TYCOON_MULTI_MINER_LEVEL_KEY;
     //========== Upgrade Keys ==========
 
     //========== Booster Keys ==========
@@ -97,6 +98,7 @@ public class TycoonData {
         TYCOON_CLAIMED_LEVELS_KEY = new NamespacedKey(plugin, "tycoon_claimed_levels");
         TYCOON_DOUBLE_DROPS_LEVEL_KEY = new NamespacedKey(plugin, "tycoon_double_drops_level");
         TYCOON_FORTUNE_LEVEL_KEY = new NamespacedKey(plugin, "tycoon_fortune_level");
+        TYCOON_MULTI_MINER_LEVEL_KEY = new NamespacedKey(plugin, "tycoon_multi_miner_level");
         //========== Upgrade Keys ==========
 
 
@@ -159,6 +161,7 @@ public class TycoonData {
         pdc.set(TYCOON_DOUBLE_DROPS_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getDoubleDropsLevel());
         pdc.set(TYCOON_FORTUNE_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getFortuneLevel());
         pdc.set(TYCOON_MAX_INVENTORY_STORAGE_KEY, PersistentDataType.INTEGER, upgrades.getInventoryStorageLevel());
+        pdc.set(TYCOON_MULTI_MINER_LEVEL_KEY, PersistentDataType.INTEGER, upgrades.getMultipleMinerLevel());
         //Save ClaimedLevels
         String claimedLevels = upgrades.getClaimedLevels().stream().map(String::valueOf).collect(Collectors.joining(","));
         pdc.set(TYCOON_CLAIMED_LEVELS_KEY, PersistentDataType.STRING, claimedLevels);
@@ -186,6 +189,7 @@ public class TycoonData {
         upgrades.setDoubleDropsLevel(pdc.getOrDefault(TYCOON_DOUBLE_DROPS_LEVEL_KEY, PersistentDataType.INTEGER, 0));
         upgrades.setInventoryStorageLevel(pdc.getOrDefault(TYCOON_MAX_INVENTORY_STORAGE_KEY, PersistentDataType.INTEGER, 0));
         upgrades.setFortuneLevel(pdc.getOrDefault(TYCOON_FORTUNE_LEVEL_KEY, PersistentDataType.INTEGER, 0));
+        upgrades.setMultipleMinerLevel(pdc.getOrDefault(TYCOON_MULTI_MINER_LEVEL_KEY, PersistentDataType.INTEGER, 0));
 
         //Load claimed Levels from String
         String claimedLevelsData = pdc.get(TycoonData.TYCOON_CLAIMED_LEVELS_KEY, PersistentDataType.STRING);

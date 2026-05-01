@@ -28,7 +28,6 @@ public class TycoonAutoMineListener implements Listener {
             if (owner != null) {
                 owner.sendMessage(ChatColor.RED + "Inventory full! Max size: " + tycoon.getInventoryStorage() + "-items");
             }
-            tycoon.setAutoMinerEnabled(false);
         } else {
             tycoon.handleReward(spawnBlock, amount);
         }

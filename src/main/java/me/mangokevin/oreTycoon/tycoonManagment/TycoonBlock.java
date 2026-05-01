@@ -365,7 +365,7 @@ public class TycoonBlock {
     }
     //---------- AutoMiner ----------
     private void tryAutoMining() {
-        if (!isAutoMinerUnlocked){
+        if (!isAutoMinerUnlocked || isInventoryFull()){
             return;
         }
         SpawnBlock targetBlock = activeBlocks.get(random.nextInt(activeBlocks.size()));
@@ -449,8 +449,8 @@ public class TycoonBlock {
             }
         }.runTaskTimer(plugin, 0, 1L);
     }
-    private void tryAutoMiningMultiple(int amout) {
-        for (int i = 0; i < amout; i++) {
+    private void tryAutoMiningMultiple(int amount) {
+        for (int i = 0; i < amount; i++) {
             tryAutoMining();
         }
     }
@@ -998,7 +998,7 @@ public class TycoonBlock {
     }
     public void updateHologram() {
         if (!isLoaded()) {
-            Console.error(getClass() + " Cant update hologram, Tycoon is not loaded!");
+            Console.warn(getClass(), " Cant update hologram, Tycoon is not loaded!");
             return;
         }
         Hologram hologram = getHologram(tycoonLocation);

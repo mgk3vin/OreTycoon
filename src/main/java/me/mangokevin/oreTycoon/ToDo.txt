@@ -29,9 +29,9 @@ fix overview menu autoMiner icon✅
 more tycoon types✅
 
 fix inventory bug, with double drops filling up over limit~
-//TODO: save multi miner level progress
-Upgrade Spawnblock rarity?
 
+Upgrade Spawnblock rarity?
+Upgrade cap tied to tycoon level
 Upgrades:
 -Xp multi
 -Multi Mine
