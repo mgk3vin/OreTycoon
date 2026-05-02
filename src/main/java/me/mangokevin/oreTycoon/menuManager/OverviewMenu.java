@@ -310,7 +310,7 @@ public class OverviewMenu implements MenuInterface{
             if (tycoonIndex >= allTycoons.size()) break;
 
             TycoonBlock tycoonBlock = allTycoons.get(tycoonIndex);
-            totalWorth += PriceUtility.calculateWorth(tycoonBlock.getStoredItems());
+            totalWorth += tycoonBlock.getInventoryWorth();
         }
         // Das Menü komplett neu laden, um alle Items (Tycoons + Button) zu aktualisieren
         return totalWorth;

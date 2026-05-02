@@ -252,16 +252,8 @@ public class TycoonBlock {
 
             if (miningTickCounter >= miningRate) {
                 miningTickCounter = 0;
-                // Wichtig: Nur versuchen abzubauen, wenn dort auch wirklich ein Block steht!
 
                 if (activeBlocks.isEmpty()) return;
-
-                // Einen zufälligen Block aus dem Set picken
-//                SpawnBlock targetBlock = activeBlocks.get(random.nextInt(activeBlocks.size()));
-//
-//                if (targetBlock != null && targetBlock.getMaterial() != Material.AIR) {
-//                    tryAutoMining(targetBlock.getSpawnLocation());
-//                }
                 tryAutoMiningMultiple(applyMultiMinerChance());
             }
         }
@@ -288,8 +280,9 @@ public class TycoonBlock {
         WorthManager worthManager = OreTycoon.getInstance().getWorthManager();
         Economy econ = OreTycoon.getEconomy();
         double worth = worthManager.getWorth(getStoredItems());
+        worth *= sellMultiplier;
 
-        System.out.println("TycoonBlock Calculate Worth: " + PriceUtility.formatMoney(worth));
+        Console.log(getClass(), "TycoonBlock Calculate Worth: " + worth);
         if (worth <= 0) return 0.0;
         econ.depositPlayer(player, worth);
         player.sendMessage(ChatColor.GREEN + "Sold items worth: " + PriceUtility.formatMoney(worth) + " with " + getSellMultiplierFormatted() + "x Sell Multiplier");
@@ -653,7 +646,7 @@ public class TycoonBlock {
         }
     }
     public boolean isSellMultiplierMaxed() {
-        return TycoonUpgrades.calculateNewSellMultiplier(sellMultiplierLevel, 0) >= maxSellMultiplier;
+        return sellMultiplier >= maxSellMultiplier;
     }
 
     public boolean upgradeDoubleDropsChance(Player player, boolean force) {
@@ -1056,12 +1049,11 @@ public class TycoonBlock {
         hologramLines.set(3, "Level: " + level);
         hologramLines.set(4, "xp: " + levelXp + "/" + levelManager.getXpNeededForLevel(level + 1) + " | " + (int) levelManager.getProgressPercentage(levelXp, level + 1) + "%");
         hologramLines.set(5, ChatColor.DARK_GRAY + "[" +getProgressBar(20) + ChatColor.DARK_GRAY + "]");
-        String currentWorthFormatted = PriceUtility.formatMoney(PriceUtility.calculateWorth(getStoredItems()));
+        String currentWorthFormatted = getInventoryWorthFormatted();
         if (isInventoryFull()){
             hologramLines.set(6, ChatColor.RED + "" + ChatColor.BOLD + "Inventory FULL: "+ ChatColor.GREEN + currentWorthFormatted + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
         } else {
             hologramLines.set(6, ChatColor.RESET + "Inventory: "+ ChatColor.GREEN + currentWorthFormatted + ChatColor.WHITE + " | " + getStorageStatisticFormatted());
-
         }
 
         //Calculate index/Order
@@ -1349,6 +1341,13 @@ public class TycoonBlock {
     }
     public double getMaxSellMultiplier() {
         return maxSellMultiplier;
+    }
+    public double getInventoryWorth(){
+        WorthManager worthManager = OreTycoon.getInstance().getWorthManager();
+        return (worthManager.getWorth(getStoredItems()) * sellMultiplier);
+    }
+    public String getInventoryWorthFormatted(){
+        return PriceUtility.formatMoney(getInventoryWorth());
     }
     // ---------     Getter      ---------
 

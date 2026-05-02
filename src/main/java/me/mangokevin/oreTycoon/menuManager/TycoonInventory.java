@@ -213,7 +213,6 @@ public class TycoonInventory implements MenuInterface {
                     }
                 } else {
                     if (!sellCooldown.isOnCooldown(player.getUniqueId())) {
-                        //tycoonBlock.sellInventory(inventory, player);
                         tycoonBlock.sellTycoonInventory(player);
                         sellCooldown.setCooldown(player.getUniqueId());
                     } else {
@@ -259,7 +258,7 @@ public class TycoonInventory implements MenuInterface {
     private ItemStack getModeItem(InventoryMode mode) {
         return switch (mode) {
             case SELL_MODE -> {
-                String currentWorthFormatted = PriceUtility.formatMoney(PriceUtility.calculateWorth(tycoonBlock.getStoredItems()));
+                String currentWorthFormatted = tycoonBlock.getInventoryWorthFormatted();
                 yield MenuManager.createItemstack(
                         Material.GREEN_STAINED_GLASS_PANE,
                         1,

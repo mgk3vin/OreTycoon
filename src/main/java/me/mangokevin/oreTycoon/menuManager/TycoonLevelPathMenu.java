@@ -50,11 +50,12 @@ public class TycoonLevelPathMenu implements MenuInterface{
         //========== Filler ==========
 
         //========== Level items ==========
+        int unclaimedRewards = 0;
+
         int startIndex = page * usableSlots.size();
         for (int i = 0; i < usableSlots.size(); i++) {
             int slot = usableSlots.get(i);
             int level = i + 1 + startIndex;
-            int index = i + startIndex;
             int currentTycoonLevel = tycoonBlock.getLevel();
             boolean isClaimed = tycoonBlock.getTycoonUpgrades().hasClaimedLevel(level);
 
@@ -80,6 +81,7 @@ public class TycoonLevelPathMenu implements MenuInterface{
                     Console.error(ChatColor.RED + "Level reward could not be found!");
                 } else {
                     levelItem = reward;
+                    unclaimedRewards++;
                 }
             } else {
                 levelItem = MenuManager.createItemstack(Material.RED_STAINED_GLASS_PANE,
@@ -131,6 +133,28 @@ public class TycoonLevelPathMenu implements MenuInterface{
                     "next_page");
             inventory.setItem(53, next_page);
         }
+        //Claim all button
+        ItemStack claimAllItem;
+        if (unclaimedRewards > 0){
+            claimAllItem = MenuManager.createItemstack(Material.CHEST_MINECART,
+                    unclaimedRewards,
+                    ChatColor.GOLD + "Claim " + unclaimedRewards + " Rewards from this page!",
+                    null,
+                    true,
+                    true,
+                    true,
+                    "claim_all_rewards");
+        } else {
+            claimAllItem = MenuManager.createItemstack(Material.MINECART,
+                    1,
+                    ChatColor.GRAY + "No claimable Rewards available on this page!",
+                    null,
+                    false,
+                    true,
+                    true,
+                    "claim_no_rewards");
+        }
+        inventory.setItem(48, claimAllItem);
 
         //Return button
         ItemStack returnItem = MenuManager.createItemstack(Material.BARRIER,
@@ -141,7 +165,7 @@ public class TycoonLevelPathMenu implements MenuInterface{
                 true,
                 true,
                 "return");
-        inventory.setItem(49, returnItem);
+        inventory.setItem(50, returnItem);
 
     }
 
@@ -169,6 +193,30 @@ public class TycoonLevelPathMenu implements MenuInterface{
                     Console.log(getClass(), "Level reward " + level + " has been claimed!");
                     tycoonBlock.updateHologram();
                     refresh(player, inventory);
+                    break;
+                case "claim_all_rewards":
+                    for (int i = 0; i < usableSlots.size(); i++) {
+                        int currentTycoonLevel = tycoonBlock.getLevel();
+                        level = i + 1 + page * usableSlots.size();
+
+                        if (level == 0 || level > LevelRewardRegistry.getSize()){
+                            Console.error(getClass(), "Invalid level reward!");
+                            break;
+                        }
+
+                        boolean isClaimed = tycoonBlock.getTycoonUpgrades().hasClaimedLevel(level);
+                        if (!isClaimed && currentTycoonLevel >= level) {
+                            LevelReward allLevelReward = LevelRewardRegistry.getLevelReward(level, tycoonBlock);
+                            allLevelReward.apply(player);
+                            tycoonBlock.getTycoonUpgrades().claimLevel(level);
+                            Console.log(getClass(), "Level reward " + level + " has been claimed!");
+                        }
+                    }
+                    tycoonBlock.updateHologram();
+                    refresh(player, inventory);
+                    break;
+                case "claim_no_rewards":
+                    player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1, 1);
                     break;
                 case "level_item_locked":
                     player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.2f);

@@ -64,7 +64,7 @@ public class StatsMenu implements MenuInterface {
 
         //Inventory Icon slot 18
         List<String> inventoryLore = Arrays.asList("§8§m-----------------------",
-                ChatColor.WHITE + "Worth: "  + ChatColor.GREEN + PriceUtility.formatMoney(PriceUtility.calculateWorth(tycoonBlock.getStoredItems())),
+                ChatColor.WHITE + "Worth: "  + ChatColor.GREEN + tycoonBlock.getInventoryWorthFormatted(),
                 ChatColor.WHITE + "Storage: " + tycoonBlock.getStorageStatisticFormatted() + " items",
                 "§8§m-----------------------",
                 ChatColor.YELLOW + "[Left click to open]",

@@ -110,7 +110,7 @@ public class MenuManager {
                 block.getProgressBar(20) + " " + block.getProgressPercentage() + "%",
                 ChatColor.GRAY + "Inventory: " + block.getStorageStatisticFormatted(),
                 ChatColor.GRAY + "Spawn rate: " + block.getSpawnRateFormatted() + (block.getTycoonBoosterManager().isSpawnSpeedBoosterActive() ? ChatColor.GREEN + " [Boost -" + (block.getSpawnSpeedBooster().getBoostValue()/20) + "s]" : ""),
-                ChatColor.GRAY + "Mining rate: " + (block.getTycoonUpgrades().isAutoMinerUnlocked() ? getMiningRateDisplay(block ): ChatColor.RED + "[LOCKED]"),
+                ChatColor.GRAY + (block.getTycoonUpgrades().isAutoMinerUnlocked() ? getMiningRateDisplay(block) : ChatColor.GRAY + "Mining Rate: " + ChatColor.RED + "[LOCKED]"),
                 ChatColor.GRAY + "Sell Multiplier: " + block.getSellMultiplierFormatted() + (block.getTycoonBoosterManager().isSellMultiplierBoosterActive() ? ChatColor.GREEN + " [Boost +" + block.getSellMultiplierBooster().getBoostValue() + "x]" : ""),
                 "§8§m-----------------------");
 
