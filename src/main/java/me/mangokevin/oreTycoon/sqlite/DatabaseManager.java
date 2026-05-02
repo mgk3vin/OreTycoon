@@ -297,7 +297,7 @@ public class DatabaseManager {
                 saveTycoonUpgrades(tycoonBlock);
                 saveTycoonClaimedLevels(tycoonBlock);
                 saveTycoonInventory(tycoonBlock);
-                saveTycoonActiveMaterials(tycoonBlock);
+                //saveTycoonActiveMaterials(tycoonBlock);
                 saveTycoonActiveBoosters(tycoonBlock);
                 saveTycoonSpawnedBlockLocations(tycoonBlock, activeBlocksSnapshot);
             } catch (SQLException e) {
@@ -410,8 +410,9 @@ public class DatabaseManager {
             Console.error(getClass(), "Database inventory save failed! Reason: " + e.getMessage());
         }
     }
+    @Deprecated
     private void saveTycoonActiveMaterials(TycoonBlock tycoonBlock) {
-        Map<Material, Boolean> activeMaterials = tycoonBlock.getActiveRessourceMaterialsMap();
+        //Map<Material, Boolean> activeMaterials = tycoonBlock.getActiveRessourceMaterialsMap();
         String delSql = "DELETE FROM tycoon_active_materials WHERE tycoon_uid = ?";
         //Delete previous entries
         try (PreparedStatement delStatement = connection.prepareStatement(delSql)){
@@ -440,6 +441,7 @@ public class DatabaseManager {
             Console.error(getClass(), "Database active materials save failed! Reason: " + e.getMessage());
         }
     }
+
     private void saveTycoonActiveBoosters(TycoonBlock tycoonBlock) {
         TycoonBoosterAbstract tycoonBooster = tycoonBlock.isAnyBoosterActive();
         if (tycoonBooster == null) return;
@@ -545,7 +547,7 @@ public class DatabaseManager {
                         tycoonBlock.setIndex(tycoonIndex);
 
                         loadTycoonInventory(tycoonBlock);
-                        loadTycoonActiveMaterials(tycoonBlock);
+                        //loadTycoonActiveMaterials(tycoonBlock);
                         loadTycoonActiveBoosters(tycoonBlock);
                         loadTycoonSpawnedLocations(tycoonBlock);
 
@@ -639,6 +641,7 @@ public class DatabaseManager {
             Console.error(getClass(), "Database inventory load failed! Reason: " + e.getMessage());
         }
     }
+    @Deprecated
     private void loadTycoonActiveMaterials(TycoonBlock tycoonBlock) {
         String sql =  "SELECT * FROM tycoon_active_materials WHERE tycoon_uid = ?";
         try(PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -669,6 +672,7 @@ public class DatabaseManager {
             Console.error(getClass(), "Database active materials load failed! Reason: " + e.getMessage());
         }
     }
+
     private void loadTycoonActiveBoosters(TycoonBlock tycoonBlock) {
         String sql = "SELECT * FROM tycoon_active_boosters WHERE tycoon_uid = ?";
         try(PreparedStatement statement = connection.prepareStatement(sql)) {
