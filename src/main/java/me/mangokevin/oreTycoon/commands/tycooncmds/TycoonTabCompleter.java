@@ -45,39 +45,6 @@ public class TycoonTabCompleter implements TabCompleter {
                         .collect(Collectors.toList());
             }
         }
-//        if (strings.length == 2 && strings[0].equalsIgnoreCase("toggle_all")) {
-//            List<String> subcommands = Arrays.asList("on", "off");
-//
-//            return subcommands.stream().filter(string -> string.toLowerCase().startsWith(strings[1].toLowerCase()))
-//                    .collect(Collectors.toList());
-//        }
-//        if (strings.length == 2 && strings[0].equalsIgnoreCase("give")) {
-//            List<String> subcommands = Arrays.asList(
-//                    "wood",
-//                    "jungle",
-//                    "stone",
-//                    "deepslate",
-//                    "coal",
-//                    "iron",
-//                    "nether",
-//                    "ocean",
-//                    "ice",
-//                    "mesa",
-//                    "wool",
-//                    "concrete",
-//                    "diamond",
-//                    "end");
-//
-//            return subcommands.stream().filter(string -> string.toLowerCase().startsWith(strings[1].toLowerCase()))
-//                    .collect(Collectors.toList());
-//        }
-//        if (strings.length == 2 && strings[0].equalsIgnoreCase("booster")) {
-//            List<String> subcommands = Arrays.asList("sellmultiplier", "autominer", "all", "spawnspeed");
-//
-//            return subcommands.stream().filter(string -> string.toLowerCase().startsWith(strings[1].toLowerCase()))
-//                    .collect(Collectors.toList());
-//        }
-
         return List.of();
     }
 }

@@ -59,6 +59,9 @@ public class GiveTycoonSubCommand implements TycoonSubCommand {
             case "coal" -> {
                 tycoonManager.giveDefaultTycoonBlock(player, TycoonType.COAL, amount);
             }
+            case "copper" -> {
+                tycoonManager.giveDefaultTycoonBlock(player, TycoonType.COPPER, amount);
+            }
             case "ocean" -> {
                 tycoonManager.giveDefaultTycoonBlock(player, TycoonType.OCEAN, amount);
             }
@@ -80,8 +83,26 @@ public class GiveTycoonSubCommand implements TycoonSubCommand {
             case "iron" -> {
                 tycoonManager.giveDefaultTycoonBlock(player,  TycoonType.IRON, amount);
             }
+            case "lapis" -> {
+                tycoonManager.giveDefaultTycoonBlock(player,  TycoonType.LAPIS, amount);
+            }
+            case "gold" -> {
+                tycoonManager.giveDefaultTycoonBlock(player,  TycoonType.GOLD, amount);
+            }
+            case "redstone" -> {
+                tycoonManager.giveDefaultTycoonBlock(player,  TycoonType.REDSTONE, amount);
+            }
+            case "quartz" -> {
+                tycoonManager.giveDefaultTycoonBlock(player,  TycoonType.QUARTZ, amount);
+            }
             case "diamond" -> {
                 tycoonManager.giveDefaultTycoonBlock(player, TycoonType.DIAMOND, amount);
+            }
+            case "emerald" -> {
+                tycoonManager.giveDefaultTycoonBlock(player,  TycoonType.EMERALD, amount);
+            }
+            case "netherite" -> {
+                tycoonManager.giveDefaultTycoonBlock(player,  TycoonType.NETHERITE, amount);
             }
             case "end" -> {
                 tycoonManager.giveDefaultTycoonBlock(player, TycoonType.END, amount);
@@ -101,7 +122,12 @@ public class GiveTycoonSubCommand implements TycoonSubCommand {
                         "stone",
                         "deepslate",
                         "coal",
+                        "copper",
                         "iron",
+                        "lapis",
+                        "gold",
+                        "redstone",
+                        "quartz",
                         "nether",
                         "ocean",
                         "ice",
@@ -109,6 +135,8 @@ public class GiveTycoonSubCommand implements TycoonSubCommand {
                         "wool",
                         "concrete",
                         "diamond",
+                        "emerald",
+                        "netherite",
                         "end");
             }
             case 3 -> {

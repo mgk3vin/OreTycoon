@@ -90,7 +90,7 @@ public class OverviewMenu implements MenuInterface{
 
             if (tycoonIndex < tycoonBlockList.size()) {
                 TycoonBlock block = tycoonBlockList.get(tycoonIndex);
-                inventory.setItem(slot, menuManager.createTycoonItem(block));
+                inventory.setItem(slot, MenuManager.createTycoonItem(block));
             } else if (tycoonIndex < maxTycoonsPerPlayer) {
                 inventory.setItem(slot, MenuManager.createItemstack(
                         Material.BLACK_STAINED_GLASS_PANE,
@@ -310,7 +310,7 @@ public class OverviewMenu implements MenuInterface{
             if (tycoonIndex >= allTycoons.size()) break;
 
             TycoonBlock tycoonBlock = allTycoons.get(tycoonIndex);
-            totalWorth += PriceUtility.calculateWorth(tycoonBlock.getStoredItems());
+            totalWorth += tycoonBlock.getInventoryWorth();
         }
         // Das Menü komplett neu laden, um alle Items (Tycoons + Button) zu aktualisieren
         return totalWorth;

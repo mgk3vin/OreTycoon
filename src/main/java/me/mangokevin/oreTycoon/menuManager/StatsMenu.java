@@ -2,6 +2,7 @@ package me.mangokevin.oreTycoon.menuManager;
 
 import me.mangokevin.oreTycoon.OreTycoon;
 import me.mangokevin.oreTycoon.tycoonManagment.*;
+import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.worth.PriceUtility;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -44,7 +45,11 @@ public class StatsMenu implements MenuInterface {
 
 
         //Tycoon Icon slot 13
-        ItemStack tycoonItem = menuManager.createTycoonItem(tycoonBlock);
+        ItemStack tycoonItem = MenuManager.createTycoonItem(tycoonBlock);
+        if (tycoonItem == null) {
+            Console.error(getClass(), "Tycoon Item is null");
+            return;
+        };
         ItemMeta tycoonMeta = tycoonItem.getItemMeta();
         if (tycoonMeta != null) {
             List<String> lore = tycoonMeta.getLore();
@@ -59,7 +64,7 @@ public class StatsMenu implements MenuInterface {
 
         //Inventory Icon slot 18
         List<String> inventoryLore = Arrays.asList("§8§m-----------------------",
-                ChatColor.WHITE + "Worth: "  + ChatColor.GREEN + PriceUtility.formatMoney(PriceUtility.calculateWorth(tycoonBlock.getStoredItems())),
+                ChatColor.WHITE + "Worth: "  + ChatColor.GREEN + tycoonBlock.getInventoryWorthFormatted(),
                 ChatColor.WHITE + "Storage: " + tycoonBlock.getStorageStatisticFormatted() + " items",
                 "§8§m-----------------------",
                 ChatColor.YELLOW + "[Left click to open]",

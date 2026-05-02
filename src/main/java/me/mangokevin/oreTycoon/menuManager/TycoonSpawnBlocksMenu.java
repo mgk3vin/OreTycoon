@@ -46,8 +46,6 @@ public class TycoonSpawnBlocksMenu implements MenuInterface{
     public void refresh(Player player, Inventory inventory) {
         MenuManager.addFiller(inventory, Material.GRAY_STAINED_GLASS_PANE);
 
-        Map<Material, Boolean> activeRessourceMaterialsMap = tycoonBlock.getActiveRessourceMaterialsMap();
-
         //Map<Material, Integer> spawnBlocksList = tycoonBlock.getTycoonType().getResources();
         List<SpawnMaterial> spawnMaterials = tycoonBlock.getSpawnMaterials();
         int startIndex = 10;
@@ -60,7 +58,7 @@ public class TycoonSpawnBlocksMenu implements MenuInterface{
             Material material = spawnMaterial.getMaterial();
             int chance = spawnMaterial.getWeight();
 
-            boolean isActive = activeRessourceMaterialsMap.getOrDefault(material, true);
+            boolean isActive = spawnMaterial.isActive();
 
             //effective Chance
             double effectiveChance = 0.0;
@@ -121,18 +119,17 @@ public class TycoonSpawnBlocksMenu implements MenuInterface{
         String action = pdc.get(TycoonData.MENU_ACTION_KEY, PersistentDataType.STRING);
 
         switch (action) {
-            case "spawn_block":
-                Map<Material, Boolean> activeResources = tycoonBlock.getActiveRessourceMaterialsMap();
-                Material clickedMaterial = item.getType();
-
-                boolean isActive = activeResources.getOrDefault(clickedMaterial, true);
-                activeResources.put(clickedMaterial, !isActive);
-
-                Console.debug("[TycoonSpawnBlocksMenu] Setting inventory item: " + !isActive + " Item -> " + item.getType().name());
-                //tycoonBlock.setActiveResourceMaterialsMap(activeResources);
-
-                refresh(player, inventory);
-                break;
+//            case "spawn_block":
+//                Material clickedMaterial = item.getType();
+//
+//                boolean isActive = activeResources.getOrDefault(clickedMaterial, true);
+//                activeResources.put(clickedMaterial, !isActive);
+//
+//                Console.debug("[TycoonSpawnBlocksMenu] Setting inventory item: " + !isActive + " Item -> " + item.getType().name());
+//                //tycoonBlock.setActiveResourceMaterialsMap(activeResources);
+//
+//                refresh(player, inventory);
+//                break;
             case "return":
                 new StatsMenu(tycoonBlock, plugin).open(player);
                 break;

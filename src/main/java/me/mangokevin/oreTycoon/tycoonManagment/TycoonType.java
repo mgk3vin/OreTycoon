@@ -242,15 +242,36 @@ public enum TycoonType {
             1.0,
             40,
             List.of(
-                    new SpawnMaterial(Material.STONE,       60, SpawnMaterialRarity.COMMON),
-                    new SpawnMaterial(Material.COAL_ORE,    30, SpawnMaterialRarity.UNCOMMON),
-                    new SpawnMaterial(Material.COBBLESTONE, 10, SpawnMaterialRarity.COMMON)
+                    new SpawnMaterial(Material.STONE,       30, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.COBBLESTONE, 30, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.DEEPSLATE,       30, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.COAL_ORE,    20, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.DEEPSLATE_COAL_ORE,   10, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.COAL_BLOCK, 10, SpawnMaterialRarity.RARE)
             ),
             Arrays.asList(
                             Material.COAL_ORE,
                             Material.DEEPSLATE_COAL_ORE
             )),
-
+    COPPER(Material.WAXED_COPPER_BLOCK,
+            ChatColor.GOLD + "Copper Tycoon",
+            40.0,
+            5*20,
+            6*20,
+            1.0,
+            40,
+            List.of(
+                    new SpawnMaterial(Material.STONE,       30, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.COBBLESTONE, 20, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.DEEPSLATE,       20, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.COPPER_ORE,    20, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.DEEPSLATE_COPPER_ORE,   10, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.COPPER_BLOCK, 10, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.RAW_COPPER_BLOCK, 10, SpawnMaterialRarity.RARE)
+            ),
+            List.of(
+                    Material.BARRIER
+            )),
     IRON(Material.IRON_BLOCK,
             "§fIron Tycoon",
             70.0,
@@ -259,38 +280,152 @@ public enum TycoonType {
             1.0,
             70,
             List.of(
-                    new SpawnMaterial(Material.STONE,         40, SpawnMaterialRarity.COMMON),
+                    new SpawnMaterial(Material.STONE,       20, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.COBBLESTONE, 20, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.DEEPSLATE,       20, SpawnMaterialRarity.RARE),
                     new SpawnMaterial(Material.IRON_ORE,      40, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.DEEPSLATE_IRON_ORE,   20, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.IRON_BLOCK, 10, SpawnMaterialRarity.EPIC),
                     new SpawnMaterial(Material.RAW_IRON_BLOCK,20, SpawnMaterialRarity.RARE)
             ),
             Arrays.asList(
                             Material.IRON_ORE,
                             Material.DEEPSLATE_IRON_ORE
             )),
-
-    DIAMOND(Material.DIAMOND_BLOCK,
-            "§bDiamond Tycoon",
+    LAPIS(Material.LAPIS_ORE,
+            ChatColor.BLUE + "Lapis Tycoon",
+            75.0,
+            4*20,
+            6*20,
+            1.0,
+            80,
+            List.of(
+                    new SpawnMaterial(Material.STONE,       20, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.COBBLESTONE, 20, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.DEEPSLATE,       20, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.LAPIS_ORE,      40, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.DEEPSLATE_LAPIS_ORE,   20, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.LAPIS_BLOCK,10, SpawnMaterialRarity.EPIC)
+            ),
+            List.of(
+                    Material.BARRIER
+            )),
+    GOLD(Material.GOLD_BLOCK,
+            ChatColor.GOLD + "Gold Tycoon",
+            85.0,
+            4*20,
+            5*20,
+            1.0,
+            85,
+            List.of(
+                    new SpawnMaterial(Material.STONE,       20, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.COBBLESTONE, 20, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.DEEPSLATE,       20, SpawnMaterialRarity.EPIC),
+                    new SpawnMaterial(Material.GOLD_ORE,      40, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.DEEPSLATE_GOLD_ORE,   20, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.GOLD_BLOCK,10, SpawnMaterialRarity.EPIC),
+                    new SpawnMaterial(Material.RAW_GOLD_BLOCK, 20, SpawnMaterialRarity.RARE)
+            ),
+            List.of(
+                    Material.BARRIER
+            )),
+    REDSTONE(Material.REDSTONE_BLOCK,
+            ChatColor.RED + "Redstone Tycoon",
             100.0,
-            3*20,
+            4*20,
             5*20,
             1.0,
             100,
             List.of(
-                    new SpawnMaterial(Material.DIAMOND_ORE,           50, SpawnMaterialRarity.RARE),
-                    new SpawnMaterial(Material.DEEPSLATE_DIAMOND_ORE, 40, SpawnMaterialRarity.EPIC),
-                    new SpawnMaterial(Material.DIAMOND_BLOCK,         10, SpawnMaterialRarity.LEGENDARY)
+                    new SpawnMaterial(Material.STONE,       20, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.COBBLESTONE, 20, SpawnMaterialRarity.EPIC),
+                    new SpawnMaterial(Material.DEEPSLATE,       20, SpawnMaterialRarity.EPIC),
+                    new SpawnMaterial(Material.REDSTONE_ORE,      40, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.DEEPSLATE_REDSTONE_ORE,   20, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.REDSTONE_BLOCK,10, SpawnMaterialRarity.EPIC)
+            ),
+            List.of(
+                    Material.BARRIER
+            )),
+    QUARTZ(Material.QUARTZ_BLOCK,
+            ChatColor.WHITE + "Quartz Tycoon",
+            110.0,
+            4*20,
+            5*20,
+            1.0,
+            120,
+            List.of(
+                    new SpawnMaterial(Material.NETHERRACK,       30, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.NETHER_GOLD_ORE, 20, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.SOUL_SOIL,       30, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.SOUL_SAND,       30, SpawnMaterialRarity.UNCOMMON),
+                    new SpawnMaterial(Material.NETHER_QUARTZ_ORE,      20, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.QUARTZ_BLOCK,   10, SpawnMaterialRarity.EPIC)
+            ),
+            List.of(
+                    Material.BARRIER
+            )),
+    DIAMOND(Material.DIAMOND_BLOCK,
+            "§bDiamond Tycoon",
+            120.0,
+            3*20,
+            5*20,
+            1.0,
+            140,
+            List.of(
+                    new SpawnMaterial(Material.STONE,       30, SpawnMaterialRarity.EPIC),
+                    new SpawnMaterial(Material.COBBLESTONE, 30, SpawnMaterialRarity.EPIC),
+                    new SpawnMaterial(Material.DEEPSLATE,       20, SpawnMaterialRarity.EPIC),
+                    new SpawnMaterial(Material.DIAMOND_ORE,           20, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.DEEPSLATE_DIAMOND_ORE, 10, SpawnMaterialRarity.EPIC),
+                    new SpawnMaterial(Material.DIAMOND_BLOCK,         5, SpawnMaterialRarity.LEGENDARY)
             ),
             Arrays.asList(
                             Material.DIAMOND_ORE,
                             Material.DEEPSLATE_DIAMOND_ORE)),
+    EMERALD(Material.EMERALD_BLOCK,
+            ChatColor.GREEN + "Emerald Tycoon",
+            130.0,
+            3*20,
+            4*20,
+            1.0,
+            160,
+            List.of(
+                    new SpawnMaterial(Material.STONE,       30, SpawnMaterialRarity.EPIC),
+                    new SpawnMaterial(Material.COBBLESTONE, 30, SpawnMaterialRarity.EPIC),
+                    new SpawnMaterial(Material.DEEPSLATE,       20, SpawnMaterialRarity.LEGENDARY),
+                    new SpawnMaterial(Material.EMERALD_ORE,           20, SpawnMaterialRarity.EPIC),
+                    new SpawnMaterial(Material.DEEPSLATE_EMERALD_ORE, 10, SpawnMaterialRarity.EPIC),
+                    new SpawnMaterial(Material.EMERALD_BLOCK,         5, SpawnMaterialRarity.LEGENDARY)
+            ),
+            List.of(
+                    Material.BARRIER
+            )),
+    NETHERITE(Material.NETHERITE_BLOCK,
+            ChatColor.DARK_PURPLE + "Emerald Tycoon",
+            140.0,
+            3*20,
+            4*20,
+            1.0,
+            200,
+            List.of(
+                    new SpawnMaterial(Material.NETHERRACK,       20, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.SOUL_SAND,       20, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.SOUL_SOIL,       20, SpawnMaterialRarity.RARE),
+                    new SpawnMaterial(Material.ANCIENT_DEBRIS,           10, SpawnMaterialRarity.EPIC),
+                    new SpawnMaterial(Material.NETHERITE_BLOCK, 5, SpawnMaterialRarity.LEGENDARY)
+            ),
+            List.of(
+                    Material.BARRIER
+            )),
     END(
             Material.END_STONE,
             ChatColor.LIGHT_PURPLE + "End Tycoon",
-            120.0,
-            20*4,
-            20*4,
+            150.0,
+            20*3,
+            20*3,
             1.0,
-            60,
+            200,
             List.of(
                     new SpawnMaterial(Material.END_STONE,        30, SpawnMaterialRarity.COMMON),
                     new SpawnMaterial(Material.END_STONE_BRICKS, 25, SpawnMaterialRarity.COMMON),

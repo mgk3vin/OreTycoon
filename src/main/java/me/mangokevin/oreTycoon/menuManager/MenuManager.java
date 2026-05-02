@@ -96,7 +96,7 @@ public class MenuManager {
         itemStack.setItemMeta(itemMeta);
     }
 
-    public ItemStack createTycoonItem(TycoonBlock block){
+    public static ItemStack createTycoonItem(TycoonBlock block){
         String autoMinerStatus = (block.getTycoonUpgrades().isAutoMinerUnlocked() ?
                 (block.isAutoMinerEnabled() ? ChatColor.GREEN + "Enabled" : ChatColor.RED + "Disabled")
                 : ChatColor.RED + "" + ChatColor.BOLD + "LOCKED");
@@ -110,7 +110,7 @@ public class MenuManager {
                 block.getProgressBar(20) + " " + block.getProgressPercentage() + "%",
                 ChatColor.GRAY + "Inventory: " + block.getStorageStatisticFormatted(),
                 ChatColor.GRAY + "Spawn rate: " + block.getSpawnRateFormatted() + (block.getTycoonBoosterManager().isSpawnSpeedBoosterActive() ? ChatColor.GREEN + " [Boost -" + (block.getSpawnSpeedBooster().getBoostValue()/20) + "s]" : ""),
-                ChatColor.GRAY + "Mining rate: " + (block.getTycoonUpgrades().isAutoMinerUnlocked() ? getMiningRateDisplay(block ): ChatColor.RED + "[LOCKED]"),
+                ChatColor.GRAY + (block.getTycoonUpgrades().isAutoMinerUnlocked() ? getMiningRateDisplay(block) : ChatColor.GRAY + "Mining Rate: " + ChatColor.RED + "[LOCKED]"),
                 ChatColor.GRAY + "Sell Multiplier: " + block.getSellMultiplierFormatted() + (block.getTycoonBoosterManager().isSellMultiplierBoosterActive() ? ChatColor.GREEN + " [Boost +" + block.getSellMultiplierBooster().getBoostValue() + "x]" : ""),
                 "§8§m-----------------------");
 
@@ -165,7 +165,7 @@ public class MenuManager {
         worldItem.setItemMeta(worldItemMeta);
         return worldItem;
     }
-    private String getMiningRateDisplay(TycoonBlock block) {
+    private static String getMiningRateDisplay(TycoonBlock block) {
         return ChatColor.GRAY + "Mining rate: " + block.getMiningRateFormatted() + (block.getTycoonBoosterManager().isAutoMinerBoosterActive() ? ChatColor.GREEN + " [Boost -" + (block.getAutoMinerSpeedBooster().getBoostValue()/20) + "s]" : "");
     }
     public static ItemStack createItemstack(Material material, int amount, String name, List<String> lore, Boolean glint, Boolean hideAttributes, Boolean isMenuItem, String action){

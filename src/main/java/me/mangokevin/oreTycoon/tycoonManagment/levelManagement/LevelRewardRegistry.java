@@ -100,82 +100,41 @@ public class LevelRewardRegistry {
         }
     }
     private static LevelReward createSellMultiplierReward(int level, RewardTier rewardTier, TycoonBlock tycoonBlock, Economy economy) {
-        switch (rewardTier) {
-            case COMMON -> {
-                if (tycoonBlock.isSellMultiplierMaxed()){
-                    return new LevelReward(Material.GOLD_INGOT, ChatColor.GRAY + "Level: " + level,
-                            Arrays.asList(
-                                    "§8§m-----------------------",
-                                    "§8Reward: " + ChatColor.GREEN + "+5k Cash",
-                                    "§8Tier: " + rewardTier.getDisplayName(),
-                                    "§8§m-----------------------"
-                            ),
-                            rewardTier,
-                            (player) -> {
-                                economy.depositPlayer(player, 5000);
-                            },
-                            level
-                    );
-                } else {
-                    return new LevelReward(Material.EMERALD, ChatColor.GRAY + "Level: " + level,
-                            Arrays.asList(
-                                    "§8§m-----------------------",
-                                    "§8Reward: " + ChatColor.GREEN + "+1 Sell Multiplier Level",
-                                    "§8Tier: " + rewardTier.getDisplayName(),
-                                    "§8§m-----------------------"
-                            ),
-                            rewardTier,
-                            (player) -> {
-                                tycoonBlock.upgradeSellMultiplier(player, true);
-                            },
-                            level
-                    );
-                }
-
-            }
-            case null, default -> {
-                Console.error(GetClass.class, "Invalid reward tier!");
-                return null;
-            }
+        if (tycoonBlock.isSellMultiplierMaxed()) {
+            return createCashReward(level, rewardTier, economy);
+        } else {
+            return new LevelReward(Material.EMERALD, ChatColor.GRAY + "Level: " + level,
+                    Arrays.asList(
+                            "§8§m-----------------------",
+                            "§8Reward: " + ChatColor.GREEN + "+1 Sell Multiplier Level",
+                            "§8Tier: " + rewardTier.getDisplayName(),
+                            "§8§m-----------------------"
+                    ),
+                    rewardTier,
+                    (player) -> {
+                        tycoonBlock.upgradeSellMultiplier(player, true);
+                    },
+                    level
+            );
         }
     }
     private static LevelReward createAutoMinerReward(int level, RewardTier rewardTier,TycoonBlock tycoonBlock, Economy economy) {
-        switch (rewardTier) {
-            case COMMON -> {
-                if (tycoonBlock.isMiningRateMaxed()){
-                    return new LevelReward(Material.GOLD_INGOT, ChatColor.GRAY + "Level: " + level,
-                            Arrays.asList(
-                                    "§8§m-----------------------",
-                                    "§8Reward: " + ChatColor.GREEN + "+5k Cash",
-                                    "§8Tier: " + rewardTier.getDisplayName(),
-                                    "§8§m-----------------------"
-                            ),
-                            rewardTier,
-                            (player) -> {
-                                economy.depositPlayer(player, 5000);
-                            },
-                            level
-                    );
-                } else {
-                    return new LevelReward(Material.GOLDEN_PICKAXE, ChatColor.GRAY + "Level: " + level,
-                            Arrays.asList(
-                                    "§8§m-----------------------",
-                                    "§8Reward: " + ChatColor.GOLD + "+1 Auto Miner Level",
-                                    "§8Tier: " + rewardTier.getDisplayName(),
-                                    "§8§m-----------------------"
-                            ),
-                            rewardTier,
-                            (player) -> {
-                                tycoonBlock.upgradeMiningRate(player, true);
-                            },
-                            level
-                    );
-                }
-            }
-            case null, default -> {
-                Console.error(GetClass.class, "Invalid reward tier!");
-                return null;
-            }
+        if (tycoonBlock.isMiningRateMaxed()) {
+            return createCashReward(level, rewardTier, economy);
+        } else {
+            return new LevelReward(Material.GOLDEN_PICKAXE, ChatColor.GRAY + "Level: " + level,
+                    Arrays.asList(
+                            "§8§m-----------------------",
+                            "§8Reward: " + ChatColor.GOLD + "+1 Auto Miner Level",
+                            "§8Tier: " + rewardTier.getDisplayName(),
+                            "§8§m-----------------------"
+                    ),
+                    rewardTier,
+                    (player) -> {
+                        tycoonBlock.upgradeMiningRate(player, true);
+                    },
+                    level
+            );
         }
     }
     private static LevelReward createMaxStorageReward(int level, RewardTier rewardTier,TycoonBlock tycoonBlock, Economy economy) {
@@ -184,36 +143,21 @@ public class LevelRewardRegistry {
                 return new LevelReward(Material.CHEST, ChatColor.GRAY + "Level: " + level,
                     Arrays.asList(
                             "§8§m-----------------------",
-                            "§8Reward: " + ChatColor.GOLD + "+1 Storage Level",
+                            "§8Reward: " + ChatColor.GOLD + "+3 Storage Level",
                             "§8Tier: " + rewardTier.getDisplayName(),
                             "§8§m-----------------------"
                     ),
                     rewardTier,
                     (player) -> {
-                        tycoonBlock.upgradeMaxInventoryStorage(player, true);
+                        for (int i = 0; i < 3; i++) {
+                            tycoonBlock.upgradeMaxInventoryStorage(player, true);
+                        }
                         player.playSound(player.getLocation(), Sound.BLOCK_CHEST_LOCKED, 1.0f, 1.0f);
                     },
                         level
                 );
             }
             case RARE -> {
-                return new LevelReward(Material.CHEST, ChatColor.GRAY + "Level: " + level,
-                        Arrays.asList(
-                                "§8§m-----------------------",
-                                "§8Reward: " + ChatColor.GOLD + "+3 Storage Level",
-                                "§8Tier: " + rewardTier.getDisplayName(),
-                                "§8§m-----------------------"
-                        ),
-                        rewardTier,
-                        (player) -> {
-                            for (int i = 0; i < 3; i++) {
-                                tycoonBlock.upgradeMaxInventoryStorage(player, true);
-                            }
-                        },
-                        level
-                );
-            }
-            case EPIC -> {
                 return new LevelReward(Material.CHEST, ChatColor.GRAY + "Level: " + level,
                         Arrays.asList(
                                 "§8§m-----------------------",
@@ -226,11 +170,12 @@ public class LevelRewardRegistry {
                             for (int i = 0; i < 5; i++) {
                                 tycoonBlock.upgradeMaxInventoryStorage(player, true);
                             }
+                            player.playSound(player.getLocation(), Sound.BLOCK_CHEST_LOCKED, 1.0f, 1.0f);
                         },
                         level
                 );
             }
-            case LEGENDARY -> {
+            case EPIC -> {
                 return new LevelReward(Material.CHEST, ChatColor.GRAY + "Level: " + level,
                         Arrays.asList(
                                 "§8§m-----------------------",
@@ -243,6 +188,25 @@ public class LevelRewardRegistry {
                             for (int i = 0; i < 10; i++) {
                                 tycoonBlock.upgradeMaxInventoryStorage(player, true);
                             }
+                            player.playSound(player.getLocation(), Sound.BLOCK_CHEST_LOCKED, 1.0f, 1.0f);
+                        },
+                        level
+                );
+            }
+            case LEGENDARY -> {
+                return new LevelReward(Material.CHEST, ChatColor.GRAY + "Level: " + level,
+                        Arrays.asList(
+                                "§8§m-----------------------",
+                                "§8Reward: " + ChatColor.GOLD + "+20 Storage Level",
+                                "§8Tier: " + rewardTier.getDisplayName(),
+                                "§8§m-----------------------"
+                        ),
+                        rewardTier,
+                        (player) -> {
+                            for (int i = 0; i < 20; i++) {
+                                tycoonBlock.upgradeMaxInventoryStorage(player, true);
+                            }
+                            player.playSound(player.getLocation(), Sound.BLOCK_CHEST_LOCKED, 1.0f, 1.0f);
                         },
                         level
                 );
@@ -278,7 +242,7 @@ public class LevelRewardRegistry {
                         "§8§m-----------------------",
                         "§8Reward: " + booster.getDisplayName(),
                         "§8Boost: " + ChatColor.GREEN + "+ " + booster.getBoostValue() + "x sell multiplier",
-                        "§8Duration" + ChatColor.GREEN + booster.getRemainingTimeFormatted(booster.getDuration()),
+                        "§8Duration: " + ChatColor.GREEN + booster.getRemainingTimeFormatted(booster.getDuration()),
                         "§8Tier: " + rewardTier.getDisplayName(),
                         "§8§m-----------------------"
                 ),

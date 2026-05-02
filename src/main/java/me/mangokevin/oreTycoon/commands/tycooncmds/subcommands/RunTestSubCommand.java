@@ -1,6 +1,6 @@
 package me.mangokevin.oreTycoon.commands.tycooncmds.subcommands;
 
-import me.mangokevin.oreTycoon.tycoonManagment.TycoonUpgrades;
+import me.mangokevin.oreTycoon.tycoonManagment.upgrades.TycoonUpgrades;
 import org.bukkit.entity.Player;
 
 public class RunTestSubCommand implements TycoonSubCommand {

@@ -5,27 +5,21 @@ import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.StoredItemKey;
 import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.SpawnBlock;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.bukkit.inventory.ItemStack;
 
 public class TycoonAutoMinedEvent extends Event {
     private static final HandlerList HANDLERS = new HandlerList();
     private final TycoonBlock tycoonBlock;
-    private final ItemStack itemStack;
     private final SpawnBlock spawnBlock;
     private final StoredItemKey item;
 
-    public TycoonAutoMinedEvent(TycoonBlock tycoonBlock, ItemStack itemStack, SpawnBlock spawnBlock, StoredItemKey item) {
+    public TycoonAutoMinedEvent(TycoonBlock tycoonBlock, SpawnBlock spawnBlock, StoredItemKey item) {
         this.tycoonBlock = tycoonBlock;
-        this.itemStack = itemStack;
         this.spawnBlock = spawnBlock;
         this.item = item;
     }
 
     public TycoonBlock getTycoonBlock() {
         return tycoonBlock;
-    }
-    public ItemStack getItemStack() {
-        return itemStack;
     }
     public StoredItemKey getItem() {
         return item;
