@@ -18,6 +18,7 @@ import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.StoredItemKey;
 import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.SpawnBlock;
 import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.SpawnMaterial;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
+import me.mangokevin.oreTycoon.tycoonManagment.upgrades.TycoonUpgrades;
 import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.levelManagment.LevelManager;
 import me.mangokevin.oreTycoon.worth.PriceUtility;
@@ -82,13 +83,13 @@ public class TycoonBlock {
     private int spawnRateLevel;
 
     private int miningRate;
-    private static final int min_mining_rate = 10;
+    private final int min_mining_rate = 10;
     private int miningRateLevel;
 
     private double sellMultiplier = 1;
     private int sellMultiplierLevel;
     private double sellMultiplierBuff;
-    private double maxSellMultiplier = 5.0;
+    private final double maxSellMultiplier = 5.0;
 
 
     private double doubleDropsChance = 0.0;
@@ -96,14 +97,15 @@ public class TycoonBlock {
     private int doubleDropsTier;
     private int doubleDropsAmount;
     private int baseDoubleDropsAmount = 0;
-    private final double maxDoubleDropsChance = 100.0;
+    private final double maxDoubleDropsChance = 100;
+    private final double maxRawDoubleDropsChance = 500;
 
     private double fortuneChance = 1.0;
     private int fortuneChanceLevel;
     private int fortuneTier;
     private int fortuneMultiplier;
     private int baseFortuneMultiplier = 1;
-    private final double maxFortuneChance = 100.0;
+    private final double maxRawFortuneChance = 500;
 
     private double multiMinerChance = 0;
     private int multiMinerChanceLevel;
@@ -111,6 +113,7 @@ public class TycoonBlock {
     private int multiMinerAmount;
     private int baseMultiMinerAmount = 1;
     private final double maxMultiMinerChance = 100.0;
+    private final double maxRawMultiMinerChance = 500;
 
 
     private int inventoryStorage;
@@ -501,6 +504,8 @@ public class TycoonBlock {
         fortuneChanceLevel = upgrades.getFortuneLevel();
         double rawFortuneChance = TycoonUpgrades.calculateNewFortuneChance(fortuneChanceLevel, 0);
 
+        double maxFortuneChance = 100.0;
+
         fortuneTier = (int) ((rawFortuneChance - 1)/ maxFortuneChance);
         fortuneMultiplier = 2 + fortuneTier;
         baseFortuneMultiplier = fortuneMultiplier - 1;
@@ -544,166 +549,201 @@ public class TycoonBlock {
     public void upgradeSpawnRate(Player player) {
         upgradeSpawnRate(player, false);
     }
-    public void upgradeSpawnRate(Player player, boolean force) {
+    public boolean upgradeSpawnRate(Player player, boolean force) {
         if (spawnRate <= minSpawnRate) {
             giveMaxLevelMSG(player);
-            return;
+            return false;
         }
         int nextLevel = spawnRateLevel + 1;
         if (force) {
             upgrades.setSpawnRateLevel(nextLevel);
             updateAttributes();
+            return true;
         } else {
             double cost = TycoonUpgrades.getSpawnRateUpgradeCost(this, nextLevel);
-            handleUpgrade(player, cost, () -> {
+            return handleUpgrade(player, cost, () -> {
                 upgrades.setSpawnRateLevel(nextLevel);
+                player.sendMessage(ChatColor.GREEN + "You upgraded the Spawn rate to " + getSpawnRateFormatted() + "s for: " + PriceUtility.formatMoney(cost));
             });
-            player.sendMessage(ChatColor.GREEN + "You upgraded the Spawn rate to " + getSpawnRateFormatted() + "s for: " + PriceUtility.formatMoney(cost));
+        }
+    }
+    public void upgradeSpawnRate(Player player, boolean force, int amount) {
+        for (int i = 0; i < amount; i++) {
+            if (!upgradeSpawnRate(player, force)) break;
         }
     }
     public boolean isSpawnRateMaxed() {
         return spawnRate <= minSpawnRate;
     }
 
-    public void upgradeMiningRate(Player player) {
-        upgradeMiningRate(player, false);
-    }
-    public void upgradeMiningRate(Player player, boolean force) {
+    public boolean upgradeMiningRate(Player player, boolean force) {
         int nextLevel = miningRateLevel + 1;
 
         if (miningRate <= min_mining_rate) {
             giveMaxLevelMSG(player);
-            return;
+            return false;
         }
         if (miningRate <= spawnRate) {
             player.sendMessage(ChatColor.RED + "Mining rate level " + miningRateLevel + " can't be higher than spawn rate level: " + spawnRateLevel);
-            return;
+            return false;
         }
 
         if (force) {
             upgrades.setMiningRateLevel(nextLevel);
             updateAttributes();
+            return true;
         } else {
             double cost = TycoonUpgrades.getMiningRateUpgradeCost(this,nextLevel);
-            handleUpgrade(player, cost, () -> {
+            return handleUpgrade(player, cost, () -> {
                 upgrades.setMiningRateLevel(nextLevel);
+                player.sendMessage(ChatColor.GREEN + "You upgraded the Mining rate to " + getMiningRateFormatted() + "s for: " + PriceUtility.formatMoney(cost));
             });
-            player.sendMessage(ChatColor.GREEN + "You upgraded the Mining rate to " + getMiningRateFormatted() + "s for: " + PriceUtility.formatMoney(cost));
+        }
+    }
+    public void upgradeMiningRate(Player player, boolean force, int amount) {
+        for (int i = 0; i < amount; i++) {
+            if (!upgradeMiningRate(player, force)) break;
         }
     }
     public boolean isMiningRateMaxed(){
-        return  miningRate <= spawnRate || miningRate <= min_mining_rate;
+        return miningRate <= spawnRate || miningRate <= min_mining_rate;
     }
 
-    public void upgradeMaxInventoryStorage(Player player) {
-        upgradeMaxInventoryStorage(player, false);
-    }
-    public void upgradeMaxInventoryStorage(Player player, boolean force) {
+    public boolean upgradeMaxInventoryStorage(Player player, boolean force) {
         int nextLevel = inventoryStorageLevel + 1;
         if (force) {
             upgrades.setInventoryStorageLevel(nextLevel);
             updateAttributes();
+            return true;
         } else {
             double cost = TycoonUpgrades.getInventoryStorageUpgradeCost(this, nextLevel);
-            handleUpgrade(player, cost, () -> {
+            return handleUpgrade(player, cost, () -> {
                 upgrades.setInventoryStorageLevel(nextLevel);
+                player.sendMessage(ChatColor.GREEN + "You upgraded the Inventory Storage to " + getStorageStatisticFormatted() + ChatColor.GREEN + " for: " + PriceUtility.formatMoney(cost));
             });
-            player.sendMessage(ChatColor.GREEN + "You upgraded the Inventory Storage to " + getStorageStatisticFormatted() + ChatColor.GREEN + " for: " + PriceUtility.formatMoney(cost));
-
+        }
+    }
+    public void upgradeMaxInventoryStorage(Player player, boolean force, int amount) {
+        for (int i = 0; i < amount; i++) {
+            if (!upgradeMaxInventoryStorage(player, force)) break;
         }
     }
 
-    public void upgradeSellMultiplier(Player player) {
-        upgradeSellMultiplier(player, false);
-    }
-    public void upgradeSellMultiplier(Player player, boolean force) {
+    public boolean upgradeSellMultiplier(Player player, boolean force) {
         if (sellMultiplier >= maxSellMultiplier) {
             giveMaxLevelMSG(player);
-            return;
+            return false;
         }
         int nextLevel = upgrades.getSellMultiplierLevel() + 1;
         if (force) {
             upgrades.setSellMultiplierLevel(nextLevel);
             updateAttributes();
+            return true;
         } else {
             double cost = TycoonUpgrades.getSellMultiplierUpgradeCost(this, nextLevel);
-            handleUpgrade(player, cost, () -> {
+            return handleUpgrade(player, cost, () -> {
                 upgrades.setSellMultiplierLevel(nextLevel);
+                player.sendMessage(ChatColor.GREEN + "You upgraded the Sell Multiplier to " + getSellMultiplier() + "x for: " + PriceUtility.formatMoney(cost));
             });
-            player.sendMessage(ChatColor.GREEN + "You upgraded the Sell Multiplier to " + getSellMultiplier() + "x for: " + PriceUtility.formatMoney(cost));
+        }
+    }
+    public void upgradeSellMultiplier(Player player, boolean force, int amount) {
+        for (int i = 0; i < amount; i++) {
+            if (!upgradeSellMultiplier(player, force)) break;
         }
     }
     public boolean isSellMultiplierMaxed() {
-        return sellMultiplier >= maxSellMultiplier;
+        return TycoonUpgrades.calculateNewSellMultiplier(sellMultiplierLevel, 0) >= maxSellMultiplier;
     }
 
-    public void upgradeDoubleDropsChance(Player player) {
-        upgradeDoubleDropsChance(player, false);
-    }
-    public void upgradeDoubleDropsChance(Player player, boolean force) {
+    public boolean upgradeDoubleDropsChance(Player player, boolean force) {
         double rawDoubleDropsChance = TycoonUpgrades.calculateNewDoubleDropChance(doubleDropsChanceLevel, 0);
 
-        if (rawDoubleDropsChance >= 500) {
+        if (rawDoubleDropsChance >= maxRawDoubleDropsChance) {
             player.sendMessage(ChatColor.RED + "Max Level Reached!");
-            return;
+            return false;
         }
         int nextLevel = doubleDropsChanceLevel + 1;
         if (force) {
             upgrades.setDoubleDropsLevel(nextLevel);
             updateAttributes();
+            return true;
         } else {
             double cost = TycoonUpgrades.getDoubleDropChanceUpgradeCost(this,nextLevel);
-            handleUpgrade(player, cost, () -> {
+            return handleUpgrade(player, cost, () -> {
                 upgrades.setDoubleDropsLevel(nextLevel);
+                player.sendMessage(ChatColor.GREEN + "You upgrade Double Drops Chance to " + getDoubleDropsChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
             });
-            player.sendMessage(ChatColor.GREEN + "You upgrade Double Drops Chance to " + getDoubleDropsChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
+        }
+    }
+    public void upgradeDoubleDropsChance(Player player, boolean force, int amount) {
+        for (int i = 0; i < amount; i++) {
+            if (!upgradeDoubleDropsChance(player, force)) break;
         }
     }
     public boolean isDoubleDropsChanceMaxed() {
-        return doubleDropsChance >= maxDoubleDropsChance;
+        return TycoonUpgrades.calculateNewDoubleDropChance(doubleDropsChanceLevel, 0) >= maxRawDoubleDropsChance;
     }
 
     public void upgradeFortuneChance(Player player) {
         upgradeFortuneChance(player, false);
     }
-    public void upgradeFortuneChance(Player player, boolean force) {
+    public boolean upgradeFortuneChance(Player player, boolean force) {
         double rawFortuneChance = TycoonUpgrades.calculateNewFortuneChance(fortuneChanceLevel, 0);
 
-        if (rawFortuneChance >= 500.0) {
+        if (rawFortuneChance >= maxRawFortuneChance) {
             giveMaxLevelMSG(player);
-            return;
+            return false;
         }
         int nextLevel = upgrades.getFortuneLevel() + 1;
         if (force) {
             upgrades.setFortuneLevel(nextLevel);
             updateAttributes();
+            return true;
         } else {
             double cost = TycoonUpgrades.getFortuneUpgradeCost(this, nextLevel);
-            handleUpgrade(player, cost, () -> {
+            return handleUpgrade(player, cost, () -> {
                 upgrades.setFortuneLevel(nextLevel);
+                player.sendMessage(ChatColor.GREEN + "You upgraded Fortune Chance to " + getFortuneChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
             });
-            player.sendMessage(ChatColor.GREEN + "You upgraded Fortune Chance to " + getFortuneChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
         }
     }
+    public void upgradeFortuneChance(Player player, boolean force, int amount) {
+        for (int i = 0; i < amount; i++) {
+            if (!upgradeFortuneChance(player, force)) break;
+        }
+    }
+    public boolean isFortuneChanceMaxed() {
+        return TycoonUpgrades.calculateNewFortuneChance(fortuneChanceLevel, 0) >= maxRawFortuneChance;
+    }
 
-    public void upgradeMultiMinerChance(Player player, boolean force) {
+    public boolean upgradeMultiMinerChance(Player player, boolean force) {
         double rawMultiMinerChance = TycoonUpgrades.calculateMultipleMinerChance(multiMinerChanceLevel, 0);
-        if (rawMultiMinerChance >= 500.0) {
+        if (rawMultiMinerChance >= maxRawMultiMinerChance) {
             giveMaxLevelMSG(player);
-            return;
+            return false;
         }
 
         int nextLevel = upgrades.getMultipleMinerLevel() + 1;
         if (force) {
             upgrades.setMultipleMinerLevel(nextLevel);
             updateAttributes();
+            return true;
         } else {
             double cost = TycoonUpgrades.getMultipleMinerUpgradeCost(this, nextLevel);
-            handleUpgrade(player, cost, () -> {
+            return handleUpgrade(player, cost, () -> {
                 upgrades.setMultipleMinerLevel(nextLevel);
+                player.sendMessage(ChatColor.GREEN + "You upgraded Multi Miner Chance to " + getMultiMinerChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
             });
-            player.sendMessage(ChatColor.GREEN + "You upgraded Multi Miner Chance to " + getMultiMinerChanceFormatted() + " for: " + PriceUtility.formatMoney(cost));
         }
+    }
+    public void upgradeMultiMinerChance(Player player, boolean force, int amount) {
+        for (int i = 0; i < amount; i++) {
+            if (!upgradeMultiMinerChance(player, force)) break;
+        }
+    }
+    public boolean isMultiMinerChanceMaxed() {
+        return TycoonUpgrades.calculateMultipleMinerChance(multiMinerChanceLevel, 0) >= maxRawMultiMinerChance;
     }
     public int applyMultiMinerChance() {
         if (random.nextDouble() * 100.0 < multiMinerChance) {
@@ -726,11 +766,8 @@ public class TycoonBlock {
             return baseFortuneMultiplier;
         }
     }
-    public boolean isFortuneChanceMaxed() {
-        return TycoonUpgrades.calculateNewFortuneChance(fortuneChanceLevel, 0) >= 500.0;
-    }
 
-    private void handleUpgrade(Player player, double cost, Runnable onSuccess) {
+    private boolean handleUpgrade(Player player, double cost, Runnable onSuccess) {
         Economy economy = OreTycoon.getEconomy();
 
         if (economy.has(player, cost)) {
@@ -739,9 +776,11 @@ public class TycoonBlock {
             onSuccess.run();
 
             updateAttributes();
+            return true;
         }else {
             player.sendMessage(ChatColor.RED + "Not enough money!");
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+            return false;
         }
     }
     private void giveMaxLevelMSG(Player player) {
@@ -1292,6 +1331,24 @@ public class TycoonBlock {
     }
     public int getMultiMinerAmount() {
         return multiMinerAmount;
+    }
+    public int getMin_mining_rate() {
+        return min_mining_rate;
+    }
+    public int getMin_spawn_rate() {
+        return minSpawnRate;
+    }
+    public double getMaxRawDoubleDropsChance() {
+        return maxRawDoubleDropsChance;
+    }
+    public double getMaxRawFortuneChance() {
+        return maxRawFortuneChance;
+    }
+    public double getMaxRawMultiMinerChance() {
+        return maxRawMultiMinerChance;
+    }
+    public double getMaxSellMultiplier() {
+        return maxSellMultiplier;
     }
     // ---------     Getter      ---------
 

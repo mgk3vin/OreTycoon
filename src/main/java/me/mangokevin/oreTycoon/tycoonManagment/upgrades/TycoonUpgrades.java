@@ -1,5 +1,6 @@
-package me.mangokevin.oreTycoon.tycoonManagment;
+package me.mangokevin.oreTycoon.tycoonManagment.upgrades;
 
+import me.mangokevin.oreTycoon.tycoonManagment.TycoonBlock;
 import me.mangokevin.oreTycoon.utility.Console;
 import me.mangokevin.oreTycoon.worth.PriceUtility;
 
@@ -79,7 +80,7 @@ public class TycoonUpgrades {
     }
     public static double getInventoryStorageUpgradeCost(TycoonBlock tycoonBlock, int level){
         double base = tycoonBlock.getTycoonType().getBasePrice() * 10.0;
-        double multi = 1.015;
+        double multi = 1.01;
         return Math.round(getExponentialUpgradeCost(level, base, multi));
     }
     public static double getMultipleMinerUpgradeCost(TycoonBlock tycoonBlock, int level){

@@ -1,7 +1,6 @@
 package me.mangokevin.oreTycoon.sqlite;
 
 import me.mangokevin.oreTycoon.OreTycoon;
-import me.mangokevin.oreTycoon.menuManager.TycoonInventory;
 import me.mangokevin.oreTycoon.tycoonManagment.*;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.BoosterRegistry;
 import me.mangokevin.oreTycoon.tycoonManagment.booster.TycoonBoosterAbstract;
@@ -10,6 +9,7 @@ import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.SpawnMaterial;
 import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.SpawnMaterialRarity;
 import me.mangokevin.oreTycoon.tycoonManagment.spawnBlocks.StoredItemKey;
 import me.mangokevin.oreTycoon.tycoonManagment.tycoonBlockManagement.TycoonRegistry;
+import me.mangokevin.oreTycoon.tycoonManagment.upgrades.TycoonUpgrades;
 import me.mangokevin.oreTycoon.utility.Console;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -21,9 +21,6 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
